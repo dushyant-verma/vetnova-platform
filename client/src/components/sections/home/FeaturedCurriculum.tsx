@@ -18,7 +18,7 @@ export const FeaturedCurriculum = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
               className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-brand-secondary font-black text-sm uppercase tracking-widest mb-8 backdrop-blur-md shadow-lg"
             >
               <Sparkles className="w-5 h-5" />
@@ -28,7 +28,7 @@ export const FeaturedCurriculum = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.1, duration: 0.8, ease: "easeOut" }}
               className="text-5xl md:text-6xl lg:text-8xl font-black font-poppins mb-8 tracking-tighter leading-[1.05]"
             >
               Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-secondary to-brand-primary">Curriculum</span>
@@ -37,7 +37,7 @@ export const FeaturedCurriculum = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
               className="text-2xl text-slate-400 font-light leading-relaxed max-w-3xl"
             >
               Immersive, hands-on clinical training programs designed to accelerate your veterinary career with practical, real-world skills.
@@ -47,7 +47,7 @@ export const FeaturedCurriculum = () => {
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
             className="shrink-0"
           >
             <Link to="/programs" className="inline-flex items-center gap-4 px-10 py-5 bg-white/5 border border-white/10 rounded-full font-bold text-lg text-white hover:bg-white hover:text-slate-900 transition-all duration-300 shadow-xl group">
@@ -63,7 +63,7 @@ export const FeaturedCurriculum = () => {
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent z-10" />
             <img
@@ -106,7 +106,7 @@ export const FeaturedCurriculum = () => {
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-brand-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
               <div className="relative z-10">
@@ -130,7 +130,7 @@ export const FeaturedCurriculum = () => {
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
             >
               <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/10 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3 pointer-events-none" />
               <div className="relative z-10">

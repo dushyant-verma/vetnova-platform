@@ -1,6 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion';
 import { Users, MonitorPlay, GraduationCap, MapPin } from 'lucide-react';
+import { motion, Variants } from "framer-motion";
 
 const stats = [
   {
@@ -25,15 +26,12 @@ const stats = [
   }
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0, y: 40 },
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
     transition: {
-      duration: 0.8,
-      staggerChildren: 0.15,
-      ease: [0.22, 1, 0.36, 1]
+      staggerChildren: 0.2
     }
   }
 };
@@ -46,7 +44,7 @@ const itemVariants = {
 export const HeroStatsBar = () => {
   return (
     <section className="relative z-30 px-6 md:px-12 -mt-32 lg:-mt-40 max-w-[1500px] mx-auto mb-32">
-      <motion.div 
+      <motion.div
         className="bg-white/90 backdrop-blur-2xl rounded-[3rem] shadow-[0_30px_60px_rgba(0,0,0,0.05)] border border-white/50 p-10 md:p-14 relative overflow-hidden group"
         variants={containerVariants}
         initial="hidden"
@@ -60,8 +58,8 @@ export const HeroStatsBar = () => {
           {stats.map((stat, idx) => {
             const Icon = stat.icon;
             return (
-              <motion.div 
-                key={idx} 
+              <motion.div
+                key={idx}
                 className={`flex flex-col items-center text-center px-6 ${idx !== 0 ? 'pt-12 md:pt-0' : ''}`}
                 variants={itemVariants}
                 whileHover={{ y: -8 }}

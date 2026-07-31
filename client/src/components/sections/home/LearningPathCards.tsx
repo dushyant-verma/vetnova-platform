@@ -1,8 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion';
 import { ArrowRight, Stethoscope, Microscope, GraduationCap, Award, HeartPulse } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
+import { motion, Variants } from "framer-motion";
 const paths = [
   {
     title: 'Early Career Vet Doctor',
@@ -41,17 +41,20 @@ const paths = [
   }
 ];
 
-const containerVariants = {
+
+
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.15, ease: [0.22, 1, 0.36, 1] }
+    transition: {
+      staggerChildren: 0.2
+    }
   }
 };
-
 const cardVariants = {
   hidden: { opacity: 0, y: 50, scale: 0.95 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
+  visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.8 } }
 };
 
 export const LearningPathCards = () => {
@@ -67,7 +70,7 @@ export const LearningPathCards = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-5xl md:text-6xl lg:text-7xl font-black font-poppins text-slate-900 mb-10 tracking-tighter leading-[1.05]"
           >
             Programs designed around <br className="hidden md:block" />
@@ -77,7 +80,7 @@ export const LearningPathCards = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
             className="text-2xl text-slate-500 leading-relaxed font-light max-w-4xl mx-auto"
           >
             Select your learner profile below to discover targeted curriculums built specifically for your experience level, professional goals and clinical concerns.

@@ -37,7 +37,7 @@ export const CoursesSection = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
               className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-brand-primary/5 border border-brand-primary/10 text-brand-primary font-black text-sm uppercase tracking-widest mb-8"
             >
               <GraduationCap className="w-5 h-5" />
@@ -47,7 +47,7 @@ export const CoursesSection = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.1, duration: 0.8, ease: "easeOut" }}
               className="text-5xl md:text-6xl lg:text-7xl font-black font-poppins text-slate-900 mb-8 tracking-tighter leading-[1.05]"
             >
               Popular <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Courses</span>
@@ -56,7 +56,7 @@ export const CoursesSection = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
               className="text-2xl text-slate-600 font-light leading-relaxed max-w-3xl"
             >
               Upgrade your clinical skills with our highly rated certification programs, workshops, and immersive wet labs.
@@ -66,7 +66,7 @@ export const CoursesSection = () => {
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
           >
             <Link to="/programs" className="inline-flex items-center px-10 py-5 bg-white border-2 border-slate-200 rounded-full font-bold text-lg text-slate-900 hover:border-brand-primary hover:text-brand-primary transition-all duration-300 shadow-sm hover:shadow-2xl group">
               View All Courses <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform" />
@@ -81,8 +81,8 @@ export const CoursesSection = () => {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-8 py-4 rounded-full text-sm font-black uppercase tracking-widest transition-all duration-300 ${activeCategory === cat
-                  ? 'bg-brand-primary text-white shadow-[0_10px_30px_rgba(8,112,184,0.3)]'
-                  : 'bg-white text-slate-500 border border-slate-200 hover:border-brand-primary/50 hover:text-brand-primary hover:shadow-lg'
+                ? 'bg-brand-primary text-white shadow-[0_10px_30px_rgba(8,112,184,0.3)]'
+                : 'bg-white text-slate-500 border border-slate-200 hover:border-brand-primary/50 hover:text-brand-primary hover:shadow-lg'
                 }`}
             >
               {cat}
@@ -108,7 +108,7 @@ export const CoursesSection = () => {
                   initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
                   key={course._id}
                   className="bg-white rounded-[3rem] overflow-hidden border border-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_60px_rgba(8,112,184,0.12)] hover:border-brand-primary/30 transition-all duration-500 group flex flex-col cursor-pointer"
                 >
