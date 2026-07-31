@@ -12,6 +12,7 @@ const Event_1 = require("./models/Event");
 const Blog_1 = require("./models/Blog");
 const Testimonial_1 = require("./models/Testimonial");
 dotenv_1.default.config();
+console.log("MONGO_URI:", process.env.MONGO_URI);
 const importData = async () => {
     try {
         await (0, db_1.connectDB)();
