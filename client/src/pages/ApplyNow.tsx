@@ -51,7 +51,7 @@ export const ApplyNow = () => {
 
     setLoading(true);
     setError('');
-    
+
     try {
       const formPayload = new FormData();
       Object.keys(formData).forEach(key => {
@@ -90,7 +90,7 @@ export const ApplyNow = () => {
       <Navbar />
       <main className="flex-grow pt-32 pb-24">
         <div className="container mx-auto px-6 max-w-4xl">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-12"
@@ -112,11 +112,11 @@ export const ApplyNow = () => {
             </motion.div>
           ) : (
             <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl overflow-hidden">
-              
+
               {/* Stepper */}
               <div className="bg-slate-900 px-8 py-6">
                 <div className="flex justify-between items-center relative">
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 -z-0"></div>
+                  <div className="absolute left-0 top-[30%] -translate-y-1/2 w-full h-1 bg-slate-800 -z-0"></div>
                   {steps.map(step => (
                     <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${currentStep >= step.id ? 'bg-brand-secondary text-white shadow-lg shadow-brand-secondary/30' : 'bg-slate-800 text-slate-400'}`}>
@@ -132,7 +132,7 @@ export const ApplyNow = () => {
               <div className="p-8 md:p-12">
                 <form onSubmit={handleSubmit}>
                   {error && <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium">{error}</div>}
-                  
+
                   <AnimatePresence mode="wait">
                     {currentStep === 1 && (
                       <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
@@ -266,7 +266,7 @@ export const ApplyNow = () => {
                     <Button type="button" variant="outline" onClick={prevStep} disabled={currentStep === 1} className="rounded-full px-6">
                       <ChevronLeft className="w-4 h-4 mr-2" /> Back
                     </Button>
-                    
+
                     <Button type="submit" disabled={loading} className="rounded-full px-8 shadow-md">
                       {currentStep === 5 ? (
                         loading ? 'Submitting...' : 'Submit Application'
