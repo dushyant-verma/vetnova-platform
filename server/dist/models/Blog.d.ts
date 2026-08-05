@@ -1,31 +1,61 @@
 import mongoose from 'mongoose';
 export declare const Blog: mongoose.Model<{
     title: string;
+    slug?: string;
     content: string;
+    excerpt?: string;
     author: string;
-    category?: string;
+    authorRole: string;
+    authorImage?: string;
+    category: string;
+    tags: string[];
     image?: string;
     status: "Draft" | "Published";
+    isFeatured: boolean;
+    readTime: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImage?: string;
 } & mongoose.DefaultTimestampProps, {}, {}, {
     id: string;
 }, mongoose.Document<unknown, {}, {
     title: string;
+    slug?: string;
     content: string;
+    excerpt?: string;
     author: string;
-    category?: string;
+    authorRole: string;
+    authorImage?: string;
+    category: string;
+    tags: string[];
     image?: string;
     status: "Draft" | "Published";
+    isFeatured: boolean;
+    readTime: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImage?: string;
 } & mongoose.DefaultTimestampProps, {
     id: string;
 }, {
     timestamps: true;
 }> & Omit<{
     title: string;
+    slug?: string;
     content: string;
+    excerpt?: string;
     author: string;
-    category?: string;
+    authorRole: string;
+    authorImage?: string;
+    category: string;
+    tags: string[];
     image?: string;
     status: "Draft" | "Published";
+    isFeatured: boolean;
+    readTime: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImage?: string;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -36,29 +66,59 @@ export declare const Blog: mongoose.Model<{
     timestamps: true;
 }, {
     title: string;
+    slug?: string;
     content: string;
+    excerpt?: string;
     author: string;
-    category?: string;
+    authorRole: string;
+    authorImage?: string;
+    category: string;
+    tags: string[];
     image?: string;
     status: "Draft" | "Published";
+    isFeatured: boolean;
+    readTime: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImage?: string;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
     title: string;
+    slug?: string;
     content: string;
+    excerpt?: string;
     author: string;
-    category?: string;
+    authorRole: string;
+    authorImage?: string;
+    category: string;
+    tags: string[];
     image?: string;
     status: "Draft" | "Published";
+    isFeatured: boolean;
+    readTime: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImage?: string;
 } & mongoose.DefaultTimestampProps, {
     id: string;
 }, Omit<mongoose.DefaultSchemaOptions, "timestamps"> & {
     timestamps: true;
 }> & Omit<{
     title: string;
+    slug?: string;
     content: string;
+    excerpt?: string;
     author: string;
-    category?: string;
+    authorRole: string;
+    authorImage?: string;
+    category: string;
+    tags: string[];
     image?: string;
     status: "Draft" | "Published";
+    isFeatured: boolean;
+    readTime: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImage?: string;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -69,11 +129,21 @@ export declare const Blog: mongoose.Model<{
     createdAt: NativeDate;
     updatedAt: NativeDate;
     title: string;
+    slug?: string;
     content: string;
+    excerpt?: string;
     author: string;
-    category?: string;
+    authorRole: string;
+    authorImage?: string;
+    category: string;
+    tags: string[];
     image?: string;
     status: "Draft" | "Published";
+    isFeatured: boolean;
+    readTime: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImage?: string;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -82,11 +152,21 @@ export declare const Blog: mongoose.Model<{
     createdAt: NativeDate;
     updatedAt: NativeDate;
     title: string;
+    slug?: string;
     content: string;
+    excerpt?: string;
     author: string;
-    category?: string;
+    authorRole: string;
+    authorImage?: string;
+    category: string;
+    tags: string[];
     image?: string;
     status: "Draft" | "Published";
+    isFeatured: boolean;
+    readTime: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    ogImage?: string;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {

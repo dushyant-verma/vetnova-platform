@@ -70,7 +70,7 @@ export const LearningPathCards = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.8 }}
             className="text-5xl md:text-6xl lg:text-7xl font-black font-poppins text-slate-900 mb-10 tracking-tighter leading-[1.05]"
           >
             Programs designed around <br className="hidden md:block" />
@@ -80,7 +80,7 @@ export const LearningPathCards = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
+            transition={{ delay: 0.2, duration: 0.8 }}
             className="text-2xl text-slate-500 leading-relaxed font-light max-w-4xl mx-auto"
           >
             Select your learner profile below to discover targeted curriculums built specifically for your experience level, professional goals and clinical concerns.

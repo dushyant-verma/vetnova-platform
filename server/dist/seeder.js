@@ -44,8 +44,153 @@ const importData = async () => {
             { title: 'Exotic Pet Anesthesia Workshop', description: 'A hands-on workshop tailored for veterinarians seeking to improve safety protocols when anesthetizing birds and reptiles.', date: new Date('2026-11-20'), location: 'VetNova Campus, Pune', type: 'workshop', image: 'https://images.unsplash.com/photo-1516280440502-1249b40e4f2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' }
         ]);
         await Blog_1.Blog.create([
-            { title: 'The Future of Minimally Invasive Surgery in Veterinary Medicine', excerpt: 'How laparoscopy and thoracoscopy are changing the landscape of animal care.', content: 'Minimally invasive surgery (MIS) is rapidly becoming the standard of care in veterinary medicine. From laparoscopic spays to complex thoracoscopic procedures, the benefits of reduced pain, shorter hospital stays, and faster recovery are undeniable. At VetNova, we are committed to equipping the next generation of surgeons with the skills needed to perform these advanced techniques...', author: adminUser, tags: ['Surgery', 'Innovation'], image: 'https://images.unsplash.com/photo-1584982751601-97d883861214?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
-            { title: 'Understanding Feline Hypertrophic Cardiomyopathy', excerpt: 'A deep dive into diagnosing and managing HCM in cats.', content: 'Feline Hypertrophic Cardiomyopathy (HCM) is the most common heart disease in cats. Early detection through echocardiography is critical for managing the condition and preventing sudden heart failure or thromboembolism. In this article, Dr. Vikram Singh discusses the subtle clinical signs, the importance of genetic screening, and the latest treatment protocols...', author: adminUser, tags: ['Cardiology', 'Feline Medicine'], image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' }
+            {
+                title: 'Step-by-Step Soft Tissue Surgical Preparation & Aseptic Scrubbing Protocols',
+                slug: 'step-by-step-soft-tissue-surgical-preparation-protocols',
+                category: 'Surgery',
+                excerpt: 'A practical guide for junior veterinary surgeons on sterile OR setup, instrument ergonomics, scrub mechanics, and patient draping to minimize surgical site infections.',
+                content: `
+          <h2 id="section-1">1. Introduction & Principles of Asepsis</h2>
+          <p>Surgical site infections (SSIs) remain one of the most preventable causes of post-operative morbidity in small animal practice. Achieving strict surgical asepsis requires more than just wearing clean scrubs; it demands a disciplined chain of aseptic behaviors starting from patient clip preparation to final skin closure.</p>
+          <p>Veterinary surgeons must distinguish between <strong>sanitization</strong>, <strong>disinfection</strong>, and <strong>sterilization</strong>. In the operating room, any breach in the sterile barrier introduces transient pathogens directly into vascular tissues.</p>
+          <div class="callout-box tip">
+            <strong style="display: block; color: var(--teal-dark); margin-bottom: 6px;"><i class="fa-solid fa-lightbulb"></i> Clinical Insight: The 5-Minute Scrub Rule</strong>
+            <span>Initial surgical scrubs of the day must last a full 5 minutes timed by wall clock. Subsequent scrubs between routine cases may be reduced to 3 minutes using alcohol-based chlorhexidine gluconate rubs.</span>
+          </div>
+          <h2 id="section-2">2. Sterile Surgical Scrub Mechanics</h2>
+          <p>The goal of surgical hand scrubbing is to eliminate transient microflora and significantly reduce resident skin bacteria. Two primary scrub techniques are recognized in veterinary medicine: Anatomical Timed Scrub and Brush Stroke Count.</p>
+          <h3 id="section-2-1">A. Anatomical Timed Scrub Technique</h3>
+          <p>Dividing each finger, hand, and forearm into four anatomical planes (dorsal, palmar, medial, lateral) ensures zero skin surface is skipped:</p>
+          <ol style="margin-bottom: 24px; padding-left: 24px; line-height: 1.8;">
+            <li><strong>Pre-wash:</strong> Perform a standard 30-second handwash under warm water to remove macroscopic soil.</li>
+            <li><strong>Nail cleaning:</strong> Use a sterile pick under running water to clean subungual spaces.</li>
+            <li><strong>Scrub sequence:</strong> Scrub fingertips (30 strokes), then each finger surface, palm, back of hand, wrist, and progress up to 2 inches above the elbow.</li>
+            <li><strong>Rinsing:</strong> Keep hands continuously elevated above elbows so water drains from fingertips down toward non-sterile elbows.</li>
+          </ol>
+          <div class="callout-box important">
+            <strong style="display: block; color: #e11d48; margin-bottom: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> Warning: Avoid Over-Scrubbing Abrasions</strong>
+            <span>Vigorous scrub brush friction causes epidermal micro-abrasions, releasing deeper resident skin bacteria into the surgical field. Always use soft sponge bristles on skin and firm bristles only for fingernails.</span>
+          </div>
+          <h2 id="section-3">3. Instrument Ergonomics & Mayo Stand Setup</h2>
+          <p>A well-organized Mayo stand accelerates surgical efficiency and reduces open-wound air exposure time. Arrange instruments logically according to procedure phases.</p>
+        `,
+                author: 'Dr. Amit Kulkarni',
+                authorRole: 'Senior Veterinary Surgeon & Lead Faculty',
+                authorImage: 'assets/images/blog/blog-author-amit.webp',
+                image: 'assets/images/blog/blog-featured-guide.webp',
+                status: 'Published',
+                isFeatured: true,
+                readTime: '8 Min Read',
+                seoTitle: 'Step-by-Step Soft Tissue Surgical Preparation & Aseptic Scrubbing Protocols | VetNova',
+                seoDescription: 'A practical guide for junior veterinary surgeons on sterile OR setup, instrument ergonomics, scrub mechanics, and patient draping to minimize surgical site infections.',
+                ogImage: 'assets/images/blog/blog-featured-guide.webp'
+            },
+            {
+                title: 'Diagnostic X-Ray Reading: Identifying Thoracic & Abdominal Lesions',
+                slug: 'diagnostic-x-ray-reading-identifying-thoracic-abdominal-lesions',
+                category: 'Radiology & Imaging',
+                excerpt: 'Systematic approach to evaluating cardiomegaly, pulmonary opacities, and intestinal foreign bodies in small animal radiographs.',
+                content: `
+          <h2>Mastering Digital X-Ray Interpretation</h2>
+          <p>Radiographic examination remains the primary non-invasive diagnostic modality in small animal emergency and critical care medicine. Interpreting radiographs methodically prevents cognitive bias and ensures subtle lesions are not overlooked.</p>
+          <h3>Systematic Thoracic Evaluation</h3>
+          <p>When evaluating thoracic radiographs, systematically inspect the extrathoracic structures, pleural space, mediastinum, cardiac silhouette, and pulmonary parenchyma.</p>
+        `,
+                author: 'Dr. Priya Sharma',
+                authorRole: 'Radiology Educator',
+                authorImage: 'assets/images/blog/blog-author-priya.webp',
+                image: 'assets/images/blog/blog-radiology-reading.webp',
+                status: 'Published',
+                isFeatured: false,
+                readTime: '6 Min Read',
+                seoTitle: 'Diagnostic X-Ray Reading Guide | VetNova',
+                seoDescription: 'Systematic approach to evaluating thoracic & abdominal lesions in small animals.'
+            },
+            {
+                title: 'Emergency Triage & Rapid Fluid Resuscitation Protocols',
+                slug: 'emergency-triage-rapid-fluid-resuscitation-protocols',
+                category: 'Emergency Care',
+                excerpt: 'How to triage acute hypovolemic shock, toxic ingestion, and respiratory distress cases during emergency hospital admissions.',
+                content: `
+          <h2>Rapid Assessment in Veterinary ICU</h2>
+          <p>In acute veterinary emergencies, early recognition of shock states and immediate fluid resuscitation save lives. Triage protocols must prioritize airway, breathing, and circulation (ABCs).</p>
+        `,
+                author: 'Dr. Rajesh Verma',
+                authorRole: 'Critical Care Lead',
+                authorImage: 'assets/images/blog/blog-author-rajesh.webp',
+                image: 'assets/images/hero-veterinary-training.webp',
+                status: 'Published',
+                isFeatured: false,
+                readTime: '7 Min Read'
+            },
+            {
+                title: 'Canine Ovariohysterectomy: Suture Selection & Vessel Ligation',
+                slug: 'canine-ovariohysterectomy-suture-selection-vessel-ligation',
+                category: 'Surgery',
+                excerpt: 'Detailed breakdown of pedicle ligation, friction knots, subcuticular closure patterns, and postoperative recovery monitoring.',
+                content: `
+          <h2>Surgical Steps for Canine Spay</h2>
+          <p>Canine ovariohysterectomy is one of the most frequently performed soft tissue procedures. Precision in pedicle exteriorization and ligature security is paramount to prevent hemorrhage.</p>
+        `,
+                author: 'Dr. Amit Kulkarni',
+                authorRole: 'Senior Surgeon',
+                authorImage: 'assets/images/blog/blog-author-amit.webp',
+                image: 'assets/images/blog/blog-soft-tissue-surgery.webp',
+                status: 'Published',
+                isFeatured: false,
+                readTime: '10 Min Read'
+            },
+            {
+                title: 'Ultrasound Probe Positioning for Abdominal AFAST Scans',
+                slug: 'ultrasound-probe-positioning-abdominal-afast-scans',
+                category: 'Radiology & Imaging',
+                excerpt: 'Mastering the 4 cardinal acoustic windows (diaphragmatico-hepatic, spleno-renal, cysto-colic, hepatorenal) to detect free abdominal fluid.',
+                content: `
+          <h2>AFAST Point-of-Care Ultrasound</h2>
+          <p>Abdominal Focused Assessment with Sonography for Trauma (AFAST) is an invaluable rapid bedside scan designed to detect free fluid in traumatized patients.</p>
+        `,
+                author: 'Dr. Priya Sharma',
+                authorRole: 'Radiology Specialist',
+                authorImage: 'assets/images/blog/blog-author-priya.webp',
+                image: 'assets/images/blog/blog-ultrasound-fast.webp',
+                status: 'Published',
+                isFeatured: false,
+                readTime: '5 Min Read'
+            },
+            {
+                title: 'Role of Vet Nurses in Sterile OR Preparation & Patient Recovery',
+                slug: 'role-of-vet-nurses-in-sterile-or-preparation-patient-recovery',
+                category: 'Vet Nurses',
+                excerpt: 'Essential checklist for clinic assistants: autoclaving cycles, patient positioning, IV catheter placement, and vitals logging.',
+                content: `
+          <h2>Veterinary Nursing Protocol</h2>
+          <p>Veterinary nurses are the backbone of surgical operating suites. Proper autoclaving monitoring, patient preparation, and post-anesthetic monitoring are vital responsibilities.</p>
+        `,
+                author: 'Dr. Rahul Deshmukh',
+                authorRole: 'Clinical Director',
+                authorImage: 'assets/images/blog/blog-author-rahul.webp',
+                image: 'assets/images/blog/blog-vet-nurse-or.webp',
+                status: 'Published',
+                isFeatured: false,
+                readTime: '4 Min Read'
+            },
+            {
+                title: 'Post-Op Pain Management & Analgesia Protocols in Small Animals',
+                slug: 'post-op-pain-management-analgesia-protocols-in-small-animals',
+                category: 'Clinical Skills',
+                excerpt: 'Combining NSAIDs, opioids, and local nerve blocks for multimodal pain control during post-surgical recovery.',
+                content: `
+          <h2>Multimodal Analgesia in Small Animals</h2>
+          <p>Effective analgesia improves healing rates and prevents central sensitization. Utilizing multimodal strategies targets pain pathways at multiple levels.</p>
+        `,
+                author: 'Dr. Amit Kulkarni',
+                authorRole: 'Senior Surgeon',
+                authorImage: 'assets/images/blog/blog-author-amit.webp',
+                image: 'assets/images/blog/blog-post-op-pain.webp',
+                status: 'Published',
+                isFeatured: false,
+                readTime: '8 Min Read'
+            }
         ]);
         await Testimonial_1.Testimonial.create([
             { name: 'Dr. Sarah Patel', role: 'Veterinary Surgeon', content: 'The hands-on soft tissue surgery intensive completely transformed my practice. The faculty at VetNova provided personalized guidance that gave me the confidence to perform complex procedures.', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },

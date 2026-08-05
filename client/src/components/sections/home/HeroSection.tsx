@@ -86,7 +86,7 @@ export const HeroSection = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9, x: 20 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
             className="lg:col-span-6 xl:col-span-6 relative z-10"
           >
             <div className="relative rounded-[3rem] overflow-hidden aspect-square md:aspect-[4/3] shadow-[0_20px_50px_rgba(8,_112,_184,_0.15)] ring-1 ring-slate-900/5 bg-white p-4 group">

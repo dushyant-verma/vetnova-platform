@@ -1,23 +1,33 @@
 import { Request, Response } from 'express';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 
 export const crudFactory = (model: Model<any>, populateOpts?: any) => {
   return {
     getAll: async (req: Request, res: Response) => {
       try {
-        const { search, searchFields } = req.query;
-        let query = {};
+        const { search, searchFields, category, status, featured } = req.query;
+        let query: any = {};
         
-        if (search && searchFields) {
-          const fields = (searchFields as string).split(',');
-          query = {
-            $or: fields.map((field) => ({
-              [field]: { $regex: search, $options: 'i' }
-            }))
-          };
+        if (status) {
+          query.status = status;
         }
 
-        let dbQuery = model.find(query);
+        if (category && category !== 'all') {
+          query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+        }
+
+        if (featured !== undefined) {
+          query.isFeatured = featured === 'true';
+        }
+
+        if (search) {
+          const fields = searchFields ? (searchFields as string).split(',') : ['title', 'excerpt', 'content', 'category'];
+          query.$or = fields.map((field) => ({
+            [field]: { $regex: search, $options: 'i' }
+          }));
+        }
+
+        let dbQuery = model.find(query).sort({ createdAt: -1 });
         if (populateOpts) {
           dbQuery = dbQuery.populate(populateOpts);
         }
@@ -31,11 +41,25 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
     
     getOne: async (req: Request, res: Response) => {
       try {
-        let dbQuery = model.findById(req.params.id);
-        if (populateOpts) {
-          dbQuery = dbQuery.populate(populateOpts);
+        const idOrSlug = String(req.params.id);
+        let doc: any = null;
+
+        if (mongoose.Types.ObjectId.isValid(idOrSlug)) {
+          let dbQuery = model.findById(idOrSlug);
+          if (populateOpts) {
+            dbQuery = dbQuery.populate(populateOpts);
+          }
+          doc = await dbQuery;
         }
-        const doc = await dbQuery;
+
+        if (!doc) {
+          let dbQuery = model.findOne({ slug: idOrSlug });
+          if (populateOpts) {
+            dbQuery = dbQuery.populate(populateOpts);
+          }
+          doc = await dbQuery;
+        }
+
         if (doc) res.json(doc);
         else res.status(404).json({ message: 'Not found' });
       } catch (error: any) {
