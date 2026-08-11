@@ -28,12 +28,15 @@ export const ImageUpload = ({ value, onChange, label = "Upload Image" }: ImageUp
     formData.append('image', file);
 
     try {
-      const { data } = await api.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      onChange(data.url);
+      const { data } = await api.post('/upload', formData);
+      const imageUrl = data?.url || data?.data?.url;
+      if (imageUrl) {
+        onChange(imageUrl);
+      } else {
+        setError('Upload succeeded but no image URL was returned');
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to upload image');
+      setError(err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to upload image');
     } finally {
       setLoading(false);
     }

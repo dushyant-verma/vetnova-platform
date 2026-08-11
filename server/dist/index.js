@@ -56,6 +56,15 @@ app.use('/api/stats', statsRoutes_1.default);
 app.get('/api/health', (req, res) => {
     res.json({ status: 'API is running' });
 });
+// Global Error Handler Middleware
+app.use((err, req, res, next) => {
+    console.error('Unhandled Server Error:', err);
+    res.status(err.status || err.statusCode || 500).json({
+        success: false,
+        message: err.message || 'Internal Server Error',
+        error: err.stack || String(err)
+    });
+});
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
