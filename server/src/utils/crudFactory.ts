@@ -9,7 +9,7 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
         let query: any = {};
         
         if (status) {
-          query.status = status;
+          query.status = { $regex: new RegExp(`^${status}$`, 'i') };
         }
 
         if (category && category !== 'all') {
@@ -54,6 +54,14 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
 
         if (!doc) {
           let dbQuery = model.findOne({ slug: idOrSlug });
+          if (populateOpts) {
+            dbQuery = dbQuery.populate(populateOpts);
+          }
+          doc = await dbQuery;
+        }
+
+        if (!doc) {
+          let dbQuery = model.findOne({ slug: { $regex: new RegExp(`^${idOrSlug}$`, 'i') } });
           if (populateOpts) {
             dbQuery = dbQuery.populate(populateOpts);
           }

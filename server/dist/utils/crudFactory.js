@@ -12,7 +12,7 @@ const crudFactory = (model, populateOpts) => {
                 const { search, searchFields, category, status, featured } = req.query;
                 let query = {};
                 if (status) {
-                    query.status = status;
+                    query.status = { $regex: new RegExp(`^${status}$`, 'i') };
                 }
                 if (category && category !== 'all') {
                     query.category = { $regex: new RegExp(`^${category}$`, 'i') };
@@ -50,6 +50,13 @@ const crudFactory = (model, populateOpts) => {
                 }
                 if (!doc) {
                     let dbQuery = model.findOne({ slug: idOrSlug });
+                    if (populateOpts) {
+                        dbQuery = dbQuery.populate(populateOpts);
+                    }
+                    doc = await dbQuery;
+                }
+                if (!doc) {
+                    let dbQuery = model.findOne({ slug: { $regex: new RegExp(`^${idOrSlug}$`, 'i') } });
                     if (populateOpts) {
                         dbQuery = dbQuery.populate(populateOpts);
                     }
