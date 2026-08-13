@@ -6,12 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const Media_1 = require("../models/Media");
 const cloudinaryConfig_1 = require("../config/cloudinaryConfig");
 const router = express_1.default.Router();
-// Multer memory storage for direct Cloudinary stream upload
+// Memory storage only - zero local disk writing in production or dev
 const memoryStorage = multer_1.default.memoryStorage();
 const allowedMimetypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -45,54 +44,25 @@ router.post('/', authMiddleware_1.protect, authMiddleware_1.admin, (req, res, ne
     if (!req.file) {
         return res.status(400).json({ success: false, message: 'No image file uploaded' });
     }
-    const isProd = process.env.NODE_ENV === 'production';
-    const hasCloudinary = (0, cloudinaryConfig_1.isCloudinaryConfigured)();
+    if (!(0, cloudinaryConfig_1.isCloudinaryConfigured)()) {
+        console.error('[Storage Error] Cloudinary credentials missing or unconfigured.');
+        return res.status(500).json({
+            success: false,
+            message: 'Permanent image storage is not configured'
+        });
+    }
     try {
-        let imageUrl = '';
-        let publicId = '';
-        let format = req.file.mimetype;
-        let size = req.file.size;
-        if (hasCloudinary) {
-            // Determine folder based on request query/body context or default media
-            const folder = (req.body.folder || 'vetnova/media').toString();
-            const cloudResult = await (0, cloudinaryConfig_1.uploadBufferToCloudinary)(req.file.buffer, folder, req.file.originalname);
-            imageUrl = cloudResult.secure_url;
-            publicId = cloudResult.public_id;
-            format = cloudResult.format;
-            size = cloudResult.bytes;
-        }
-        else {
-            if (isProd) {
-                console.error('[Storage Error] Cloudinary is unconfigured in production environment!');
-                return res.status(500).json({
-                    success: false,
-                    message: 'Permanent cloud media storage is not configured. Upload rejected to prevent data loss.'
-                });
-            }
-            // Local development fallback only
-            console.warn('[Storage Warning] Cloudinary unconfigured. Using local development fallback storage.');
-            const uploadsDir = path_1.default.join(process.cwd(), 'uploads');
-            if (!fs_1.default.existsSync(uploadsDir)) {
-                fs_1.default.mkdirSync(uploadsDir, { recursive: true });
-            }
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-            const ext = path_1.default.extname(req.file.originalname || '.webp') || '.webp';
-            const filename = `dev-${uniqueSuffix}${ext.toLowerCase()}`;
-            const filePath = path_1.default.join(uploadsDir, filename);
-            fs_1.default.writeFileSync(filePath, req.file.buffer);
-            const host = req.get('host') || 'localhost:5001';
-            const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
-            imageUrl = `${protocol}://${host}/uploads/${filename}`;
-            publicId = filename;
-        }
+        const folder = (req.body.folder || 'vetnova/media').toString();
+        const cloudResult = await (0, cloudinaryConfig_1.uploadBufferToCloudinary)(req.file.buffer, folder, req.file.originalname);
         let mediaObj = null;
         try {
             const media = new Media_1.Media({
-                filename: req.file.originalname || publicId,
-                url: imageUrl,
-                public_id: publicId,
-                format: format,
-                size: size
+                filename: req.file.originalname || cloudResult.public_id,
+                url: cloudResult.secure_url,
+                public_id: cloudResult.public_id,
+                format: cloudResult.format,
+                size: cloudResult.bytes,
+                folder: folder
             });
             mediaObj = await media.save();
         }
@@ -101,7 +71,7 @@ router.post('/', authMiddleware_1.protect, authMiddleware_1.admin, (req, res, ne
         }
         return res.status(200).json({
             success: true,
-            url: imageUrl,
+            url: cloudResult.secure_url,
             media: mediaObj
         });
     }
@@ -109,7 +79,7 @@ router.post('/', authMiddleware_1.protect, authMiddleware_1.admin, (req, res, ne
         console.error('[Upload Handler Error]:', error);
         return res.status(500).json({
             success: false,
-            message: 'Error processing media upload',
+            message: error?.message || 'Error processing media upload',
             error: error?.message || 'Server processing error'
         });
     }

@@ -1,8 +1,6 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
-import os from 'os';
 import { admin, protect, AuthRequest } from '../middlewares/authMiddleware';
 import { Media } from '../models/Media';
 import {
@@ -13,7 +11,7 @@ import {
 
 const router = express.Router();
 
-// Multer memory storage for direct Cloudinary stream upload
+// Memory storage only - zero local disk writing in production or dev
 const memoryStorage = multer.memoryStorage();
 
 const allowedMimetypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -51,60 +49,27 @@ router.post('/', protect, admin, (req: AuthRequest, res: express.Response, next:
     return res.status(400).json({ success: false, message: 'No image file uploaded' });
   }
 
-  const isProd = process.env.NODE_ENV === 'production';
-  const hasCloudinary = isCloudinaryConfigured();
+  if (!isCloudinaryConfigured()) {
+    console.error('[Storage Error] Cloudinary credentials missing or unconfigured.');
+    return res.status(500).json({
+      success: false,
+      message: 'Permanent image storage is not configured'
+    });
+  }
 
   try {
-    let imageUrl = '';
-    let publicId = '';
-    let format = req.file.mimetype;
-    let size = req.file.size;
-
-    if (hasCloudinary) {
-      // Determine folder based on request query/body context or default media
-      const folder = (req.body.folder || 'vetnova/media').toString();
-      const cloudResult = await uploadBufferToCloudinary(req.file.buffer, folder, req.file.originalname);
-      imageUrl = cloudResult.secure_url;
-      publicId = cloudResult.public_id;
-      format = cloudResult.format;
-      size = cloudResult.bytes;
-    } else {
-      if (isProd) {
-        console.error('[Storage Error] Cloudinary is unconfigured in production environment!');
-        return res.status(500).json({
-          success: false,
-          message: 'Permanent cloud media storage is not configured. Upload rejected to prevent data loss.'
-        });
-      }
-
-      // Local development fallback only
-      console.warn('[Storage Warning] Cloudinary unconfigured. Using local development fallback storage.');
-      const uploadsDir = path.join(process.cwd(), 'uploads');
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      const ext = path.extname(req.file.originalname || '.webp') || '.webp';
-      const filename = `dev-${uniqueSuffix}${ext.toLowerCase()}`;
-      const filePath = path.join(uploadsDir, filename);
-
-      fs.writeFileSync(filePath, req.file.buffer);
-
-      const host = req.get('host') || 'localhost:5001';
-      const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
-      imageUrl = `${protocol}://${host}/uploads/${filename}`;
-      publicId = filename;
-    }
+    const folder = (req.body.folder || 'vetnova/media').toString();
+    const cloudResult = await uploadBufferToCloudinary(req.file.buffer, folder, req.file.originalname);
 
     let mediaObj = null;
     try {
       const media = new Media({
-        filename: req.file.originalname || publicId,
-        url: imageUrl,
-        public_id: publicId,
-        format: format,
-        size: size
+        filename: req.file.originalname || cloudResult.public_id,
+        url: cloudResult.secure_url,
+        public_id: cloudResult.public_id,
+        format: cloudResult.format,
+        size: cloudResult.bytes,
+        folder: folder
       });
       mediaObj = await media.save();
     } catch (mediaErr) {
@@ -113,14 +78,14 @@ router.post('/', protect, admin, (req: AuthRequest, res: express.Response, next:
 
     return res.status(200).json({
       success: true,
-      url: imageUrl,
+      url: cloudResult.secure_url,
       media: mediaObj
     });
   } catch (error: any) {
     console.error('[Upload Handler Error]:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error processing media upload',
+      message: error?.message || 'Error processing media upload',
       error: error?.message || 'Server processing error'
     });
   }

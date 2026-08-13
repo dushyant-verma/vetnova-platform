@@ -8,6 +8,7 @@ import { SEO } from '@/components/SEO';
 import { Clock, User, Calendar, Share2, Loader2, ArrowLeft, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
+import { getMediaUrl, handleImageLoadError } from '@/utils/mediaUtils';
 
 const DEFAULT_BLOG_FALLBACK = 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=1200&q=80';
 
@@ -63,7 +64,7 @@ export const BlogDetails = () => {
     day: 'numeric',
     year: 'numeric'
   });
-  const coverImage = blog.image || DEFAULT_BLOG_FALLBACK;
+  const coverImage = getMediaUrl(blog.image);
   const contentHtml = blog.content || `<p>${blog.excerpt || 'No content available for this article.'}</p>`;
   const tags: string[] = Array.isArray(blog.tags) && blog.tags.length > 0 ? blog.tags : ['Veterinary Practice', 'Clinical Updates'];
 
@@ -117,10 +118,7 @@ export const BlogDetails = () => {
              <img 
                src={coverImage} 
                alt={`${title} - VetNova`}
-               onError={(e) => {
-                 console.warn('[Blog Detail Image] Failed to load:', coverImage);
-                 (e.currentTarget as HTMLImageElement).src = DEFAULT_BLOG_FALLBACK;
-               }}
+               onError={(e) => handleImageLoadError(e, coverImage)}
                className="w-full h-full object-cover" 
              />
            </motion.div>

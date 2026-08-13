@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../lib/axios';
 import SEO from '@/components/SEO';
 import { Link } from 'react-router-dom';
+import { getMediaUrl, handleImageLoadError } from '@/utils/mediaUtils';
 
 const DEFAULT_BLOG_FALLBACK = 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80';
 
@@ -99,13 +100,10 @@ export const Blog = () => {
                         {formattedCategory}
                       </div>
                       <img 
-                        src={post.image || DEFAULT_BLOG_FALLBACK} 
+                        src={getMediaUrl(post.image)} 
                         alt={`${post.title} - VetNova`}
                         loading="lazy"
-                        onError={(e) => {
-                          console.warn('[Blog Image] Failed to load:', post.image);
-                          (e.currentTarget as HTMLImageElement).src = DEFAULT_BLOG_FALLBACK;
-                        }}
+                        onError={(e) => handleImageLoadError(e, post.image)}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </Link>

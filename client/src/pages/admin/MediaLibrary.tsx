@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Image, Upload, Trash2, Loader2, Copy, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
+import { getMediaUrl, handleImageLoadError } from '@/utils/mediaUtils';
 
 export const MediaLibrary = () => {
   const queryClient = useQueryClient();
@@ -28,9 +29,9 @@ export const MediaLibrary = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-media'] });
       setUploading(false);
     },
-    onError: () => {
+    onError: (err: any) => {
       setUploading(false);
-      alert('Upload failed');
+      alert(err?.response?.data?.message || 'Upload failed');
     }
   });
 
@@ -106,7 +107,12 @@ export const MediaLibrary = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {filteredMedia.map((media: any) => (
               <div key={media._id} className="group relative border border-slate-200 rounded-lg overflow-hidden aspect-square bg-slate-50">
-                <img src={media.url} alt={media.filename} className="w-full h-full object-cover" />
+                <img 
+                  src={getMediaUrl(media.url)} 
+                  alt={media.filename || 'Media'} 
+                  onError={(e) => handleImageLoadError(e, media.url)}
+                  className="w-full h-full object-cover" 
+                />
                 <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                   <p className="text-white text-xs truncate w-11/12 text-center px-1">{media.filename}</p>
                   <div className="flex gap-2">

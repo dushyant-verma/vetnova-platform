@@ -25,7 +25,6 @@ const Gallery_1 = require("./models/Gallery");
 const Page_1 = require("./models/Page");
 const Setting_1 = require("./models/Setting");
 const Media_1 = require("./models/Media");
-const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 // Connect Database
@@ -43,7 +42,6 @@ else {
 app.use((0, cors_1.default)());
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ limit: '10mb', extended: true }));
-app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
 // Routes
 app.use('/api/auth', authRoutes_1.default);
 app.use('/api/programs', programRoutes_1.default);
