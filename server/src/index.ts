@@ -41,8 +41,30 @@ if (isCloudinaryActive) {
   console.warn('[Storage WARNING] Cloudinary configuration missing or invalid. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME / API_KEY / API_SECRET');
 }
 
-// Middleware
-app.use(cors());
+// CORS Middleware Configuration
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'https://vetnova-platform.vercel.app',
+  'https://vetnova-platform.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'http://localhost:3000'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, origin || true);
+    } else {
+      callback(null, origin || true);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+}));
+
+app.options('*', cors());
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
@@ -83,6 +105,11 @@ app.get('/api/health/storage', (req, res) => {
 // Global Error Handler Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Unhandled Server Error:', err);
+  const origin = req.headers.origin;
+  if (origin && typeof origin === 'string') {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
   res.status(err.status || err.statusCode || 500).json({
     success: false,
     message: err.message || 'Internal Server Error',
