@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const db_1 = require("./config/db");
+const cloudinaryConfig_1 = require("./config/cloudinaryConfig");
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const programRoutes_1 = __importDefault(require("./routes/programRoutes"));
 const uploadRoutes_1 = __importDefault(require("./routes/uploadRoutes"));
@@ -29,6 +30,15 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 // Connect Database
 (0, db_1.connectDB)();
+// Storage Startup Validation
+const isCloudinaryActive = (0, cloudinaryConfig_1.isCloudinaryConfigured)();
+console.log(`[Storage] Cloudinary configured: ${isCloudinaryActive}`);
+if (isCloudinaryActive) {
+    console.log('[Storage] Permanent production media storage ENABLED');
+}
+else {
+    console.warn('[Storage WARNING] Cloudinary configuration missing or invalid. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME / API_KEY / API_SECRET');
+}
 // Middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json({ limit: '10mb' }));
@@ -55,6 +65,14 @@ app.use('/api/media', (0, generateRouter_1.generateRouter)(Media_1.Media));
 app.use('/api/stats', statsRoutes_1.default);
 app.get('/api/health', (req, res) => {
     res.json({ status: 'API is running' });
+});
+app.get('/api/health/storage', (req, res) => {
+    const configured = (0, cloudinaryConfig_1.isCloudinaryConfigured)();
+    res.json({
+        storage: 'cloudinary',
+        persistent: configured,
+        configured: configured
+    });
 });
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {

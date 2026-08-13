@@ -12,8 +12,12 @@ interface BlogForm {
   excerpt: string;
   content: string;
   author: string;
+  authorRole: string;
+  category: string;
+  readTime: string;
   tags: string;
   image: string;
+  status: string;
 }
 
 export const BlogManagement = () => {
@@ -28,8 +32,12 @@ export const BlogManagement = () => {
       excerpt: '',
       content: '',
       author: '',
+      authorRole: 'Veterinary Specialist',
+      category: 'GENERAL',
+      readTime: '5 Min Read',
       tags: '',
-      image: ''
+      image: '',
+      status: 'Published'
     }
   });
 
@@ -41,10 +49,15 @@ export const BlogManagement = () => {
     }
   });
 
+  const invalidateQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-blogs'] });
+    queryClient.invalidateQueries({ queryKey: ['blogs'] });
+  };
+
   const createMutation = useMutation({
     mutationFn: (data: any) => api.post('/blogs', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-blogs'] });
+      invalidateQueries();
       setIsModalOpen(false);
       reset();
     }
@@ -53,7 +66,7 @@ export const BlogManagement = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string, data: any }) => api.put(`/blogs/${id}`, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-blogs'] });
+      invalidateQueries();
       setIsModalOpen(false);
       reset();
       setEditingId(null);
@@ -63,7 +76,7 @@ export const BlogManagement = () => {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/blogs/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-blogs'] });
+      invalidateQueries();
     }
   });
 
@@ -83,9 +96,13 @@ export const BlogManagement = () => {
     setValue('title', blog.title);
     setValue('excerpt', blog.excerpt || '');
     setValue('content', blog.content || '');
-    setValue('author', blog.author?.name || typeof blog.author === 'string' ? blog.author : '');
+    setValue('author', typeof blog.author === 'string' ? blog.author : blog.author?.name || '');
+    setValue('authorRole', blog.authorRole || 'Veterinary Specialist');
+    setValue('category', blog.category || 'GENERAL');
+    setValue('readTime', blog.readTime || '5 Min Read');
     setValue('tags', blog.tags?.join(', ') || '');
     setValue('image', blog.image || '');
+    setValue('status', blog.status || 'Published');
     setEditingId(blog._id);
     setIsModalOpen(true);
   };
@@ -93,6 +110,7 @@ export const BlogManagement = () => {
   const onSubmit = (data: BlogForm) => {
     const payload = {
       ...data,
+      category: data.category.toUpperCase(),
       tags: data.tags.split(',').map(t => t.trim()).filter(Boolean)
     };
     if (editingId) {
@@ -134,6 +152,7 @@ export const BlogManagement = () => {
           <thead className="bg-white">
             <tr className="text-sm font-medium text-slate-500 border-b border-slate-100">
               <th className="px-6 py-4">Title</th>
+              <th className="px-6 py-4">Category</th>
               <th className="px-6 py-4">Author</th>
               <th className="px-6 py-4">Date</th>
               <th className="px-6 py-4 text-right">Actions</th>
@@ -141,14 +160,19 @@ export const BlogManagement = () => {
           </thead>
           <tbody className="text-sm divide-y divide-slate-50">
             {isLoading ? (
-              <tr><td colSpan={4} className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-primary" /></td></tr>
+              <tr><td colSpan={5} className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-primary" /></td></tr>
             ) : blogs?.length === 0 ? (
-              <tr><td colSpan={4} className="text-center py-8 text-slate-500">No posts found.</td></tr>
+              <tr><td colSpan={5} className="text-center py-8 text-slate-500">No posts found.</td></tr>
             ) : blogs?.map((blog: any) => (
               <tr key={blog._id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 font-medium text-slate-900">{blog.title}</td>
+                <td className="px-6 py-4 font-medium text-slate-900 max-w-xs truncate">{blog.title}</td>
                 <td className="px-6 py-4 text-slate-600">
-                  {blog.author?.name || blog.author || 'Admin'}
+                  <span className="px-2.5 py-1 bg-slate-100 rounded-full text-xs font-semibold text-slate-700">
+                    {(blog.category || 'GENERAL').toUpperCase()}
+                  </span>
+                </td>
+                <td className="px-6 py-4 text-slate-600">
+                  {typeof blog.author === 'string' ? blog.author : blog.author?.name || 'Admin'}
                 </td>
                 <td className="px-6 py-4 text-slate-600">
                   <div className="flex items-center gap-2">
@@ -173,25 +197,63 @@ export const BlogManagement = () => {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? 'Edit Post' : 'New Post'}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Controller name="title" control={control} rules={{ required: true }} render={({ field }) => (
-            <div><label className="block text-sm font-medium mb-1">Title *</label><input {...field} className="w-full border border-slate-300 rounded-lg p-2" /></div>
+            <div><label className="block text-sm font-medium mb-1">Title *</label><input {...field} className="w-full border border-slate-300 rounded-lg p-2 text-sm" /></div>
           )} />
-          <Controller name="excerpt" control={control} render={({ field }) => (
-            <div><label className="block text-sm font-medium mb-1">Excerpt</label><textarea {...field} rows={2} className="w-full border border-slate-300 rounded-lg p-2" /></div>
-          )} />
-          <Controller name="content" control={control} rules={{ required: true }} render={({ field }) => (
-            <div><label className="block text-sm font-medium mb-1">Content *</label><textarea {...field} rows={6} className="w-full border border-slate-300 rounded-lg p-2" /></div>
-          )} />
+          
           <div className="grid grid-cols-2 gap-4">
-            <Controller name="author" control={control} render={({ field }) => (
-              <div><label className="block text-sm font-medium mb-1">Author Name</label><input {...field} className="w-full border border-slate-300 rounded-lg p-2" /></div>
+            <Controller name="category" control={control} render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium mb-1">Category</label>
+                <select {...field} className="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                  <option value="GENERAL">GENERAL</option>
+                  <option value="SURGERY">SURGERY</option>
+                  <option value="RADIOLOGY & IMAGING">RADIOLOGY & IMAGING</option>
+                  <option value="CLINICAL UPDATES">CLINICAL UPDATES</option>
+                  <option value="DENTISTRY">DENTISTRY</option>
+                </select>
+              </div>
             )} />
-            <Controller name="tags" control={control} render={({ field }) => (
-              <div><label className="block text-sm font-medium mb-1">Tags (comma separated)</label><input {...field} className="w-full border border-slate-300 rounded-lg p-2" /></div>
+            <Controller name="readTime" control={control} render={({ field }) => (
+              <div><label className="block text-sm font-medium mb-1">Reading Time</label><input {...field} placeholder="e.g. 5 Min Read" className="w-full border border-slate-300 rounded-lg p-2 text-sm" /></div>
             )} />
           </div>
+
+          <Controller name="excerpt" control={control} render={({ field }) => (
+            <div><label className="block text-sm font-medium mb-1">Excerpt</label><textarea {...field} rows={2} className="w-full border border-slate-300 rounded-lg p-2 text-sm" /></div>
+          )} />
+          
+          <Controller name="content" control={control} rules={{ required: true }} render={({ field }) => (
+            <div><label className="block text-sm font-medium mb-1">Content *</label><textarea {...field} rows={6} className="w-full border border-slate-300 rounded-lg p-2 text-sm font-mono" /></div>
+          )} />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Controller name="author" control={control} render={({ field }) => (
+              <div><label className="block text-sm font-medium mb-1">Author Name</label><input {...field} className="w-full border border-slate-300 rounded-lg p-2 text-sm" /></div>
+            )} />
+            <Controller name="authorRole" control={control} render={({ field }) => (
+              <div><label className="block text-sm font-medium mb-1">Author Role</label><input {...field} className="w-full border border-slate-300 rounded-lg p-2 text-sm" /></div>
+            )} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Controller name="tags" control={control} render={({ field }) => (
+              <div><label className="block text-sm font-medium mb-1">Tags (comma separated)</label><input {...field} className="w-full border border-slate-300 rounded-lg p-2 text-sm" /></div>
+            )} />
+            <Controller name="status" control={control} render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select {...field} className="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                  <option value="Published">Published</option>
+                  <option value="Draft">Draft</option>
+                </select>
+              </div>
+            )} />
+          </div>
+
           <Controller name="image" control={control} render={({ field: { value, onChange } }) => (
             <ImageUpload value={value} onChange={onChange} label="Cover Image" />
           )} />
+
           <div className="pt-4 flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Post'}</Button>

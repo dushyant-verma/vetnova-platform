@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import { connectDB } from './config/db';
+import { isCloudinaryConfigured } from './config/cloudinaryConfig';
 
 import authRoutes from './routes/authRoutes';
 import programRoutes from './routes/programRoutes';
@@ -30,6 +31,15 @@ const app = express();
 
 // Connect Database
 connectDB();
+
+// Storage Startup Validation
+const isCloudinaryActive = isCloudinaryConfigured();
+console.log(`[Storage] Cloudinary configured: ${isCloudinaryActive}`);
+if (isCloudinaryActive) {
+  console.log('[Storage] Permanent production media storage ENABLED');
+} else {
+  console.warn('[Storage WARNING] Cloudinary configuration missing or invalid. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME / API_KEY / API_SECRET');
+}
 
 // Middleware
 app.use(cors());
@@ -60,6 +70,15 @@ app.use('/api/stats', statsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'API is running' });
+});
+
+app.get('/api/health/storage', (req, res) => {
+  const configured = isCloudinaryConfigured();
+  res.json({
+    storage: 'cloudinary',
+    persistent: configured,
+    configured: configured
+  });
 });
 
 // Global Error Handler Middleware
