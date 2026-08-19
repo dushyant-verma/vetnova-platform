@@ -15,6 +15,7 @@ export declare const Expert: mongoose.Model<{
         linkedin?: string;
         twitter?: string;
     };
+    programs: string[];
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps, {}, {}, {
@@ -35,6 +36,7 @@ export declare const Expert: mongoose.Model<{
         linkedin?: string;
         twitter?: string;
     };
+    programs: string[];
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps, {
@@ -57,6 +59,7 @@ export declare const Expert: mongoose.Model<{
         linkedin?: string;
         twitter?: string;
     };
+    programs: string[];
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps & {
@@ -83,6 +86,7 @@ export declare const Expert: mongoose.Model<{
         linkedin?: string;
         twitter?: string;
     };
+    programs: string[];
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
@@ -101,6 +105,7 @@ export declare const Expert: mongoose.Model<{
         linkedin?: string;
         twitter?: string;
     };
+    programs: string[];
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps, {
@@ -123,6 +128,7 @@ export declare const Expert: mongoose.Model<{
         linkedin?: string;
         twitter?: string;
     };
+    programs: string[];
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps & {
@@ -149,6 +155,7 @@ export declare const Expert: mongoose.Model<{
         linkedin?: string;
         twitter?: string;
     };
+    programs: string[];
     displayOrder: number;
     status: "Draft" | "Published";
 } & {
@@ -173,6 +180,7 @@ export declare const Expert: mongoose.Model<{
         linkedin?: string;
         twitter?: string;
     };
+    programs: string[];
     displayOrder: number;
     status: "Draft" | "Published";
 } & {

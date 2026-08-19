@@ -5,15 +5,21 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
   return {
     getAll: async (req: Request, res: Response) => {
       try {
-        const { search, searchFields, category, status, featured } = req.query;
+        const { search, searchFields, category, status, featured, program, public: isPublic } = req.query;
         let query: any = {};
         
         if (status) {
           query.status = { $regex: new RegExp(`^${status}$`, 'i') };
+        } else if (isPublic === 'true') {
+          query.status = 'Published';
         }
 
         if (category && category !== 'all') {
           query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+        }
+
+        if (program && program !== 'all') {
+          query.programs = { $regex: new RegExp(`^${program}$`, 'i') };
         }
 
         if (featured !== undefined) {
@@ -21,13 +27,16 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
         }
 
         if (search) {
-          const fields = searchFields ? (searchFields as string).split(',') : ['title', 'excerpt', 'content', 'category'];
+          const fields = searchFields ? (searchFields as string).split(',') : ['name', 'title', 'excerpt', 'content', 'category', 'specialization', 'department', 'designation'];
           query.$or = fields.map((field) => ({
             [field]: { $regex: search, $options: 'i' }
           }));
         }
 
-        let dbQuery = model.find(query).sort({ createdAt: -1 });
+        const hasDisplayOrder = model.schema.path('displayOrder') !== undefined;
+        const sortOptions: any = hasDisplayOrder ? { displayOrder: 1, createdAt: -1 } : { createdAt: -1 };
+
+        let dbQuery = model.find(query).sort(sortOptions);
         if (populateOpts) {
           dbQuery = dbQuery.populate(populateOpts);
         }
@@ -95,6 +104,44 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
     
     deleteOne: async (req: Request, res: Response) => {
       try {
+        const docToDelete = await model.findById(req.params.id);
+        if (!docToDelete) {
+          return res.status(404).json({ message: 'Not found' });
+        }
+
+        // Safe cleanup when deleting a BlogCategory
+        if (model.modelName === 'BlogCategory') {
+          const BlogModel = mongoose.models.Blog;
+          const CategoryModel = model;
+          
+          if (BlogModel) {
+            const catName = docToDelete.name;
+            const catSlug = docToDelete.slug;
+            
+            // Reassign affected blogs to GENERAL
+            await BlogModel.updateMany(
+              {
+                $or: [
+                  { category: { $regex: new RegExp(`^${catName}$`, 'i') } },
+                  { category: { $regex: new RegExp(`^${catSlug}$`, 'i') } }
+                ]
+              },
+              { $set: { category: 'GENERAL' } }
+            );
+
+            // Ensure GENERAL category exists in database
+            const generalExists = await CategoryModel.findOne({ name: { $regex: /^GENERAL$/i } });
+            if (!generalExists) {
+              await CategoryModel.create({
+                name: 'GENERAL',
+                slug: 'general',
+                description: 'General articles and announcements',
+                status: 'Published'
+              });
+            }
+          }
+        }
+
         await model.findByIdAndDelete(req.params.id);
         res.json({ message: 'Removed successfully' });
       } catch (error: any) {

@@ -17,9 +17,18 @@ interface FacultyForm {
   image: string;
   linkedin: string;
   email: string;
+  programs: string[];
   displayOrder: number;
   status: string;
 }
+
+const DEFAULT_PROGRAMS = [
+  { id: 'veterinary-skill-up', title: 'Veterinary Skill Up (6 Months)' },
+  { id: 'emergency-medicine', title: 'Emergency & Critical Care' },
+  { id: 'radiology-ultrasound', title: 'Radiology & Ultrasound' },
+  { id: 'soft-tissue-surgery', title: 'Soft Tissue Surgery' },
+  { id: 'vet-nurse-programme', title: 'Veterinary Nurse Programme' }
+];
 
 export const FacultyManagement = () => {
   const queryClient = useQueryClient();
@@ -27,7 +36,7 @@ export const FacultyManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const { control, handleSubmit, reset, setValue } = useForm<FacultyForm>({
+  const { control, handleSubmit, reset, setValue, watch } = useForm<FacultyForm>({
     defaultValues: {
       name: '',
       designation: '',
@@ -38,10 +47,13 @@ export const FacultyManagement = () => {
       image: '',
       linkedin: '',
       email: '',
+      programs: [],
       displayOrder: 0,
       status: 'Published'
     }
   });
+
+  const selectedPrograms = watch('programs') || [];
 
   const { data: experts, isLoading } = useQuery({
     queryKey: ['admin-experts', searchTerm],
@@ -50,6 +62,23 @@ export const FacultyManagement = () => {
       return data;
     }
   });
+
+  const { data: apiPrograms } = useQuery({
+    queryKey: ['admin-programs-list'],
+    queryFn: async () => {
+      try {
+        const { data } = await api.get('/programs');
+        return data;
+      } catch (err) {
+        return [];
+      }
+    }
+  });
+
+  // Combine DB programs with default program list
+  const programOptions = apiPrograms && apiPrograms.length > 0
+    ? apiPrograms.map((p: any) => ({ id: p.slug || p._id, title: p.title }))
+    : DEFAULT_PROGRAMS;
 
   const createMutation = useMutation({
     mutationFn: (data: any) => api.post('/experts', data),
@@ -94,6 +123,7 @@ export const FacultyManagement = () => {
       image: '',
       linkedin: '',
       email: '',
+      programs: DEFAULT_PROGRAMS.map(p => p.id), // Default assign to all programs
       displayOrder: (experts?.length || 0) + 1,
       status: 'Published'
     });
@@ -111,10 +141,20 @@ export const FacultyManagement = () => {
     setValue('image', expert.image || '');
     setValue('linkedin', expert.linkedin || expert.socialLinks?.linkedin || '');
     setValue('email', expert.email || '');
+    setValue('programs', expert.programs || DEFAULT_PROGRAMS.map(p => p.id));
     setValue('displayOrder', expert.displayOrder !== undefined ? expert.displayOrder : 0);
     setValue('status', expert.status || 'Published');
     setEditingId(expert._id);
     setIsModalOpen(true);
+  };
+
+  const handleProgramToggle = (progId: string) => {
+    const current = selectedPrograms;
+    if (current.includes(progId)) {
+      setValue('programs', current.filter(id => id !== progId));
+    } else {
+      setValue('programs', [...current, progId]);
+    }
   };
 
   const onSubmit = (data: FacultyForm) => {
@@ -136,7 +176,7 @@ export const FacultyManagement = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold font-poppins text-slate-900">Faculty Management</h1>
-          <p className="text-slate-500 text-sm">Manage teaching faculty, specialists, and academic staff.</p>
+          <p className="text-slate-500 text-sm">Manage teaching faculty, course assignments, and bios.</p>
         </div>
         <Button onClick={openAddModal} className="flex items-center gap-2">
           <Plus className="w-4 h-4" /> Add Faculty
@@ -164,8 +204,8 @@ export const FacultyManagement = () => {
           <thead className="bg-white">
             <tr className="text-sm font-medium text-slate-500 border-b border-slate-100">
               <th className="px-6 py-4">Faculty Member</th>
-              <th className="px-6 py-4">Designation / Qualification</th>
-              <th className="px-6 py-4">Department / Expertise</th>
+              <th className="px-6 py-4">Designation & Department</th>
+              <th className="px-6 py-4">Assigned Programs</th>
               <th className="px-6 py-4">Order</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4 text-right">Actions</th>
@@ -191,10 +231,12 @@ export const FacultyManagement = () => {
                 </td>
                 <td className="px-6 py-4 text-slate-600">
                   <div className="font-medium text-slate-800">{expert.designation || 'Specialist'}</div>
-                  <div className="text-xs text-slate-500">{expert.qualification}</div>
+                  <div className="text-xs text-slate-500">{expert.department || expert.specialization || 'Veterinary Sciences'}</div>
                 </td>
-                <td className="px-6 py-4 text-slate-600 font-medium">
-                  {expert.department || expert.specialization || 'Veterinary Sciences'}
+                <td className="px-6 py-4 text-slate-600">
+                  <span className="px-2 py-1 bg-slate-100 rounded text-xs font-mono font-medium text-slate-700">
+                    {expert.programs && expert.programs.length > 0 ? `${expert.programs.length} Program(s)` : 'All Programs'}
+                  </span>
                 </td>
                 <td className="px-6 py-4 text-slate-600 font-mono text-xs">
                   {expert.displayOrder !== undefined ? expert.displayOrder : 0}
@@ -250,6 +292,28 @@ export const FacultyManagement = () => {
               <input {...field} placeholder="e.g. Orthopedics & Diagnostic Imaging" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
             </div>
           )} />
+
+          {/* Multi-select Program Assignment */}
+          <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2">
+            <label className="block text-sm font-bold text-slate-800">Assign To Programs</label>
+            <p className="text-xs text-slate-500">Select programs where this faculty member will be displayed on the public website.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+              {programOptions.map((prog: any) => {
+                const isChecked = selectedPrograms.includes(prog.id);
+                return (
+                  <label key={prog.id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 hover:border-brand-primary/50 cursor-pointer text-xs font-medium text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => handleProgramToggle(prog.id)}
+                      className="rounded text-brand-primary focus:ring-brand-primary"
+                    />
+                    <span>{prog.title}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Controller name="email" control={control} render={({ field }) => (

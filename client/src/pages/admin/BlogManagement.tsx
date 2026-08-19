@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { Modal } from '@/components/ui/Modal';
 import { ImageUpload } from '@/components/ui/ImageUpload';
+import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { useForm, Controller } from 'react-hook-form';
 
 interface BlogForm {
@@ -407,10 +408,7 @@ export const BlogManagement = () => {
           )} />
           
           <Controller name="content" control={control} rules={{ required: true }} render={({ field }) => (
-            <div>
-              <label className="block text-sm font-medium mb-1 text-slate-700">Full Content *</label>
-              <textarea {...field} rows={6} placeholder="Write your post content in HTML or Markdown..." className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-brand-primary/50 outline-none" />
-            </div>
+            <RichTextEditor value={field.value} onChange={field.onChange} label="Full Article Content *" placeholder="Write article content with bold, italic, headings, lists, and hyperlinks..." />
           )} />
 
           <div className="grid grid-cols-2 gap-4">

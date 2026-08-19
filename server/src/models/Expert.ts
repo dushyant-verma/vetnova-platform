@@ -16,6 +16,7 @@ const expertSchema = new mongoose.Schema({
     linkedin: String,
     twitter: String
   },
+  programs: [{ type: String }],
   displayOrder: { type: Number, default: 0 },
   status: { type: String, enum: ['Published', 'Draft'], default: 'Published' }
 }, { timestamps: true });
