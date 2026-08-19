@@ -24,6 +24,7 @@ import { Gallery } from './models/Gallery';
 import { Page } from './models/Page';
 import { Setting } from './models/Setting';
 import { Media } from './models/Media';
+import { seedWebsiteContent } from './scripts/seedWebsiteContent';
 
 import path from 'path';
 
@@ -31,8 +32,12 @@ dotenv.config();
 
 const app = express();
 
-// Connect Database
-connectDB();
+// Connect Database & Seed Content
+connectDB().then(() => {
+  seedWebsiteContent();
+}).catch(() => {
+  seedWebsiteContent();
+});
 
 // Storage Startup Validation
 const isCloudinaryActive = isCloudinaryConfigured();
