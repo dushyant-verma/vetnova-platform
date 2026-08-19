@@ -13,6 +13,8 @@ import { generateRouter } from './utils/generateRouter';
 import { crudFactory } from './utils/crudFactory';
 
 import { Expert } from './models/Expert';
+import { AdvisoryBoard } from './models/AdvisoryBoard';
+import { BlogCategory } from './models/BlogCategory';
 import { Event } from './models/Event';
 import { Blog } from './models/Blog';
 import { Application } from './models/Application';
@@ -74,6 +76,10 @@ app.use('/api/settings/footer', footerRoutes);
 
 // Dynamic Generic Routes
 app.use('/api/experts', generateRouter(Expert));
+app.use('/api/faculty', generateRouter(Expert));
+app.use('/api/advisory-board', generateRouter(AdvisoryBoard));
+app.use('/api/categories', generateRouter(BlogCategory));
+app.use('/api/blog-categories', generateRouter(BlogCategory));
 app.use('/api/events', generateRouter(Event));
 app.use('/api/blogs', generateRouter(Blog));
 const applicationCrud = crudFactory(Application, 'program');

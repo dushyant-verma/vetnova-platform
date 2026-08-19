@@ -5,17 +5,21 @@ const Program_1 = require("../models/Program");
 const Application_1 = require("../models/Application");
 const User_1 = require("../models/User");
 const Expert_1 = require("../models/Expert");
+const AdvisoryBoard_1 = require("../models/AdvisoryBoard");
+const BlogCategory_1 = require("../models/BlogCategory");
 const Event_1 = require("../models/Event");
 const Blog_1 = require("../models/Blog");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const router = (0, express_1.Router)();
 router.get('/', authMiddleware_1.protect, authMiddleware_1.admin, async (req, res) => {
     try {
-        const [programsCount, applicationsCount, usersCount, expertsCount, eventsCount, blogsCount] = await Promise.all([
+        const [programsCount, applicationsCount, usersCount, expertsCount, advisoryBoardCount, categoriesCount, eventsCount, blogsCount] = await Promise.all([
             Program_1.Program.countDocuments(),
             Application_1.Application.countDocuments(),
             User_1.User.countDocuments(),
             Expert_1.Expert.countDocuments(),
+            AdvisoryBoard_1.AdvisoryBoard.countDocuments(),
+            BlogCategory_1.BlogCategory.countDocuments(),
             Event_1.Event.countDocuments(),
             Blog_1.Blog.countDocuments()
         ]);
@@ -24,6 +28,9 @@ router.get('/', authMiddleware_1.protect, authMiddleware_1.admin, async (req, re
             applicationsCount,
             usersCount,
             expertsCount,
+            facultyCount: expertsCount,
+            advisoryBoardCount,
+            categoriesCount,
             eventsCount,
             blogsCount
         });

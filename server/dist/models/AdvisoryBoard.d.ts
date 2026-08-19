@@ -1,20 +1,12 @@
 import mongoose from 'mongoose';
-export declare const Expert: mongoose.Model<{
+export declare const AdvisoryBoard: mongoose.Model<{
     name: string;
     designation?: string;
+    organization?: string;
     qualification?: string;
-    department?: string;
-    specialization?: string;
-    experience?: string;
-    education?: string;
     bio?: string;
     image?: string;
-    email?: string;
     linkedin?: string;
-    socialLinks?: {
-        linkedin?: string;
-        twitter?: string;
-    };
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps, {}, {}, {
@@ -22,19 +14,11 @@ export declare const Expert: mongoose.Model<{
 }, mongoose.Document<unknown, {}, {
     name: string;
     designation?: string;
+    organization?: string;
     qualification?: string;
-    department?: string;
-    specialization?: string;
-    experience?: string;
-    education?: string;
     bio?: string;
     image?: string;
-    email?: string;
     linkedin?: string;
-    socialLinks?: {
-        linkedin?: string;
-        twitter?: string;
-    };
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps, {
@@ -44,19 +28,11 @@ export declare const Expert: mongoose.Model<{
 }> & Omit<{
     name: string;
     designation?: string;
+    organization?: string;
     qualification?: string;
-    department?: string;
-    specialization?: string;
-    experience?: string;
-    education?: string;
     bio?: string;
     image?: string;
-    email?: string;
     linkedin?: string;
-    socialLinks?: {
-        linkedin?: string;
-        twitter?: string;
-    };
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps & {
@@ -70,37 +46,21 @@ export declare const Expert: mongoose.Model<{
 }, {
     name: string;
     designation?: string;
+    organization?: string;
     qualification?: string;
-    department?: string;
-    specialization?: string;
-    experience?: string;
-    education?: string;
     bio?: string;
     image?: string;
-    email?: string;
     linkedin?: string;
-    socialLinks?: {
-        linkedin?: string;
-        twitter?: string;
-    };
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
     name: string;
     designation?: string;
+    organization?: string;
     qualification?: string;
-    department?: string;
-    specialization?: string;
-    experience?: string;
-    education?: string;
     bio?: string;
     image?: string;
-    email?: string;
     linkedin?: string;
-    socialLinks?: {
-        linkedin?: string;
-        twitter?: string;
-    };
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps, {
@@ -110,19 +70,11 @@ export declare const Expert: mongoose.Model<{
 }> & Omit<{
     name: string;
     designation?: string;
+    organization?: string;
     qualification?: string;
-    department?: string;
-    specialization?: string;
-    experience?: string;
-    education?: string;
     bio?: string;
     image?: string;
-    email?: string;
     linkedin?: string;
-    socialLinks?: {
-        linkedin?: string;
-        twitter?: string;
-    };
     displayOrder: number;
     status: "Draft" | "Published";
 } & mongoose.DefaultTimestampProps & {
@@ -136,19 +88,11 @@ export declare const Expert: mongoose.Model<{
     updatedAt: NativeDate;
     name: string;
     designation?: string;
+    organization?: string;
     qualification?: string;
-    department?: string;
-    specialization?: string;
-    experience?: string;
-    education?: string;
     bio?: string;
     image?: string;
-    email?: string;
     linkedin?: string;
-    socialLinks?: {
-        linkedin?: string;
-        twitter?: string;
-    };
     displayOrder: number;
     status: "Draft" | "Published";
 } & {
@@ -160,19 +104,11 @@ export declare const Expert: mongoose.Model<{
     updatedAt: NativeDate;
     name: string;
     designation?: string;
+    organization?: string;
     qualification?: string;
-    department?: string;
-    specialization?: string;
-    experience?: string;
-    education?: string;
     bio?: string;
     image?: string;
-    email?: string;
     linkedin?: string;
-    socialLinks?: {
-        linkedin?: string;
-        twitter?: string;
-    };
     displayOrder: number;
     status: "Draft" | "Published";
 } & {
@@ -180,4 +116,4 @@ export declare const Expert: mongoose.Model<{
 } & {
     __v: number;
 }>;
-//# sourceMappingURL=Expert.d.ts.map
+//# sourceMappingURL=AdvisoryBoard.d.ts.map

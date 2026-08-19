@@ -33,7 +33,10 @@ const blogSchema = new mongoose_1.default.Schema({
     ogImage: { type: String },
 }, { timestamps: true });
 blogSchema.pre('validate', function (next) {
-    if (this.title && !this.slug) {
+    if (this.slug) {
+        this.slug = generateSlug(this.slug);
+    }
+    else if (this.title) {
         this.slug = generateSlug(this.title);
     }
     if (typeof next === 'function') {

@@ -46,6 +46,7 @@ const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(m => ({ de
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const ProgramManagement = lazy(() => import('./pages/admin/ProgramManagement').then(m => ({ default: m.ProgramManagement })));
 const FacultyManagement = lazy(() => import('./pages/admin/FacultyManagement').then(m => ({ default: m.FacultyManagement })));
+const AdvisoryBoardManagement = lazy(() => import('./pages/admin/AdvisoryBoardManagement').then(m => ({ default: m.AdvisoryBoardManagement })));
 const EventManagement = lazy(() => import('./pages/admin/EventManagement').then(m => ({ default: m.EventManagement })));
 const BlogManagement = lazy(() => import('./pages/admin/BlogManagement').then(m => ({ default: m.BlogManagement })));
 const ApplicationsManagement = lazy(() => import('./pages/admin/ApplicationsManagement').then(m => ({ default: m.ApplicationsManagement })));
@@ -108,16 +109,11 @@ function App() {
               <Route element={<AdminRoute />}>
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="pages" element={<PageBuilder />} />
-                  <Route path="media" element={<MediaLibrary />} />
-                  <Route path="programs" element={<ProgramManagement />} />
                   <Route path="faculty" element={<FacultyManagement />} />
-                  <Route path="events" element={<EventManagement />} />
+                  <Route path="advisory-board" element={<AdvisoryBoardManagement />} />
                   <Route path="blog" element={<BlogManagement />} />
-                  <Route path="applications" element={<ApplicationsManagement />} />
+                  <Route path="media" element={<MediaLibrary />} />
                   <Route path="users" element={<UsersRolesManagement />} />
-                  <Route path="footer-settings" element={<FooterSettings />} />
-                  <Route path="global-settings" element={<GlobalSettings />} />
                 </Route>
               </Route>
             </Routes>

@@ -30,7 +30,9 @@ const blogSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 blogSchema.pre('validate', function(this: any, next: any) {
-  if (this.title && !this.slug) {
+  if (this.slug) {
+    this.slug = generateSlug(this.slug);
+  } else if (this.title) {
     this.slug = generateSlug(this.title);
   }
   if (typeof next === 'function') {

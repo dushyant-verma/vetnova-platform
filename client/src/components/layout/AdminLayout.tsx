@@ -3,12 +3,10 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
   LayoutDashboard, 
-  BookOpen, 
   Users, 
-  Calendar, 
+  Award,
   FileText, 
-  MessageSquare,
-  Settings,
+  FileImage,
   LogOut
 } from 'lucide-react';
 
@@ -16,17 +14,14 @@ export const AdminLayout = () => {
   const location = useLocation();
   const { logout, user } = useAuth();
   
-    const navItems = [
-      { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-      { name: 'Page Builder', path: '/admin/pages', icon: FileText },
-      { name: 'Media Library', path: '/admin/media', icon: FileText },
-      { name: 'Programs', path: '/admin/programs', icon: BookOpen },
-      { name: 'Faculty', path: '/admin/faculty', icon: Users },
-      { name: 'Events', path: '/admin/events', icon: Calendar },
-      { name: 'Blog', path: '/admin/blog', icon: FileText },
-      { name: 'Applications', path: '/admin/applications', icon: FileText },
-      { name: 'Users', path: '/admin/users', icon: Users },
-    ];
+  const navItems = [
+    { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
+    { name: 'Faculty', path: '/admin/faculty', icon: Users },
+    { name: 'Advisory Board', path: '/admin/advisory-board', icon: Award },
+    { name: 'Blog', path: '/admin/blog', icon: FileText },
+    { name: 'Media Library', path: '/admin/media', icon: FileImage },
+    { name: 'Users', path: '/admin/users', icon: Users },
+  ];
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -59,12 +54,6 @@ export const AdminLayout = () => {
         </nav>
         
         <div className="p-4 border-t border-slate-100 space-y-2">
-          <Link to="/admin/global-settings" className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors">
-            <Settings className="w-5 h-5" /> Global Settings
-          </Link>
-          <Link to="/admin/footer-settings" className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors">
-            <Settings className="w-5 h-5" /> Footer Settings
-          </Link>
           <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-colors text-left">
             <LogOut className="w-5 h-5" /> Logout
           </button>

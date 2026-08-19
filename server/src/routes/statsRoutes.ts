@@ -3,6 +3,8 @@ import { Program } from '../models/Program';
 import { Application } from '../models/Application';
 import { User } from '../models/User';
 import { Expert } from '../models/Expert';
+import { AdvisoryBoard } from '../models/AdvisoryBoard';
+import { BlogCategory } from '../models/BlogCategory';
 import { Event } from '../models/Event';
 import { Blog } from '../models/Blog';
 import { protect, admin } from '../middlewares/authMiddleware';
@@ -16,6 +18,8 @@ router.get('/', protect, admin, async (req, res) => {
       applicationsCount,
       usersCount,
       expertsCount,
+      advisoryBoardCount,
+      categoriesCount,
       eventsCount,
       blogsCount
     ] = await Promise.all([
@@ -23,6 +27,8 @@ router.get('/', protect, admin, async (req, res) => {
       Application.countDocuments(),
       User.countDocuments(),
       Expert.countDocuments(),
+      AdvisoryBoard.countDocuments(),
+      BlogCategory.countDocuments(),
       Event.countDocuments(),
       Blog.countDocuments()
     ]);
@@ -32,6 +38,9 @@ router.get('/', protect, admin, async (req, res) => {
       applicationsCount,
       usersCount,
       expertsCount,
+      facultyCount: expertsCount,
+      advisoryBoardCount,
+      categoriesCount,
       eventsCount,
       blogsCount
     });

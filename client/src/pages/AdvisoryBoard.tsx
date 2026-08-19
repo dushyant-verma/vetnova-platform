@@ -6,30 +6,55 @@ import { SEO } from '@/components/SEO';
 import { Mail, ChevronRight, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/axios';
+
 export const AdvisoryBoard = () => {
-  const boardMembers = [
+  const { data: apiMembers } = useQuery({
+    queryKey: ['public-advisory-board'],
+    queryFn: async () => {
+      const { data } = await api.get('/advisory-board');
+      return data;
+    }
+  });
+
+  const defaultBoardMembers = [
     {
       name: 'Dr. Michael Chen',
       role: 'Chair, Veterinary Surgery',
       institution: 'Royal Veterinary College, UK',
       bio: 'Pioneer in minimally invasive veterinary orthopedics with over 200 published papers.',
-      image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=500&q=80'
+      image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=500&q=80',
+      linkedin: '#'
     },
     {
       name: 'Dr. Anita Desai',
       role: 'Director of Clinical Practice',
       institution: 'VetNova Board',
       bio: 'Former head of the National Veterinary Council. Advocate for continuing clinical education in South Asia.',
-      image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+      image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      linkedin: '#'
     },
     {
       name: 'Dr. Robert King',
       role: 'Specialist, Soft Tissue',
       institution: 'Cornell University',
       bio: 'Leading researcher in reconstructive surgery for trauma patients and congenital defects.',
-      image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80'
+      image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80',
+      linkedin: '#'
     }
   ];
+
+  const boardMembers = apiMembers && apiMembers.length > 0
+    ? apiMembers.map((m: any) => ({
+        name: m.name,
+        role: m.designation || 'Board Member',
+        institution: m.organization || 'VetNova Advisory Council',
+        bio: m.bio || '',
+        image: m.image || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=500&q=80',
+        linkedin: m.linkedin || '#'
+      }))
+    : defaultBoardMembers;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-inter">
@@ -80,7 +105,7 @@ export const AdvisoryBoard = () => {
         <section className="py-20">
           <div className="container mx-auto px-6 md:px-12 max-w-6xl">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {boardMembers.map((member, i) => (
+              {boardMembers.map((member: any, i: number) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 20 }}

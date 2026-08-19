@@ -1,23 +1,15 @@
 import mongoose from 'mongoose';
 
-const expertSchema = new mongoose.Schema({
+const advisoryBoardSchema = new mongoose.Schema({
   name: { type: String, required: true },
   designation: { type: String },
+  organization: { type: String },
   qualification: { type: String },
-  department: { type: String },
-  specialization: { type: String },
-  experience: { type: String },
-  education: { type: String },
   bio: { type: String },
   image: { type: String },
-  email: { type: String },
   linkedin: { type: String },
-  socialLinks: {
-    linkedin: String,
-    twitter: String
-  },
   displayOrder: { type: Number, default: 0 },
   status: { type: String, enum: ['Published', 'Draft'], default: 'Published' }
 }, { timestamps: true });
 
-export const Expert = mongoose.model('Expert', expertSchema);
+export const AdvisoryBoard = mongoose.model('AdvisoryBoard', advisoryBoardSchema);
