@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, Loader2, Sparkles, FolderPlus, Link as LinkIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Loader2, Sparkles, FolderPlus, Link as LinkIcon, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
@@ -15,6 +15,7 @@ interface BlogForm {
   content: string;
   category: string;
   categories: string[];
+  relatedPrograms: string[];
   author: string;
   authorRole: string;
   tags: string;
@@ -29,6 +30,14 @@ interface CategoryForm {
   description: string;
   status: string;
 }
+
+const AVAILABLE_PROGRAMS = [
+  { id: 'veterinary-skill-up', title: 'Veterinary Skill Up (6 Months)' },
+  { id: 'emergency-medicine', title: 'Emergency & Critical Care' },
+  { id: 'radiology-ultrasound', title: 'Radiology & Ultrasound' },
+  { id: 'soft-tissue-surgery', title: 'Soft Tissue Surgery' },
+  { id: 'vet-nurse-programme', title: 'Veterinary Nurse Programme' }
+];
 
 function slugify(text: string): string {
   return text
@@ -57,6 +66,7 @@ export const BlogManagement = () => {
       content: '',
       category: 'GENERAL',
       categories: ['GENERAL'],
+      relatedPrograms: [],
       author: 'Dr. Amit Kulkarni',
       authorRole: 'Senior Veterinary Surgeon',
       tags: '',
@@ -78,6 +88,7 @@ export const BlogManagement = () => {
   const watchedTitle = watch('title');
   const watchedSlug = watch('slug');
   const watchedCategories = watch('categories') || [];
+  const watchedRelatedPrograms = watch('relatedPrograms') || [];
 
   const { data: categories, isLoading: isCatLoading } = useQuery({
     queryKey: ['admin-blog-categories'],
@@ -169,6 +180,7 @@ export const BlogManagement = () => {
       content: '',
       category: defaultCat,
       categories: [defaultCat],
+      relatedPrograms: [],
       author: 'Dr. Amit Kulkarni',
       authorRole: 'Senior Veterinary Surgeon',
       tags: '',
@@ -186,18 +198,23 @@ export const BlogManagement = () => {
       ? blog.categories
       : [blog.category || 'GENERAL'];
 
-    setValue('title', blog.title || '');
-    setValue('slug', blog.slug || '');
-    setValue('excerpt', blog.excerpt || '');
-    setValue('content', blog.content || '');
-    setValue('category', assignedCats[0]);
-    setValue('categories', assignedCats);
-    setValue('author', blog.author || '');
-    setValue('authorRole', blog.authorRole || '');
-    setValue('tags', Array.isArray(blog.tags) ? blog.tags.join(', ') : blog.tags || '');
-    setValue('status', blog.status || 'Published');
-    setValue('isFeatured', blog.isFeatured || false);
-    setValue('image', blog.image || '');
+    const assignedProgs = Array.isArray(blog.relatedPrograms) ? blog.relatedPrograms : [];
+
+    reset({
+      title: blog.title || '',
+      slug: blog.slug || '',
+      excerpt: blog.excerpt || '',
+      content: blog.content || '',
+      category: assignedCats[0],
+      categories: assignedCats,
+      relatedPrograms: assignedProgs,
+      author: blog.author || '',
+      authorRole: blog.authorRole || '',
+      tags: Array.isArray(blog.tags) ? blog.tags.join(', ') : blog.tags || '',
+      status: blog.status || 'Published',
+      isFeatured: blog.isFeatured || false,
+      image: blog.image || ''
+    });
     setEditingId(blog._id);
     setIsManualSlug(true);
     setIsModalOpen(true);
@@ -220,8 +237,19 @@ export const BlogManagement = () => {
     } else {
       next = [...current, catIdentifier];
     }
-    setValue('categories', next);
+    setValue('categories', Array.from(new Set(next)));
     setValue('category', next[0] || 'GENERAL');
+  };
+
+  const handleRelatedProgramToggle = (progId: string) => {
+    const current = watchedRelatedPrograms;
+    let next: string[];
+    if (current.includes(progId)) {
+      next = current.filter(id => id !== progId);
+    } else {
+      next = [...current, progId];
+    }
+    setValue('relatedPrograms', Array.from(new Set(next)));
   };
 
   const onSubmit = (data: BlogForm) => {
@@ -231,7 +259,8 @@ export const BlogManagement = () => {
       ...data,
       slug: finalSlug,
       category: selectedCats[0],
-      categories: selectedCats,
+      categories: Array.from(new Set(selectedCats)),
+      relatedPrograms: Array.from(new Set(data.relatedPrograms || [])),
       tags: data.tags.split(',').map(t => t.trim()).filter(Boolean)
     };
     if (editingId) {
@@ -295,6 +324,7 @@ export const BlogManagement = () => {
             <tr className="text-sm font-medium text-slate-500 border-b border-slate-100">
               <th className="px-6 py-4">Article</th>
               <th className="px-6 py-4">Assigned Categories</th>
+              <th className="px-6 py-4">Related Programs</th>
               <th className="px-6 py-4">Author</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4 text-right">Actions</th>
@@ -302,13 +332,14 @@ export const BlogManagement = () => {
           </thead>
           <tbody className="text-sm divide-y divide-slate-50">
             {isLoading ? (
-              <tr><td colSpan={5} className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-primary" /></td></tr>
+              <tr><td colSpan={6} className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-primary" /></td></tr>
             ) : blogs?.length === 0 ? (
-              <tr><td colSpan={5} className="text-center py-8 text-slate-500">No blog posts found.</td></tr>
+              <tr><td colSpan={6} className="text-center py-8 text-slate-500">No blog posts found.</td></tr>
             ) : blogs?.map((blog: any) => {
               const displayCategories = Array.isArray(blog.categories) && blog.categories.length > 0
                 ? blog.categories
                 : [blog.category || 'GENERAL'];
+              const displayPrograms = Array.isArray(blog.relatedPrograms) ? blog.relatedPrograms : [];
 
               return (
                 <tr key={blog._id} className="hover:bg-slate-50 transition-colors">
@@ -329,6 +360,11 @@ export const BlogManagement = () => {
                         </span>
                       ))}
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="px-2 py-1 bg-slate-100 rounded text-xs font-mono font-medium text-slate-700">
+                      {displayPrograms.length > 0 ? `${displayPrograms.length} Program(s)` : 'Auto Fallback'}
+                    </span>
                   </td>
                   <td className="px-6 py-4 text-slate-600">
                     <div className="font-medium text-slate-800">{blog.author}</div>
@@ -429,6 +465,30 @@ export const BlogManagement = () => {
                       className="rounded text-brand-primary focus:ring-brand-primary"
                     />
                     <span>{cat.name}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Related Practical Programs Selector */}
+          <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2">
+            <label className="block text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <GraduationCap className="w-4 h-4 text-brand-primary" /> Related Practical Programs
+            </label>
+            <p className="text-xs text-slate-500">Select practical training programs related to this blog article.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+              {AVAILABLE_PROGRAMS.map((prog: any) => {
+                const isChecked = watchedRelatedPrograms.includes(prog.id);
+                return (
+                  <label key={prog.id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 hover:border-brand-primary/50 cursor-pointer text-xs font-medium text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => handleRelatedProgramToggle(prog.id)}
+                      className="rounded text-brand-primary focus:ring-brand-primary"
+                    />
+                    <span>{prog.title}</span>
                   </label>
                 );
               })}

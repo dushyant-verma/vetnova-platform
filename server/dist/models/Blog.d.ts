@@ -9,6 +9,7 @@ export declare const Blog: mongoose.Model<{
     authorImage?: string;
     category: string;
     categories: string[];
+    relatedPrograms: string[];
     tags: string[];
     image?: string;
     status: "Draft" | "Published";
@@ -29,6 +30,7 @@ export declare const Blog: mongoose.Model<{
     authorImage?: string;
     category: string;
     categories: string[];
+    relatedPrograms: string[];
     tags: string[];
     image?: string;
     status: "Draft" | "Published";
@@ -51,6 +53,7 @@ export declare const Blog: mongoose.Model<{
     authorImage?: string;
     category: string;
     categories: string[];
+    relatedPrograms: string[];
     tags: string[];
     image?: string;
     status: "Draft" | "Published";
@@ -77,6 +80,7 @@ export declare const Blog: mongoose.Model<{
     authorImage?: string;
     category: string;
     categories: string[];
+    relatedPrograms: string[];
     tags: string[];
     image?: string;
     status: "Draft" | "Published";
@@ -95,6 +99,7 @@ export declare const Blog: mongoose.Model<{
     authorImage?: string;
     category: string;
     categories: string[];
+    relatedPrograms: string[];
     tags: string[];
     image?: string;
     status: "Draft" | "Published";
@@ -117,6 +122,7 @@ export declare const Blog: mongoose.Model<{
     authorImage?: string;
     category: string;
     categories: string[];
+    relatedPrograms: string[];
     tags: string[];
     image?: string;
     status: "Draft" | "Published";
@@ -143,6 +149,7 @@ export declare const Blog: mongoose.Model<{
     authorImage?: string;
     category: string;
     categories: string[];
+    relatedPrograms: string[];
     tags: string[];
     image?: string;
     status: "Draft" | "Published";
@@ -167,6 +174,7 @@ export declare const Blog: mongoose.Model<{
     authorImage?: string;
     category: string;
     categories: string[];
+    relatedPrograms: string[];
     tags: string[];
     image?: string;
     status: "Draft" | "Published";

@@ -13,6 +13,8 @@ interface FacultyForm {
   qualification: string;
   department: string;
   specialization: string;
+  experience: string;
+  education: string;
   bio: string;
   image: string;
   linkedin: string;
@@ -43,6 +45,8 @@ export const FacultyManagement = () => {
       qualification: '',
       department: '',
       specialization: '',
+      experience: '',
+      education: '',
       bio: '',
       image: '',
       linkedin: '',
@@ -119,11 +123,13 @@ export const FacultyManagement = () => {
       qualification: '',
       department: '',
       specialization: '',
+      experience: '10+ Yrs Exp',
+      education: '',
       bio: '',
       image: '',
       linkedin: '',
       email: '',
-      programs: DEFAULT_PROGRAMS.map(p => p.id), // Default assign to all programs
+      programs: DEFAULT_PROGRAMS.map(p => p.id), // Default assign to all programs for new members
       displayOrder: (experts?.length || 0) + 1,
       status: 'Published'
     });
@@ -132,35 +138,43 @@ export const FacultyManagement = () => {
   };
 
   const openEditModal = (expert: any) => {
-    setValue('name', expert.name || '');
-    setValue('designation', expert.designation || '');
-    setValue('qualification', expert.qualification || '');
-    setValue('department', expert.department || expert.specialization || '');
-    setValue('specialization', expert.specialization || expert.department || '');
-    setValue('bio', expert.bio || '');
-    setValue('image', expert.image || '');
-    setValue('linkedin', expert.linkedin || expert.socialLinks?.linkedin || '');
-    setValue('email', expert.email || '');
-    setValue('programs', expert.programs || DEFAULT_PROGRAMS.map(p => p.id));
-    setValue('displayOrder', expert.displayOrder !== undefined ? expert.displayOrder : 0);
-    setValue('status', expert.status || 'Published');
+    reset({
+      name: expert.name || '',
+      designation: expert.designation || '',
+      qualification: expert.qualification || '',
+      department: expert.department || expert.specialization || '',
+      specialization: expert.specialization || expert.department || '',
+      experience: expert.experience || '',
+      education: expert.education || '',
+      bio: expert.bio || '',
+      image: expert.image || '',
+      linkedin: expert.linkedin || expert.socialLinks?.linkedin || '',
+      email: expert.email || '',
+      programs: Array.isArray(expert.programs) ? expert.programs : [],
+      displayOrder: expert.displayOrder !== undefined ? expert.displayOrder : 0,
+      status: expert.status || 'Published'
+    });
     setEditingId(expert._id);
     setIsModalOpen(true);
   };
 
   const handleProgramToggle = (progId: string) => {
     const current = selectedPrograms;
+    let next: string[];
     if (current.includes(progId)) {
-      setValue('programs', current.filter(id => id !== progId));
+      next = current.filter(id => id !== progId);
     } else {
-      setValue('programs', [...current, progId]);
+      next = [...current, progId];
     }
+    // Remove duplicates and save exact selection array
+    setValue('programs', Array.from(new Set(next)));
   };
 
   const onSubmit = (data: FacultyForm) => {
     const payload = {
       ...data,
-      specialization: data.department || data.specialization
+      specialization: data.department || data.specialization,
+      programs: Array.from(new Set(data.programs || []))
     };
     if (editingId) {
       updateMutation.mutate({ id: editingId, data: payload });
@@ -205,6 +219,7 @@ export const FacultyManagement = () => {
             <tr className="text-sm font-medium text-slate-500 border-b border-slate-100">
               <th className="px-6 py-4">Faculty Member</th>
               <th className="px-6 py-4">Designation & Department</th>
+              <th className="px-6 py-4">Experience</th>
               <th className="px-6 py-4">Assigned Programs</th>
               <th className="px-6 py-4">Order</th>
               <th className="px-6 py-4">Status</th>
@@ -213,9 +228,9 @@ export const FacultyManagement = () => {
           </thead>
           <tbody className="text-sm divide-y divide-slate-50">
             {isLoading ? (
-              <tr><td colSpan={6} className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-primary" /></td></tr>
+              <tr><td colSpan={7} className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-primary" /></td></tr>
             ) : experts?.length === 0 ? (
-              <tr><td colSpan={6} className="text-center py-8 text-slate-500">No faculty members found.</td></tr>
+              <tr><td colSpan={7} className="text-center py-8 text-slate-500">No faculty members found.</td></tr>
             ) : experts?.map((expert: any) => (
               <tr key={expert._id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4 flex items-center gap-3">
@@ -233,9 +248,12 @@ export const FacultyManagement = () => {
                   <div className="font-medium text-slate-800">{expert.designation || 'Specialist'}</div>
                   <div className="text-xs text-slate-500">{expert.department || expert.specialization || 'Veterinary Sciences'}</div>
                 </td>
+                <td className="px-6 py-4 text-slate-600 font-medium text-xs">
+                  {expert.experience || '10+ Yrs Exp'}
+                </td>
                 <td className="px-6 py-4 text-slate-600">
                   <span className="px-2 py-1 bg-slate-100 rounded text-xs font-mono font-medium text-slate-700">
-                    {expert.programs && expert.programs.length > 0 ? `${expert.programs.length} Program(s)` : 'All Programs'}
+                    {Array.isArray(expert.programs) ? `${expert.programs.length} Program(s)` : '0 Programs'}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-slate-600 font-mono text-xs">
@@ -286,12 +304,20 @@ export const FacultyManagement = () => {
             )} />
           </div>
 
-          <Controller name="department" control={control} render={({ field }) => (
-            <div>
-              <label className="block text-sm font-medium mb-1 text-slate-700">Department / Area of Expertise</label>
-              <input {...field} placeholder="e.g. Orthopedics & Diagnostic Imaging" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
-            </div>
-          )} />
+          <div className="grid grid-cols-2 gap-4">
+            <Controller name="department" control={control} render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium mb-1 text-slate-700">Department / Area of Expertise</label>
+                <input {...field} placeholder="e.g. Orthopedics & Diagnostic Imaging" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+              </div>
+            )} />
+            <Controller name="experience" control={control} render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium mb-1 text-slate-700">Years of Experience</label>
+                <input {...field} placeholder="e.g. 15+ Yrs Exp" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+              </div>
+            )} />
+          </div>
 
           {/* Multi-select Program Assignment */}
           <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2">

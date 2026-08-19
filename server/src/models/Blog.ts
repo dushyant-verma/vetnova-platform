@@ -20,6 +20,7 @@ const blogSchema = new mongoose.Schema({
   authorImage: { type: String },
   category: { type: String, default: 'General' },
   categories: [{ type: String }],
+  relatedPrograms: [{ type: String }],
   tags: [{ type: String }],
   image: { type: String },
   status: { type: String, enum: ['Published', 'Draft'], default: 'Published' },
