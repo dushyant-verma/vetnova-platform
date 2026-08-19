@@ -96,15 +96,17 @@ export const AdvisoryBoardManagement = () => {
   };
 
   const openEditModal = (member: any) => {
-    setValue('name', member.name || '');
-    setValue('designation', member.designation || '');
-    setValue('organization', member.organization || '');
-    setValue('qualification', member.qualification || '');
-    setValue('bio', member.bio || '');
-    setValue('image', member.image || '');
-    setValue('linkedin', member.linkedin || '');
-    setValue('displayOrder', member.displayOrder !== undefined ? member.displayOrder : 0);
-    setValue('status', member.status || 'Published');
+    reset({
+      name: member.name || '',
+      designation: member.designation || '',
+      organization: member.organization || '',
+      qualification: member.qualification || '',
+      bio: member.bio || '',
+      image: member.image || '',
+      linkedin: member.linkedin || '',
+      displayOrder: member.displayOrder !== undefined ? member.displayOrder : 0,
+      status: member.status || 'Published'
+    });
     setEditingId(member._id);
     setIsModalOpen(true);
   };

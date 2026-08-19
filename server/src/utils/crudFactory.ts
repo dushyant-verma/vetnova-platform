@@ -15,7 +15,10 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
         }
 
         if (category && category !== 'all') {
-          query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+          query.$or = [
+            { category: { $regex: new RegExp(`^${category}$`, 'i') } },
+            { categories: { $regex: new RegExp(`^${category}$`, 'i') } }
+          ];
         }
 
         if (program && program !== 'all') {

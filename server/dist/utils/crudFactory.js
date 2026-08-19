@@ -18,7 +18,10 @@ const crudFactory = (model, populateOpts) => {
                     query.status = 'Published';
                 }
                 if (category && category !== 'all') {
-                    query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+                    query.$or = [
+                        { category: { $regex: new RegExp(`^${category}$`, 'i') } },
+                        { categories: { $regex: new RegExp(`^${category}$`, 'i') } }
+                    ];
                 }
                 if (program && program !== 'all') {
                     query.programs = { $regex: new RegExp(`^${program}$`, 'i') };

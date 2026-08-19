@@ -30,8 +30,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
-  const [linkUrl, setLinkUrl] = useState('');
+  const [linkUrl, setLinkUrl] = useState('https://');
+  const [linkText, setLinkText] = useState('');
   const [openInNewTab, setOpenInNewTab] = useState(true);
+  const [activeAnchor, setActiveAnchor] = useState<HTMLAnchorElement | null>(null);
   const [savedSelection, setSavedSelection] = useState<Range | null>(null);
 
   // Initialize and sync HTML content without overriding cursor when typing
@@ -58,6 +60,22 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     executeCommand('formatBlock', `<${tag}>`);
   };
 
+  const findParentAnchor = (): HTMLAnchorElement | null => {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return null;
+    let node: Node | null = sel.getRangeAt(0).commonAncestorContainer;
+    if (node.nodeType === Node.TEXT_NODE) {
+      node = node.parentNode;
+    }
+    while (node && node !== editorRef.current) {
+      if (node.nodeName.toLowerCase() === 'a') {
+        return node as HTMLAnchorElement;
+      }
+      node = node.parentNode;
+    }
+    return null;
+  };
+
   const saveCurrentSelection = () => {
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
@@ -77,8 +95,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const openLinkDialog = () => {
     saveCurrentSelection();
-    setLinkUrl('https://');
-    setOpenInNewTab(true);
+    const existingAnchor = findParentAnchor();
+    setActiveAnchor(existingAnchor);
+
+    if (existingAnchor) {
+      setLinkUrl(existingAnchor.getAttribute('href') || 'https://');
+      setLinkText(existingAnchor.textContent || '');
+      setOpenInNewTab(existingAnchor.getAttribute('target') === '_blank');
+    } else {
+      const sel = window.getSelection();
+      const selectedText = sel ? sel.toString() : '';
+      setLinkText(selectedText);
+      setLinkUrl('https://');
+      setOpenInNewTab(true);
+    }
+
     setIsLinkModalOpen(true);
   };
 
@@ -89,31 +120,48 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     if (!linkUrl) return;
 
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed) {
-      // If no text selected, insert the link URL as text
-      const anchor = document.createElement('a');
-      anchor.href = linkUrl;
-      anchor.textContent = linkUrl;
-      if (openInNewTab) {
-        anchor.target = '_blank';
-        anchor.rel = 'noopener noreferrer';
+    if (activeAnchor) {
+      // Update existing anchor element directly
+      activeAnchor.setAttribute('href', linkUrl);
+      if (linkText) {
+        activeAnchor.textContent = linkText;
       }
-      const range = sel ? sel.getRangeAt(0) : null;
-      if (range) {
-        range.insertNode(anchor);
+      if (openInNewTab) {
+        activeAnchor.setAttribute('target', '_blank');
+        activeAnchor.setAttribute('rel', 'noopener noreferrer');
+      } else {
+        activeAnchor.removeAttribute('target');
+        activeAnchor.removeAttribute('rel');
       }
     } else {
-      executeCommand('createLink', linkUrl);
-      // Ensure target="_blank" and rel="noopener noreferrer" if requested
-      if (openInNewTab && editorRef.current) {
-        const anchors = editorRef.current.querySelectorAll('a');
-        anchors.forEach(a => {
-          if (a.getAttribute('href') === linkUrl) {
-            a.setAttribute('target', '_blank');
-            a.setAttribute('rel', 'noopener noreferrer');
-          }
-        });
+      // Insert new hyperlink
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed) {
+        const anchor = document.createElement('a');
+        anchor.href = linkUrl;
+        anchor.textContent = linkText || linkUrl;
+        if (openInNewTab) {
+          anchor.target = '_blank';
+          anchor.rel = 'noopener noreferrer';
+        }
+        const range = sel ? sel.getRangeAt(0) : null;
+        if (range) {
+          range.insertNode(anchor);
+        }
+      } else {
+        executeCommand('createLink', linkUrl);
+        if (editorRef.current) {
+          const anchors = editorRef.current.querySelectorAll('a');
+          anchors.forEach(a => {
+            if (a.getAttribute('href') === linkUrl) {
+              if (linkText) a.textContent = linkText;
+              if (openInNewTab) {
+                a.setAttribute('target', '_blank');
+                a.setAttribute('rel', 'noopener noreferrer');
+              }
+            }
+          });
+        }
       }
     }
 
@@ -123,7 +171,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const removeLink = () => {
-    executeCommand('unlink');
+    setIsLinkModalOpen(false);
+    restoreSelection();
+    if (activeAnchor) {
+      const parent = activeAnchor.parentNode;
+      while (activeAnchor.firstChild) {
+        parent?.insertBefore(activeAnchor.firstChild, activeAnchor);
+      }
+      parent?.removeChild(activeAnchor);
+    } else {
+      executeCommand('unlink');
+    }
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
   };
 
   return (
@@ -161,19 +222,27 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
           <button
             type="button"
+            onClick={() => formatBlock('h1')}
+            title="Heading 1"
+            className="px-2 py-1 text-xs font-bold rounded hover:bg-slate-200 text-slate-700 transition-colors flex items-center gap-0.5"
+          >
+            <Heading1 className="w-3.5 h-3.5" /> H1
+          </button>
+          <button
+            type="button"
             onClick={() => formatBlock('h2')}
             title="Heading 2"
-            className="px-2 py-1 text-xs font-bold rounded hover:bg-slate-200 text-slate-700 transition-colors"
+            className="px-2 py-1 text-xs font-bold rounded hover:bg-slate-200 text-slate-700 transition-colors flex items-center gap-0.5"
           >
-            H2
+            <Heading2 className="w-3.5 h-3.5" /> H2
           </button>
           <button
             type="button"
             onClick={() => formatBlock('h3')}
             title="Heading 3"
-            className="px-2 py-1 text-xs font-bold rounded hover:bg-slate-200 text-slate-700 transition-colors"
+            className="px-2 py-1 text-xs font-bold rounded hover:bg-slate-200 text-slate-700 transition-colors flex items-center gap-0.5"
           >
-            H3
+            <Heading3 className="w-3.5 h-3.5" /> H3
           </button>
           <button
             type="button"
@@ -208,10 +277,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <button
             type="button"
             onClick={openLinkDialog}
-            title="Insert Link"
-            className="p-1.5 rounded hover:bg-slate-200 text-brand-primary font-bold transition-colors"
+            title="Insert / Edit Link"
+            className="p-1.5 rounded hover:bg-slate-200 text-brand-primary font-bold transition-colors flex items-center gap-1 text-xs"
           >
-            <LinkIcon className="w-4 h-4" />
+            <LinkIcon className="w-4 h-4" /> Link
           </button>
           <button
             type="button"
@@ -237,14 +306,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           contentEditable
           onInput={handleInput}
           onBlur={handleInput}
+          onClick={() => {
+            const anchor = findParentAnchor();
+            if (anchor) setActiveAnchor(anchor);
+          }}
           className="p-4 min-h-[220px] max-h-[450px] overflow-y-auto outline-none text-sm text-slate-800 leading-relaxed prose max-w-none"
           style={{ whiteSpace: 'pre-wrap' }}
           data-placeholder={placeholder}
         />
       </div>
 
-      {/* Link Dialog Modal */}
-      <Modal isOpen={isLinkModalOpen} onClose={() => setIsLinkModalOpen(false)} title="Insert / Edit Hyperlink">
+      {/* Enhanced Link Dialog Modal */}
+      <Modal isOpen={isLinkModalOpen} onClose={() => setIsLinkModalOpen(false)} title={activeAnchor ? 'Edit Existing Hyperlink' : 'Insert Hyperlink'}>
         <form onSubmit={applyLink} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1 text-slate-700">Link URL *</label>
@@ -257,6 +330,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none font-mono"
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1 text-slate-700">Link Display Text</label>
+            <input
+              type="text"
+              value={linkText}
+              onChange={(e) => setLinkText(e.target.value)}
+              placeholder="e.g. Learn More"
+              className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none"
+            />
+          </div>
+
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -269,11 +354,22 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               Open link in new tab (`target="_blank" rel="noopener noreferrer"`)
             </label>
           </div>
-          <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
-            <Button type="button" variant="outline" onClick={() => setIsLinkModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">Insert Link</Button>
+
+          <div className="pt-4 flex justify-between items-center border-t border-slate-100">
+            {activeAnchor ? (
+              <Button type="button" variant="outline" onClick={removeLink} className="text-red-600 border-red-200 hover:bg-red-50">
+                Remove Link
+              </Button>
+            ) : <div />}
+            
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsLinkModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                {activeAnchor ? 'Update Link' : 'Insert Link'}
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>

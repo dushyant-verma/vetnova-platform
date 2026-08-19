@@ -13,7 +13,13 @@ export const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/admin', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +29,7 @@ export const AdminLogin = () => {
     try {
       const { data } = await api.post('/auth/login', { email, password });
       login(data, data.token);
-      navigate('/admin/dashboard');
+      navigate('/admin', { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid credentials');
     } finally {

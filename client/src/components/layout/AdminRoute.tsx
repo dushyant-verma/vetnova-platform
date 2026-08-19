@@ -6,7 +6,7 @@ export const AdminRoute = () => {
   const { isAuthenticated, isAdmin } = useAuth();
 
   if (!isAuthenticated || !isAdmin) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <Outlet />;
