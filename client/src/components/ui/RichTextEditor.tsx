@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -29,6 +29,25 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
+function sanitizeUrl(url: string): string {
+  const trimmed = url.trim();
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('javascript:') || lower.startsWith('data:') || lower.startsWith('vbscript:')) {
+    return '#';
+  }
+  return trimmed;
+}
+
+function escapeHtml(str: string): string {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
   onChange,
@@ -41,6 +60,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [linkUrl, setLinkUrl] = useState('https://');
   const [linkText, setLinkText] = useState('');
   const [openInNewTab, setOpenInNewTab] = useState(true);
+
+  const savedSelectionRef = useRef<{ from: number; to: number } | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -82,14 +103,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     e.stopPropagation();
 
     if (isSourceMode) {
-      // Switching from HTML Source back to Visual Mode
       if (editor) {
         editor.commands.setContent(htmlSource || '<p></p>');
         onChange(htmlSource);
       }
       setIsSourceMode(false);
     } else {
-      // Switching from Visual Mode to HTML Source
       if (editor) {
         const currentHtml = editor.getHTML();
         setHtmlSource(currentHtml);
@@ -110,8 +129,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     if (!editor) return;
 
-    const previousUrl = editor.getAttributes('link').href || '';
+    // Preserve exact document selection range before focus shifts to the modal input
     const { from, to } = editor.state.selection;
+    savedSelectionRef.current = { from, to };
+
+    const previousUrl = editor.getAttributes('link').href || '';
     const selectedText = editor.state.doc.textBetween(from, to, ' ');
 
     setLinkUrl(previousUrl || 'https://');
@@ -120,25 +142,63 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     setIsLinkModalOpen(true);
   };
 
-  const applyLink = (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const applyLink = (e?: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
     if (!editor) return;
 
-    if (!linkUrl || linkUrl.trim() === '') {
+    const cleanUrl = sanitizeUrl(linkUrl);
+
+    // Restore saved document selection before executing Tiptap link commands
+    if (savedSelectionRef.current) {
+      const { from, to } = savedSelectionRef.current;
+      editor.chain().focus().setTextSelection({ from, to }).run();
+    }
+
+    if (!cleanUrl || cleanUrl === '#') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
     } else {
-      const linkAttributes: any = { href: linkUrl.trim() };
+      const linkAttributes: any = { href: cleanUrl };
       if (openInNewTab) {
         linkAttributes.target = '_blank';
         linkAttributes.rel = 'noopener noreferrer';
       }
 
-      if (linkText && editor.state.selection.empty) {
-        editor.chain().focus().insertContent(`<a href="${linkUrl.trim()}" ${openInNewTab ? 'target="_blank" rel="noopener noreferrer"' : ''}>${linkText}</a>`).run();
+      const sel = savedSelectionRef.current || editor.state.selection;
+      const isSelectionEmpty = sel.from === sel.to;
+      const originalSelectedText = isSelectionEmpty ? '' : editor.state.doc.textBetween(sel.from, sel.to, ' ');
+
+      if (isSelectionEmpty) {
+        // Insert new link with display text at cursor position
+        const displayText = escapeHtml(linkText || cleanUrl);
+        const targetAttr = openInNewTab ? 'target="_blank" rel="noopener noreferrer"' : '';
+        editor
+          .chain()
+          .focus()
+          .insertContent(`<a href="${escapeHtml(cleanUrl)}" ${targetAttr}>${displayText}</a>`)
+          .run();
+      } else if (linkText && linkText !== originalSelectedText) {
+        // Replace selection with updated link display text
+        const displayText = escapeHtml(linkText);
+        const targetAttr = openInNewTab ? 'target="_blank" rel="noopener noreferrer"' : '';
+        editor
+          .chain()
+          .focus()
+          .setTextSelection({ from: sel.from, to: sel.to })
+          .insertContent(`<a href="${escapeHtml(cleanUrl)}" ${targetAttr}>${displayText}</a>`)
+          .run();
       } else {
-        editor.chain().focus().extendMarkRange('link').setLink(linkAttributes).run();
+        // Wrap active selection in hyperlink mark
+        editor
+          .chain()
+          .focus()
+          .setTextSelection({ from: sel.from, to: sel.to })
+          .extendMarkRange('link')
+          .setLink(linkAttributes)
+          .run();
       }
     }
 
@@ -148,12 +208,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     onChange(updatedHtml);
   };
 
-  const removeLink = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const removeLink = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
     if (editor) {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      if (savedSelectionRef.current) {
+        const { from, to } = savedSelectionRef.current;
+        editor.chain().focus().setTextSelection({ from, to }).extendMarkRange('link').unsetLink().run();
+      } else {
+        editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      }
       const updatedHtml = editor.getHTML();
       setHtmlSource(updatedHtml);
       onChange(updatedHtml);
@@ -363,19 +430,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         )}
       </div>
 
-      {/* Link Dialog Modal */}
+      {/* Link Dialog Modal (Uses <div> container with type="button" actions to prevent page refreshes) */}
       <Modal isOpen={isLinkModalOpen} onClose={() => setIsLinkModalOpen(false)} title={editor?.isActive('link') ? 'Edit Existing Hyperlink' : 'Insert Hyperlink'}>
-        <form onSubmit={applyLink} className="space-y-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1 text-slate-700">Link URL *</label>
             <input
-              type="url"
+              type="text"
               required
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://example.com/programs"
+              placeholder="https://example.com or about.html#faculty"
               className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none font-mono"
             />
+            <p className="text-xs text-slate-400 mt-1">Supports external URLs (https://...) and internal links (about.html#faculty, programs-single.html, /contact.html).</p>
           </div>
 
           <div>
@@ -397,7 +465,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               onChange={(e) => setOpenInNewTab(e.target.checked)}
               className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
             />
-            <label htmlFor="openInNewTab" className="text-sm text-slate-700 font-medium">
+            <label htmlFor="openInNewTab" className="text-sm text-slate-700 font-medium cursor-pointer">
               Open link in new tab (`target="_blank" rel="noopener noreferrer"`)
             </label>
           </div>
@@ -413,12 +481,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
               <Button type="button" variant="outline" onClick={() => setIsLinkModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="button" onClick={applyLink}>
                 {editor?.isActive('link') ? 'Update Link' : 'Insert Link'}
               </Button>
             </div>
           </div>
-        </form>
+        </div>
       </Modal>
     </div>
   );
