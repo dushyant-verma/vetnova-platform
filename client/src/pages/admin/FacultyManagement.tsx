@@ -24,13 +24,41 @@ interface FacultyForm {
   status: string;
 }
 
-const DEFAULT_PROGRAMS = [
-  { id: 'veterinary-skill-up', title: 'Veterinary Skill Up (6 Months)' },
-  { id: 'emergency-medicine', title: 'Emergency & Critical Care' },
-  { id: 'radiology-ultrasound', title: 'Radiology & Ultrasound' },
-  { id: 'soft-tissue-surgery', title: 'Soft Tissue Surgery' },
-  { id: 'vet-nurse-programme', title: 'Veterinary Nurse Programme' }
+export const CANONICAL_PROGRAMS = [
+  { id: 'veterinary-skill-up', title: 'Veterinary Skill-Up Program' },
+  { id: 'soft-tissue-surgery', title: 'Soft Tissue Surgery Track' },
+  { id: 'radiology-ultrasound', title: 'Radiology & Ultrasound Workshop' },
+  { id: 'emergency-medicine', title: 'Emergency & Critical Care Masterclass' },
+  { id: 'vet-nurse-programme', title: 'Veterinary Nurse Certification' }
 ];
+
+function normalizeProgramSlugs(programs: any[]): string[] {
+  if (!Array.isArray(programs)) return [];
+  const map: Record<string, string> = {
+    'veterinary-skill-up': 'veterinary-skill-up',
+    'veterinary skill up': 'veterinary-skill-up',
+    'soft-tissue-surgery': 'soft-tissue-surgery',
+    'soft tissue surgery': 'soft-tissue-surgery',
+    'radiology-ultrasound': 'radiology-ultrasound',
+    'radiology & ultrasound': 'radiology-ultrasound',
+    'radiology': 'radiology-ultrasound',
+    'emergency-medicine': 'emergency-medicine',
+    'emergency & critical care': 'emergency-medicine',
+    'emergency': 'emergency-medicine',
+    'vet-nurse-programme': 'vet-nurse-programme',
+    'veterinary nurse programme': 'vet-nurse-programme',
+    'nurse': 'vet-nurse-programme'
+  };
+
+  return Array.from(
+    new Set(
+      programs.map(p => {
+        const lower = String(p).toLowerCase().trim();
+        return map[lower] || lower;
+      }).filter(p => CANONICAL_PROGRAMS.some(cp => cp.id === p))
+    )
+  );
+}
 
 export const FacultyManagement = () => {
   const queryClient = useQueryClient();
@@ -66,23 +94,6 @@ export const FacultyManagement = () => {
       return data;
     }
   });
-
-  const { data: apiPrograms } = useQuery({
-    queryKey: ['admin-programs-list'],
-    queryFn: async () => {
-      try {
-        const { data } = await api.get('/programs');
-        return data;
-      } catch (err) {
-        return [];
-      }
-    }
-  });
-
-  // Combine DB programs with default program list
-  const programOptions = apiPrograms && apiPrograms.length > 0
-    ? apiPrograms.map((p: any) => ({ id: p.slug || p._id, title: p.title }))
-    : DEFAULT_PROGRAMS;
 
   const createMutation = useMutation({
     mutationFn: (data: any) => api.post('/experts', data),
@@ -129,7 +140,7 @@ export const FacultyManagement = () => {
       image: '',
       linkedin: '',
       email: '',
-      programs: DEFAULT_PROGRAMS.map(p => p.id), // Default assign to all programs for new members
+      programs: [], // Default to empty array; administrator explicitly assigns programs
       displayOrder: (experts?.length || 0) + 1,
       status: 'Published'
     });
@@ -150,7 +161,7 @@ export const FacultyManagement = () => {
       image: expert.image || '',
       linkedin: expert.linkedin || expert.socialLinks?.linkedin || '',
       email: expert.email || '',
-      programs: Array.isArray(expert.programs) ? expert.programs : [],
+      programs: normalizeProgramSlugs(expert.programs || []),
       displayOrder: expert.displayOrder !== undefined ? expert.displayOrder : 0,
       status: expert.status || 'Published'
     });
@@ -166,7 +177,6 @@ export const FacultyManagement = () => {
     } else {
       next = [...current, progId];
     }
-    // Remove duplicates and save exact selection array
     setValue('programs', Array.from(new Set(next)));
   };
 
@@ -183,123 +193,142 @@ export const FacultyManagement = () => {
     }
   };
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
-
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold font-poppins text-slate-900">Faculty Management</h1>
-          <p className="text-slate-500 text-sm">Manage teaching faculty, course assignments, and bios.</p>
+          <h1 className="text-2xl font-bold text-slate-900 font-poppins">Faculty Management</h1>
+          <p className="text-slate-500 text-sm mt-1">Manage single-program faculty assignments and profile details</p>
         </div>
-        <Button onClick={openAddModal} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Faculty
+        <Button onClick={openAddModal} className="bg-brand-primary hover:bg-brand-primary-dark text-white rounded-xl shadow-md">
+          <Plus className="w-4 h-4 mr-2" /> Add Faculty Member
         </Button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <div className="relative w-64">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search faculty..." 
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex justify-between items-center gap-4">
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search faculty by name, department, qualification..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/50"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
             />
-          </div>
-          <div className="flex gap-2 text-sm text-slate-500">
-            <span className="font-medium text-slate-900">Total:</span> {experts?.length || 0} Faculty Members
           </div>
         </div>
 
-        <table className="w-full text-left">
-          <thead className="bg-white">
-            <tr className="text-sm font-medium text-slate-500 border-b border-slate-100">
-              <th className="px-6 py-4">Faculty Member</th>
-              <th className="px-6 py-4">Designation & Department</th>
-              <th className="px-6 py-4">Experience</th>
-              <th className="px-6 py-4">Assigned Programs</th>
-              <th className="px-6 py-4">Order</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-sm divide-y divide-slate-50">
-            {isLoading ? (
-              <tr><td colSpan={7} className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-primary" /></td></tr>
-            ) : experts?.length === 0 ? (
-              <tr><td colSpan={7} className="text-center py-8 text-slate-500">No faculty members found.</td></tr>
-            ) : experts?.map((expert: any) => (
-              <tr key={expert._id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 flex items-center gap-3">
-                  {expert.image ? (
-                    <img src={expert.image} alt={expert.name} className="w-10 h-10 rounded-full object-cover border border-slate-200" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center font-bold">{expert.name.charAt(0)}</div>
-                  )}
-                  <div>
-                    <span className="font-semibold text-slate-900 block">{expert.name}</span>
-                    {expert.email && <span className="text-xs text-slate-400 block">{expert.email}</span>}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-slate-600">
-                  <div className="font-medium text-slate-800">{expert.designation || 'Specialist'}</div>
-                  <div className="text-xs text-slate-500">{expert.department || expert.specialization || 'Veterinary Sciences'}</div>
-                </td>
-                <td className="px-6 py-4 text-slate-600 font-medium text-xs">
-                  {expert.experience || '10+ Yrs Exp'}
-                </td>
-                <td className="px-6 py-4 text-slate-600">
-                  <span className="px-2 py-1 bg-slate-100 rounded text-xs font-mono font-medium text-slate-700">
-                    {Array.isArray(expert.programs) ? `${expert.programs.length} Program(s)` : '0 Programs'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-slate-600 font-mono text-xs">
-                  {expert.displayOrder !== undefined ? expert.displayOrder : 0}
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    expert.status === 'Draft' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'
-                  }`}>
-                    {expert.status || 'Published'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right space-x-2">
-                  <button onClick={() => openEditModal(expert)} className="p-2 text-slate-400 hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-colors">
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleDelete(expert._id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {isLoading ? (
+          <div className="p-12 text-center text-slate-400 flex flex-col items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-brand-primary mb-2" />
+            <span>Loading faculty records...</span>
+          </div>
+        ) : !experts || experts.length === 0 ? (
+          <div className="p-12 text-center text-slate-500">
+            No faculty members found.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200/80 text-slate-600 font-medium">
+                <tr>
+                  <th className="px-6 py-4">Faculty Member</th>
+                  <th className="px-6 py-4">Qualification / Exp</th>
+                  <th className="px-6 py-4">Assigned Programs</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {experts.map((expert: any) => {
+                  const assignedSlugs = normalizeProgramSlugs(expert.programs || []);
+                  return (
+                    <tr key={expert._id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={expert.image || 'assets/images/about/about-faculty-01.webp'}
+                            alt={expert.name}
+                            className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'assets/images/about/about-faculty-01.webp';
+                            }}
+                          />
+                          <div>
+                            <div className="font-semibold text-slate-900">{expert.name}</div>
+                            <div className="text-xs text-slate-500">{expert.department || expert.specialization}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-slate-800 font-medium">{expert.qualification || 'BVSc & AH'}</div>
+                        <div className="text-xs text-slate-500">{expert.experience || '10+ Yrs Exp'}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {assignedSlugs.length > 0 ? (
+                            assignedSlugs.map(slug => {
+                              const prog = CANONICAL_PROGRAMS.find(cp => cp.id === slug);
+                              return (
+                                <span key={slug} className="px-2 py-0.5 bg-teal-50 text-teal-700 border border-teal-200 rounded text-[11px] font-medium">
+                                  {prog ? prog.title : slug}
+                                </span>
+                              );
+                            })
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">No programs assigned</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          expert.status === 'Published' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {expert.status || 'Published'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => openEditModal(expert)}
+                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 hover:text-brand-primary transition-colors"
+                            title="Edit Faculty"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(expert._id)}
+                            className="p-1.5 hover:bg-red-50 rounded-lg text-slate-600 hover:text-red-600 transition-colors"
+                            title="Delete Faculty"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? 'Edit Faculty Member' : 'Add Faculty Member'}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto pr-1">
-          <Controller name="name" control={control} rules={{ required: true }} render={({ field }) => (
-            <div>
-              <label className="block text-sm font-medium mb-1 text-slate-700">Full Name *</label>
-              <input {...field} placeholder="e.g. Dr. Sarah Jenkins" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
-            </div>
-          )} />
-
+      {/* Add / Edit Faculty Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? 'Edit Faculty Member' : 'Add New Faculty Member'}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Controller name="designation" control={control} render={({ field }) => (
+            <Controller name="name" control={control} rules={{ required: true }} render={({ field }) => (
               <div>
-                <label className="block text-sm font-medium mb-1 text-slate-700">Designation</label>
-                <input {...field} placeholder="e.g. Head of Soft Tissue Surgery" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <label className="block text-sm font-medium mb-1 text-slate-700">Full Name *</label>
+                <input {...field} placeholder="Dr. Priya Sharma" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
             <Controller name="qualification" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Qualification</label>
-                <input {...field} placeholder="e.g. BVSc & AH, MVSc (Surgery)" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <input {...field} placeholder="e.g. BVSc & AH, MVSc (Radiology)" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
           </div>
@@ -308,31 +337,33 @@ export const FacultyManagement = () => {
             <Controller name="department" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Department / Area of Expertise</label>
-                <input {...field} placeholder="e.g. Orthopedics & Diagnostic Imaging" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <input {...field} placeholder="e.g. Abdominal Ultrasound & Radiology" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
             <Controller name="experience" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Years of Experience</label>
-                <input {...field} placeholder="e.g. 15+ Yrs Exp" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <input {...field} placeholder="e.g. 10+ Yrs Exp" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
           </div>
 
           {/* Multi-select Program Assignment */}
-          <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2">
+          <div className="border border-slate-200 rounded-xl p-3.5 bg-slate-50 space-y-2">
             <label className="block text-sm font-bold text-slate-800">Assign To Programs</label>
-            <p className="text-xs text-slate-500">Select programs where this faculty member will be displayed on the public website.</p>
+            <p className="text-xs text-slate-500">Select ONLY the single program pages where this faculty member should be displayed on the public website.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
-              {programOptions.map((prog: any) => {
+              {CANONICAL_PROGRAMS.map((prog) => {
                 const isChecked = selectedPrograms.includes(prog.id);
                 return (
-                  <label key={prog.id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 hover:border-brand-primary/50 cursor-pointer text-xs font-medium text-slate-700">
+                  <label key={prog.id} className={`flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer text-xs font-semibold transition-colors ${
+                    isChecked ? 'bg-teal-50 border-teal-500 text-teal-900' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}>
                     <input
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => handleProgramToggle(prog.id)}
-                      className="rounded text-brand-primary focus:ring-brand-primary"
+                      className="rounded text-brand-primary focus:ring-brand-primary w-4 h-4"
                     />
                     <span>{prog.title}</span>
                   </label>
@@ -345,12 +376,12 @@ export const FacultyManagement = () => {
             <Controller name="email" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Email Address</label>
-                <input {...field} type="email" placeholder="sarah.j@vetnova.in" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <input {...field} type="email" placeholder="priya.sharma@vetnova.in" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
             <Controller name="linkedin" control={control} render={({ field }) => (
               <div>
-                <label className="block text-sm font-medium mb-1 text-slate-700">LinkedIn URL</label>
+                <label className="block text-sm font-medium mb-1 text-slate-700">LinkedIn Profile</label>
                 <input {...field} placeholder="https://linkedin.com/in/..." className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
@@ -358,36 +389,43 @@ export const FacultyManagement = () => {
 
           <Controller name="bio" control={control} render={({ field }) => (
             <div>
-              <label className="block text-sm font-medium mb-1 text-slate-700">Short Bio</label>
-              <textarea {...field} rows={3} placeholder="Brief summary of clinical experience and accomplishments..." className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+              <label className="block text-sm font-medium mb-1 text-slate-700">Bio / Profile Intro</label>
+              <textarea {...field} rows={3} placeholder="Brief biography and clinical achievements..." className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
             </div>
           )} />
 
-          <Controller name="image" control={control} render={({ field: { value, onChange } }) => (
-            <ImageUpload value={value} onChange={onChange} label="Profile Image" />
+          <Controller name="image" control={control} render={({ field }) => (
+            <div>
+              <label className="block text-sm font-medium mb-1 text-slate-700">Profile Photo</label>
+              <ImageUpload value={field.value} onChange={field.onChange} />
+            </div>
           )} />
 
           <div className="grid grid-cols-2 gap-4">
-            <Controller name="displayOrder" control={control} render={({ field }) => (
-              <div>
-                <label className="block text-sm font-medium mb-1 text-slate-700">Display Order</label>
-                <input {...field} type="number" onChange={(e) => field.onChange(parseInt(e.target.value) || 0)} className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
-              </div>
-            )} />
             <Controller name="status" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Status</label>
-                <select {...field} className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-brand-primary/50 outline-none">
+                <select {...field} className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none bg-white">
                   <option value="Published">Published</option>
                   <option value="Draft">Draft</option>
                 </select>
               </div>
             )} />
+            <Controller name="displayOrder" control={control} render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium mb-1 text-slate-700">Display Order</label>
+                <input {...field} type="number" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+              </div>
+            )} />
           </div>
 
-          <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
-            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Faculty Member'}</Button>
+          <div className="pt-4 flex justify-end gap-2 border-t border-slate-100">
+            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              {editingId ? 'Save Changes' : 'Create Faculty'}
+            </Button>
           </div>
         </form>
       </Modal>
