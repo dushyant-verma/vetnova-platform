@@ -96,7 +96,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   };
 
-  const openLinkDialog = () => {
+  const openLinkDialog = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     saveCurrentSelection();
     const existingAnchor = findParentAnchor();
     setActiveAnchor(existingAnchor);
@@ -118,6 +122,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const applyLink = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsLinkModalOpen(false);
     restoreSelection();
 
@@ -173,7 +178,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     handleInput();
   };
 
-  const removeLink = () => {
+  const removeLink = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setIsLinkModalOpen(false);
     restoreSelection();
     if (activeAnchor) {
@@ -221,6 +230,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
           <div className="w-px h-5 bg-slate-300 mx-1" />
 
+          {/* Full H1 - H6 Heading Formatting Options */}
           <button
             type="button"
             onClick={() => formatBlock('h1')}
@@ -244,6 +254,30 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             className="px-2 py-1 text-xs font-bold rounded hover:bg-slate-200 text-slate-700 transition-colors flex items-center gap-0.5"
           >
             <Heading3 className="w-3.5 h-3.5" /> H3
+          </button>
+          <button
+            type="button"
+            onClick={() => formatBlock('h4')}
+            title="Heading 4"
+            className="px-2 py-1 text-xs font-semibold rounded hover:bg-slate-200 text-slate-700 transition-colors"
+          >
+            H4
+          </button>
+          <button
+            type="button"
+            onClick={() => formatBlock('h5')}
+            title="Heading 5"
+            className="px-2 py-1 text-xs font-semibold rounded hover:bg-slate-200 text-slate-700 transition-colors"
+          >
+            H5
+          </button>
+          <button
+            type="button"
+            onClick={() => formatBlock('h6')}
+            title="Heading 6"
+            className="px-2 py-1 text-xs font-semibold rounded hover:bg-slate-200 text-slate-700 transition-colors"
+          >
+            H6
           </button>
           <button
             type="button"
