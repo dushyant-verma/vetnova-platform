@@ -75,7 +75,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         openOnClick: false,
         HTMLAttributes: {
           target: '_blank',
-          rel: 'noopener noreferrer'
+          rel: 'noopener noreferrer',
+          class: 'editor-hyperlink'
         }
       })
     ],

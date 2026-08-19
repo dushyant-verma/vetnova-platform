@@ -91,3 +91,24 @@
 .mainlogosite {
   height: 3.5rem !important;
 }
+
+/* Visually Identifiable Hyperlinks in Editor */
+.tiptap a,
+.prose a,
+.editor-hyperlink {
+  color: #0284c7 !important;
+  font-weight: 700 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  background-color: rgba(2, 132, 199, 0.08);
+  padding: 1px 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.tiptap a:hover,
+.prose a:hover,
+.editor-hyperlink:hover {
+  color: #0369a1 !important;
+  background-color: rgba(2, 132, 199, 0.18);
+}
