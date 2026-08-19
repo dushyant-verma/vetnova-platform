@@ -29,31 +29,34 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder = 'Write blog content here...'
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
+  const lastHtmlRef = useRef<string>('');
+  const savedRangeRef = useRef<Range | null>(null);
+
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('https://');
   const [linkText, setLinkText] = useState('');
   const [openInNewTab, setOpenInNewTab] = useState(true);
   const [activeAnchor, setActiveAnchor] = useState<HTMLAnchorElement | null>(null);
-  const [savedSelection, setSavedSelection] = useState<Range | null>(null);
 
-  // Initialize and sync HTML content without overriding cursor when typing
+  // Initialize and sync HTML content ONLY when value is changed externally (e.g. form reset or modal open)
   useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== value) {
+    if (editorRef.current && value !== lastHtmlRef.current) {
       editorRef.current.innerHTML = value || '';
+      lastHtmlRef.current = value || '';
     }
   }, [value]);
 
   const handleInput = () => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      const currentHtml = editorRef.current.innerHTML;
+      lastHtmlRef.current = currentHtml;
+      onChange(currentHtml);
     }
   };
 
-  const executeCommand = (command: string, value: string = '') => {
-    document.execCommand(command, false, value);
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
+  const executeCommand = (command: string, val: string = '') => {
+    document.execCommand(command, false, val);
+    handleInput();
   };
 
   const formatBlock = (tag: string) => {
@@ -79,16 +82,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const saveCurrentSelection = () => {
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
-      setSavedSelection(sel.getRangeAt(0).cloneRange());
+      savedRangeRef.current = sel.getRangeAt(0).cloneRange();
     }
   };
 
   const restoreSelection = () => {
-    if (savedSelection) {
+    if (savedRangeRef.current) {
       const sel = window.getSelection();
       if (sel) {
         sel.removeAllRanges();
-        sel.addRange(savedSelection);
+        sel.addRange(savedRangeRef.current);
       }
     }
   };
@@ -121,7 +124,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (!linkUrl) return;
 
     if (activeAnchor) {
-      // Update existing anchor element directly
+      // Update existing anchor element directly in DOM
       activeAnchor.setAttribute('href', linkUrl);
       if (linkText) {
         activeAnchor.textContent = linkText;
@@ -144,9 +147,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           anchor.target = '_blank';
           anchor.rel = 'noopener noreferrer';
         }
-        const range = sel ? sel.getRangeAt(0) : null;
+        const range = savedRangeRef.current || (sel && sel.rangeCount > 0 ? sel.getRangeAt(0) : null);
         if (range) {
           range.insertNode(anchor);
+        } else if (editorRef.current) {
+          editorRef.current.appendChild(anchor);
         }
       } else {
         executeCommand('createLink', linkUrl);
@@ -165,9 +170,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       }
     }
 
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
+    handleInput();
   };
 
   const removeLink = () => {
@@ -182,9 +185,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     } else {
       executeCommand('unlink');
     }
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
+    handleInput();
   };
 
   return (
@@ -311,7 +312,6 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             if (anchor) setActiveAnchor(anchor);
           }}
           className="p-4 min-h-[220px] max-h-[450px] overflow-y-auto outline-none text-sm text-slate-800 leading-relaxed prose max-w-none"
-          style={{ whiteSpace: 'pre-wrap' }}
           data-placeholder={placeholder}
         />
       </div>
