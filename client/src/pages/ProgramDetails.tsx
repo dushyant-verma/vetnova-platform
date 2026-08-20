@@ -134,7 +134,7 @@ export const ProgramDetails = () => {
                   </div>
                   <div>
                     <p className="text-sm text-slate-500 mb-1 font-medium">Fee</p>
-                    <p className="font-bold text-slate-900 text-3xl text-brand-primary">{program.price ? `₹\${program.price}` : 'Contact Us'}</p>
+                    <p className="font-bold text-slate-900 text-3xl text-brand-primary">{program.price ? `₹${program.price}` : 'Contact Us'}</p>
                     <p className="text-xs text-slate-400 mt-2 font-medium">Includes all materials and meals</p>
                   </div>
                 </div>

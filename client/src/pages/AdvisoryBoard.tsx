@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/axios';
+import { getMediaUrl, handleImageLoadError } from '@/utils/mediaUtils';
 
 export const AdvisoryBoard = () => {
   const { data: apiMembers } = useQuery({
@@ -18,43 +19,16 @@ export const AdvisoryBoard = () => {
     }
   });
 
-  const defaultBoardMembers = [
-    {
-      name: 'Dr. Michael Chen',
-      role: 'Chair, Veterinary Surgery',
-      institution: 'Royal Veterinary College, UK',
-      bio: 'Pioneer in minimally invasive veterinary orthopedics with over 200 published papers.',
-      image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=500&q=80',
-      linkedin: '#'
-    },
-    {
-      name: 'Dr. Anita Desai',
-      role: 'Director of Clinical Practice',
-      institution: 'VetNova Board',
-      bio: 'Former head of the National Veterinary Council. Advocate for continuing clinical education in South Asia.',
-      image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=928&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      linkedin: '#'
-    },
-    {
-      name: 'Dr. Robert King',
-      role: 'Specialist, Soft Tissue',
-      institution: 'Cornell University',
-      bio: 'Leading researcher in reconstructive surgery for trauma patients and congenital defects.',
-      image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&q=80',
-      linkedin: '#'
-    }
-  ];
-
-  const boardMembers = apiMembers && apiMembers.length > 0
+  const boardMembers = Array.isArray(apiMembers)
     ? apiMembers.map((m: any) => ({
         name: m.name,
         role: m.designation || 'Board Member',
         institution: m.organization || 'VetNova Advisory Council',
         bio: m.bio || '',
-        image: m.image || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=500&q=80',
+        image: getMediaUrl(m.image),
         linkedin: m.linkedin || '#'
       }))
-    : defaultBoardMembers;
+    : [];
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-inter">
@@ -104,32 +78,43 @@ export const AdvisoryBoard = () => {
         {/* Board Members Grid */}
         <section className="py-20">
           <div className="container mx-auto px-6 md:px-12 max-w-6xl">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {boardMembers.map((member: any, i: number) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="bg-white rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 border border-slate-100 group"
-                >
-                  <div className="h-64 overflow-hidden relative">
-                    <img src={member.image} alt={member.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-900 to-transparent flex justify-end gap-3">
-                      <button className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-brand-primary transition-colors">LinkedIn</button>
-                      <button className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-brand-primary transition-colors"><Mail size={14} /></button>
+            {boardMembers.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                <p className="text-slate-500 font-medium">No advisory board members currently published.</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {boardMembers.map((member: any, i: number) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="bg-white rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 border border-slate-100 group"
+                  >
+                    <div className="h-64 overflow-hidden relative bg-slate-100">
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        onError={(e) => handleImageLoadError(e, member.image)}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-900 to-transparent flex justify-end gap-3">
+                        <button className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-brand-primary transition-colors">LinkedIn</button>
+                        <button className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-brand-primary transition-colors"><Mail size={14} /></button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-8">
-                    <h3 className="text-xl font-bold font-poppins text-slate-900 mb-1">{member.name}</h3>
-                    <p className="text-brand-secondary font-medium text-sm mb-4">{member.role}</p>
-                    <p className="text-slate-500 text-sm font-semibold uppercase tracking-wider mb-4 border-b border-slate-100 pb-4">{member.institution}</p>
-                    <p className="text-slate-600 leading-relaxed text-sm">{member.bio}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                    <div className="p-8">
+                      <h3 className="text-xl font-bold font-poppins text-slate-900 mb-1">{member.name}</h3>
+                      <p className="text-brand-secondary font-medium text-sm mb-4">{member.role}</p>
+                      <p className="text-slate-500 text-sm font-semibold uppercase tracking-wider mb-4 border-b border-slate-100 pb-4">{member.institution}</p>
+                      <p className="text-slate-600 leading-relaxed text-sm">{member.bio}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 

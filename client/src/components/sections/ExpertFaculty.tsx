@@ -2,13 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../lib/axios';
+import { getMediaUrl, handleImageLoadError } from '@/utils/mediaUtils';
 
 export const ExpertFaculty = () => {
   const { data: experts, isLoading } = useQuery({
     queryKey: ['public-experts-featured'],
     queryFn: async () => {
       const { data } = await api.get('/experts');
-      return data.slice(0, 3);
+      return Array.isArray(data) ? data.slice(0, 3) : [];
     }
   });
 
@@ -29,24 +30,29 @@ export const ExpertFaculty = () => {
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
           </div>
+        ) : !experts || experts.length === 0 ? (
+          <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100">
+            <p className="text-slate-500 font-medium">No faculty members available.</p>
+          </div>
         ) : (
           <div className="grid md:grid-cols-3 gap-8">
-            {experts?.map((expert: any, idx: number) => (
+            {experts.map((expert: any, idx: number) => (
               <motion.div
                 key={expert._id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.15, duration: 0.5 }}
-                className="group relative rounded-[2rem] overflow-hidden aspect-[3/4]"
+                className="group relative rounded-[2rem] overflow-hidden aspect-[3/4] bg-slate-100"
               >
                 <img 
-                  src={expert.image} 
+                  src={getMediaUrl(expert.image)} 
                   alt={expert.name} 
+                  onError={(e) => handleImageLoadError(e, expert.image)}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent flex flex-col justify-end p-8 text-left translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                  <p className="text-brand-secondary font-medium text-sm mb-1">{expert.specialization}</p>
+                  <p className="text-brand-secondary font-medium text-sm mb-1">{expert.specialization || expert.department}</p>
                   <h3 className="text-2xl font-bold font-poppins text-white mb-1">{expert.name}</h3>
                   <p className="text-slate-300 text-sm">{expert.education} • {expert.experience}</p>
                 </div>

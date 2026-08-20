@@ -6,6 +6,7 @@ import api from '@/lib/axios';
 import { Modal } from '@/components/ui/Modal';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useForm, Controller } from 'react-hook-form';
+import { getMediaUrl, handleImageLoadError } from '@/utils/mediaUtils';
 
 interface FacultyForm {
   name: string;
@@ -248,12 +249,10 @@ export const FacultyManagement = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <img
-                            src={expert.image || 'assets/images/about/about-faculty-01.webp'}
+                            src={getMediaUrl(expert.image)}
                             alt={expert.name}
                             className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'assets/images/about/about-faculty-01.webp';
-                            }}
+                            onError={(e) => handleImageLoadError(e, expert.image)}
                           />
                           <div>
                             <div className="font-semibold text-slate-900">{expert.name}</div>

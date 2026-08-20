@@ -27,15 +27,10 @@ const Gallery_1 = require("./models/Gallery");
 const Page_1 = require("./models/Page");
 const Setting_1 = require("./models/Setting");
 const Media_1 = require("./models/Media");
-const seedWebsiteContent_1 = require("./scripts/seedWebsiteContent");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-// Connect Database & Seed Content
-(0, db_1.connectDB)().then(() => {
-    (0, seedWebsiteContent_1.seedWebsiteContent)();
-}).catch(() => {
-    (0, seedWebsiteContent_1.seedWebsiteContent)();
-});
+// Connect Database
+(0, db_1.connectDB)();
 // Storage Startup Validation
 const isCloudinaryActive = (0, cloudinaryConfig_1.isCloudinaryConfigured)();
 console.log(`[Storage] Cloudinary configured: ${isCloudinaryActive}`);

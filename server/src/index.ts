@@ -32,12 +32,8 @@ dotenv.config();
 
 const app = express();
 
-// Connect Database & Seed Content
-connectDB().then(() => {
-  seedWebsiteContent();
-}).catch(() => {
-  seedWebsiteContent();
-});
+// Connect Database
+connectDB();
 
 // Storage Startup Validation
 const isCloudinaryActive = isCloudinaryConfigured();

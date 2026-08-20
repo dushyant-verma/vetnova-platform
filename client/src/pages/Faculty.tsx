@@ -5,6 +5,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Award, GraduationCap, Briefcase, BookOpen } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../lib/axios';
+import { getMediaUrl, handleImageLoadError } from '@/utils/mediaUtils';
 
 import SEO from '@/components/SEO';
 import { Link } from 'react-router-dom';
@@ -14,7 +15,7 @@ export const Faculty = () => {
     queryKey: ['experts'],
     queryFn: async () => {
       const { data } = await api.get('/experts');
-      return data;
+      return Array.isArray(data) ? data : [];
     }
   });
 
@@ -44,6 +45,10 @@ export const Faculty = () => {
             </div>
           ) : error ? (
             <div className="text-center text-red-500 bg-red-50 p-4 rounded-xl">Error loading faculty. Please try again later.</div>
+          ) : !experts || experts.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 shadow-sm">
+              <p className="text-slate-500 font-medium">No faculty members currently listed.</p>
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {experts.map((member: any, index: number) => (
@@ -54,23 +59,26 @@ export const Faculty = () => {
                   transition={{ delay: index * 0.1 }}
                   className="bg-white rounded-2xl overflow-hidden border border-slate-100 hover:shadow-xl transition-all duration-300 group"
                 >
-                  <div className="h-64 overflow-hidden">
+                  <div className="h-64 overflow-hidden bg-slate-100">
                     <img 
-                      src={member.image || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d'} 
-                      alt={member.name} 
+                      src={getMediaUrl(member.image)} 
+                      alt={member.name}
+                      onError={(e) => handleImageLoadError(e, member.image)}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 grayscale group-hover:grayscale-0"
                     />
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold font-poppins text-slate-900 mb-1">{member.name}</h3>
-                    <p className="text-brand-primary font-medium text-sm mb-3">{member.specialization}</p>
+                    <p className="text-brand-primary font-medium text-sm mb-3">{member.specialization || member.department}</p>
                     <p className="text-slate-600 text-sm mb-4 line-clamp-3">
                       {member.bio}
                     </p>
-                    <div className="flex items-center gap-2 text-sm text-slate-500 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">
-                      <BookOpen className="w-4 h-4 text-brand-secondary" />
-                      <span>{member.education}</span>
-                    </div>
+                    {member.education && (
+                      <div className="flex items-center gap-2 text-sm text-slate-500 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">
+                        <BookOpen className="w-4 h-4 text-brand-secondary" />
+                        <span>{member.education}</span>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}

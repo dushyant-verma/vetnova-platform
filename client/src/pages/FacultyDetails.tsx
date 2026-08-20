@@ -8,6 +8,7 @@ import { SEO } from '@/components/SEO';
 import { MapPin, Mail, Award, BookOpen, ChevronRight, Loader2, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/axios';
+import { getMediaUrl, handleImageLoadError } from '@/utils/mediaUtils';
 
 export const FacultyDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,21 +31,27 @@ export const FacultyDetails = () => {
     );
   }
 
-  // Fallback Dummy Data for Preview/UI layout testing if API fails
-  const data = isError || !faculty ? {
-    name: 'Dr. Sarah Jenkins',
-    role: 'Senior Clinical Instructor',
-    specialization: 'Small Animal Orthopedics',
-    bio: 'Dr. Sarah Jenkins is a board-certified veterinary surgeon with over 15 years of experience in small animal orthopedics. She leads the advanced surgical training modules at VetNova.',
-    qualifications: ['DVM, Cornell University', 'Diplomate, American College of Veterinary Surgeons'],
-    experience: '15+ Years Clinical Experience',
-    publications: ['Advancements in Canine TPLO', 'Minimally Invasive Fracture Repair'],
-    certifications: ['Certified Canine Rehabilitation Therapist (CCRT)'],
-    image: 'https://images.unsplash.com/photo-1594824436951-7f12bc5a6d25?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    email: 's.jenkins@vetnova.in',
-    social: { linkedin: '#' },
-    courses: [{ id: '1', title: 'Advanced Orthopedics' }]
-  } : faculty;
+  if (isError || !faculty) {
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-50 font-inter">
+        <SEO title="Faculty Not Found - VetNova" description="The requested faculty profile could not be found." />
+        <Navbar />
+        <main className="flex-grow pt-32 pb-24 container mx-auto px-6 max-w-md text-center">
+          <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Faculty Profile Not Found</h2>
+            <p className="text-slate-600 mb-6">The faculty member you are looking for is unavailable or has been removed.</p>
+            <Button asChild className="rounded-full">
+              <Link to="/faculty">Back to Faculty Directory</Link>
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const data = faculty;
+  const facultyImage = getMediaUrl(data.image);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-inter">
@@ -70,9 +77,14 @@ export const FacultyDetails = () => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="w-48 h-48 lg:w-64 lg:h-64 rounded-full overflow-hidden border-4 border-slate-800 flex-shrink-0 relative shadow-2xl"
+                className="w-48 h-48 lg:w-64 lg:h-64 rounded-full overflow-hidden border-4 border-slate-800 flex-shrink-0 relative shadow-2xl bg-slate-800"
               >
-                <img src={data.image || '/placeholder-faculty.jpg'} alt={data.name} className="w-full h-full object-cover" />
+                <img 
+                  src={facultyImage} 
+                  alt={data.name} 
+                  onError={(e) => handleImageLoadError(e, data.image)}
+                  className="w-full h-full object-cover" 
+                />
               </motion.div>
               
               <div className="text-center lg:text-left text-white flex-grow">

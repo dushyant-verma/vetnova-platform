@@ -36,6 +36,11 @@ export function getMediaUrl(url?: string | null, fallback: string = DEFAULT_FALL
 }
 
 export function handleImageLoadError(event: React.SyntheticEvent<HTMLImageElement, Event>, originalUrl?: string, fallback: string = DEFAULT_FALLBACK_IMAGE) {
-  console.warn(`[Media] Failed to load image asset: "${originalUrl || event.currentTarget.src}". Applying fallback.`);
-  event.currentTarget.src = fallback;
+  const target = event.currentTarget;
+  if (target.getAttribute('data-error-handled') === 'true') {
+    return;
+  }
+  target.setAttribute('data-error-handled', 'true');
+  console.warn(`[Media] Failed to load image asset: "${originalUrl || target.src}". Applying fallback.`);
+  target.src = fallback;
 }

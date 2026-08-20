@@ -122,7 +122,7 @@ export const ApplyNow = () => {
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${currentStep >= step.id ? 'bg-brand-secondary text-white shadow-lg shadow-brand-secondary/30' : 'bg-slate-800 text-slate-400'}`}>
                         {step.id}
                       </div>
-                      <span className={`text-xs font-medium hidden md:block \${currentStep >= step.id ? 'text-brand-secondary' : 'text-slate-500'}`}>{step.title}</span>
+                      <span className={`text-xs font-medium hidden md:block ${currentStep >= step.id ? 'text-brand-secondary' : 'text-slate-500'}`}>{step.title}</span>
                     </div>
                   ))}
                 </div>
@@ -187,13 +187,13 @@ export const ApplyNow = () => {
                           <label className="block text-sm font-medium text-slate-700 mb-4">Which program are you applying for? *</label>
                           <div className="grid gap-4">
                             {programs?.map((p: any) => (
-                              <label key={p._id} className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all \${formData.program === p._id ? 'border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary' : 'border-slate-200 hover:border-brand-primary/50'}`}>
+                              <label key={p._id} className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${formData.program === p._id ? 'border-brand-primary bg-brand-primary/5 ring-1 ring-brand-primary' : 'border-slate-200 hover:border-brand-primary/50'}`}>
                                 <input type="radio" name="program" value={p._id} checked={formData.program === p._id} onChange={handleChange} className="hidden" />
                                 <div className="flex-grow">
                                   <h4 className="font-bold text-slate-900">{p.title}</h4>
                                   <p className="text-sm text-slate-500 capitalize">{p.type} • {p.duration || 'Variable Duration'}</p>
                                 </div>
-                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center \${formData.program === p._id ? 'border-brand-primary bg-brand-primary' : 'border-slate-300'}`}>
+                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${formData.program === p._id ? 'border-brand-primary bg-brand-primary' : 'border-slate-300'}`}>
                                   {formData.program === p._id && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
                                 </div>
                               </label>
