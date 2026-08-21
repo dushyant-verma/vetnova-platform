@@ -3,19 +3,19 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
-import { 
-  Bold, 
-  Italic, 
-  Underline as UnderlineIcon, 
-  Heading1, 
-  Heading2, 
-  Heading3, 
-  List, 
-  ListOrdered, 
-  Link as LinkIcon, 
-  Unlink, 
-  Undo, 
-  Redo, 
+import {
+  Bold,
+  Italic,
+  Underline as UnderlineIcon,
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  Link as LinkIcon,
+  Unlink,
+  Undo,
+  Redo,
   Code,
   Eye
 } from 'lucide-react';
@@ -237,7 +237,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     <div className="space-y-1">
       {label && <label className="block text-sm font-medium text-slate-700">{label}</label>}
       <div className="border border-slate-300 rounded-xl overflow-hidden bg-white focus-within:ring-2 focus-within:ring-brand-primary/50">
-        
+
         {/* Editor Toolbar */}
         <div className="bg-slate-50 border-b border-slate-200 p-2 flex flex-wrap gap-1 items-center">
           {!isSourceMode && editor && (
@@ -398,9 +398,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <button
             type="button"
             onClick={toggleSourceMode}
-            className={`p-1.5 px-2.5 rounded text-xs font-bold transition-colors flex items-center gap-1 ml-auto ${
-              isSourceMode ? 'bg-slate-900 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
-            }`}
+            className={`p-1.5 px-2.5 rounded text-xs font-bold transition-colors flex items-center gap-1 ml-auto ${isSourceMode ? 'bg-slate-900 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-800'
+              }`}
             title={isSourceMode ? 'Switch to Visual Editor' : 'Switch to HTML Code View'}
           >
             {isSourceMode ? (
@@ -422,7 +421,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onChange={handleSourceChange}
             rows={12}
             placeholder="Edit raw HTML code..."
-            className="w-full p-4 font-mono text-xs text-slate-800 bg-slate-950 text-slate-100 outline-none leading-relaxed min-h-[220px] max-h-[450px]"
+            className="w-full p-4 font-mono text-xs text-slate-800 bg-slate-200 text-slate-100 outline-none leading-relaxed min-h-[220px] max-h-[450px]"
           />
         ) : (
           <div className="p-4 min-h-[220px] max-h-[450px] overflow-y-auto text-sm text-slate-800 leading-relaxed prose max-w-none">
@@ -477,7 +476,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 Remove Link
               </Button>
             ) : <div />}
-            
+
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={() => setIsLinkModalOpen(false)}>
                 Cancel
