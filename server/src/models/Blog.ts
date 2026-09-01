@@ -38,11 +38,24 @@ blogSchema.pre('validate', function(this: any, next: any) {
     this.slug = generateSlug(this.title);
   }
 
-  // Ensure categories array and legacy category field remain synced
+  // Ensure categories array is deduplicated case-insensitively and synced with legacy category field
   if (Array.isArray(this.categories)) {
-    this.category = this.categories[0] || '';
+    const uniqueCats: string[] = [];
+    const seen = new Set<string>();
+    for (const cat of this.categories) {
+      if (cat && typeof cat === 'string' && cat.trim()) {
+        const trimmed = cat.trim();
+        const key = trimmed.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueCats.push(trimmed);
+        }
+      }
+    }
+    this.categories = uniqueCats;
+    this.category = uniqueCats[0] || '';
   } else if (this.category) {
-    this.categories = [this.category];
+    this.categories = [this.category.trim()];
   }
 
   if (typeof next === 'function') {

@@ -421,12 +421,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           <textarea
             value={htmlSource}
             onChange={handleSourceChange}
-            rows={12}
+            rows={18}
             placeholder="Edit raw HTML code..."
-            className="w-full p-4 font-mono text-xs bg-slate-900 text-slate-100 caret-white selection:bg-brand-primary selection:text-white outline-none leading-relaxed min-h-[220px] max-h-[450px] overflow-y-auto block resize-y border-none"
+            className="w-full p-4 font-mono text-xs bg-slate-900 text-slate-100 caret-white selection:bg-brand-primary selection:text-white outline-none leading-relaxed min-h-[420px] max-h-[650px] overflow-y-auto block resize-y border-none"
           />
         ) : (
-          <div className="p-4 min-h-[220px] max-h-[450px] overflow-y-auto text-sm text-slate-800 leading-relaxed prose max-w-none">
+          <div className="p-4 min-h-[420px] max-h-[650px] overflow-y-auto text-sm text-slate-800 leading-relaxed prose max-w-none">
             {editor && <EditorContent editor={editor} />}
           </div>
         )}

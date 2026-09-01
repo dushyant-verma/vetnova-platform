@@ -88,11 +88,18 @@ export const Blog = () => {
                 const rawCategories = Array.isArray(post.categories) && post.categories.length > 0
                   ? post.categories
                   : (post.category ? [post.category] : []);
-                const uniqueCategories = [...new Set(
-                  rawCategories
-                    .filter(Boolean)
-                    .map((c: any) => String(c).trim().toUpperCase())
-                )];
+                const uniqueCategories: string[] = [];
+                const seenCats = new Set<string>();
+                for (const c of rawCategories) {
+                  if (c && String(c).trim()) {
+                    const str = String(c).trim();
+                    const key = str.toLowerCase();
+                    if (!seenCats.has(key)) {
+                      seenCats.add(key);
+                      uniqueCategories.push(str.toUpperCase());
+                    }
+                  }
+                }
 
                 return (
                   <motion.div

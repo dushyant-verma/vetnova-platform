@@ -58,15 +58,22 @@ export const BlogDetails = () => {
   const rawCategories = Array.isArray(blog.categories) && blog.categories.length > 0
     ? blog.categories
     : (blog.category ? [blog.category] : []);
-  const uniqueCategories = [...new Set(
-    rawCategories
-      .filter(Boolean)
-      .map((c: any) => String(c).trim().toUpperCase())
-  )];
+  const uniqueCategories: string[] = [];
+  const seenCats = new Set<string>();
+  for (const c of rawCategories) {
+    if (c && String(c).trim()) {
+      const str = String(c).trim();
+      const key = str.toLowerCase();
+      if (!seenCats.has(key)) {
+        seenCats.add(key);
+        uniqueCategories.push(str.toUpperCase());
+      }
+    }
+  }
   const displayCategory = uniqueCategories.join(' • ');
   const authorName = typeof blog.author === 'string' ? blog.author : blog.author?.name || 'VetNova Specialist';
   const authorRole = blog.authorRole || 'Veterinary Specialist';
-  const readingTime = blog.readTime || '5 min read';
+  const readingTime = blog.readTime || '5 Min Read';
   const formattedDate = new Date(blog.createdAt || Date.now()).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',

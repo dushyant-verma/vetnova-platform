@@ -18,6 +18,7 @@ interface BlogForm {
   relatedPrograms: string[];
   author: string;
   authorRole: string;
+  readTime: string;
   tags: string;
   status: string;
   isFeatured: boolean;
@@ -69,6 +70,7 @@ export const BlogManagement = () => {
       relatedPrograms: [],
       author: 'Dr. Amit Kulkarni',
       authorRole: 'Senior Veterinary Surgeon',
+      readTime: '5 Min Read',
       tags: '',
       status: 'Published',
       isFeatured: false,
@@ -182,6 +184,7 @@ export const BlogManagement = () => {
       relatedPrograms: [],
       author: 'Dr. Amit Kulkarni',
       authorRole: 'Senior Veterinary Surgeon',
+      readTime: '5 Min Read',
       tags: '',
       status: 'Published',
       isFeatured: false,
@@ -209,6 +212,7 @@ export const BlogManagement = () => {
       relatedPrograms: assignedProgs,
       author: blog.author || '',
       authorRole: blog.authorRole || '',
+      readTime: blog.readTime || '5 Min Read',
       tags: Array.isArray(blog.tags) ? blog.tags.join(', ') : blog.tags || '',
       status: blog.status || 'Published',
       isFeatured: blog.isFeatured || false,
@@ -264,11 +268,24 @@ export const BlogManagement = () => {
   const onSubmit = (data: BlogForm) => {
     const finalSlug = slugify(data.slug || data.title);
     const selectedCats = Array.isArray(data.categories) ? data.categories : (data.category ? [data.category] : []);
+    const uniqueSelectedCats: string[] = [];
+    const seenCats = new Set<string>();
+    for (const c of selectedCats) {
+      if (c && typeof c === 'string' && c.trim()) {
+        const trimmed = c.trim();
+        const key = trimmed.toLowerCase();
+        if (!seenCats.has(key)) {
+          seenCats.add(key);
+          uniqueSelectedCats.push(trimmed);
+        }
+      }
+    }
     const payload = {
       ...data,
       slug: finalSlug,
-      category: selectedCats[0] || '',
-      categories: Array.from(new Set(selectedCats)),
+      category: uniqueSelectedCats[0] || '',
+      categories: uniqueSelectedCats,
+      readTime: data.readTime || '5 Min Read',
       relatedPrograms: Array.from(new Set(data.relatedPrograms || [])),
       tags: typeof data.tags === 'string' ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : (data.tags || [])
     };
@@ -518,7 +535,7 @@ export const BlogManagement = () => {
             <RichTextEditor value={field.value} onChange={field.onChange} label="Full Article Content *" placeholder="Write article content with bold, italic, headings, lists, and hyperlinks..." />
           )} />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <Controller name="author" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Author Name</label>
@@ -529,6 +546,12 @@ export const BlogManagement = () => {
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Author Role</label>
                 <input {...field} placeholder="e.g. Veterinary Surgeon" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+              </div>
+            )} />
+            <Controller name="readTime" control={control} render={({ field }) => (
+              <div>
+                <label className="block text-sm font-medium mb-1 text-slate-700">Reading Time</label>
+                <input {...field} placeholder="e.g. 5 Min Read" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
           </div>
