@@ -112,3 +112,25 @@
   color: #0369a1 !important;
   background-color: rgba(2, 132, 199, 0.18);
 }
+
+.ProseMirror {
+  min-height: 200px !important;
+  height: 200px !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  box-sizing: border-box;
+}
+
+.tiptap.ProseMirror {
+  min-height: 420px !important;
+  max-height: 620px !important;
+  height: 420px !important;
+  overflow-y: auto !important;
+  padding: 16px !important;
+  box-sizing: border-box;
+}
+
+/* Keep empty editor usable */
+.tiptap.ProseMirror:focus {
+  outline: none;
+}
