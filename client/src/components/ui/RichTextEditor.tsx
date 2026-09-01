@@ -139,7 +139,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     setLinkUrl(previousUrl || 'https://');
     setLinkText(selectedText || '');
-    setOpenInNewTab(editor.getAttributes('link').target === '_blank' || true);
+    const isLinkActive = editor.isActive('link');
+    const existingTarget = editor.getAttributes('link').target;
+    setOpenInNewTab(isLinkActive ? existingTarget === '_blank' : true);
     setIsLinkModalOpen(true);
   };
 
@@ -421,7 +423,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             onChange={handleSourceChange}
             rows={12}
             placeholder="Edit raw HTML code..."
-            className="w-full p-4 font-mono text-xs text-slate-800 bg-slate-200 text-slate-100 outline-none leading-relaxed min-h-[220px] max-h-[450px]"
+            className="w-full p-4 font-mono text-xs bg-slate-900 text-slate-100 caret-white selection:bg-brand-primary selection:text-white outline-none leading-relaxed min-h-[220px] max-h-[450px] overflow-y-auto block resize-y border-none"
           />
         ) : (
           <div className="p-4 min-h-[220px] max-h-[450px] overflow-y-auto text-sm text-slate-800 leading-relaxed prose max-w-none">

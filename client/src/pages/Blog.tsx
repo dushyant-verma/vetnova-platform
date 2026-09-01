@@ -85,7 +85,14 @@ export const Blog = () => {
                 const authorName = typeof post.author === 'string' ? post.author : post.author?.name || 'VetNova Specialist';
                 const authorRole = post.authorRole || 'Veterinary Specialist';
                 const readTime = post.readTime || '5 Min Read';
-                const formattedCategory = (post.category || 'GENERAL').toUpperCase();
+                const rawCategories = Array.isArray(post.categories) && post.categories.length > 0
+                  ? post.categories
+                  : (post.category ? [post.category] : []);
+                const uniqueCategories = [...new Set(
+                  rawCategories
+                    .filter(Boolean)
+                    .map((c: any) => String(c).trim().toUpperCase())
+                )];
 
                 return (
                   <motion.div
@@ -96,9 +103,11 @@ export const Blog = () => {
                     className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full"
                   >
                     <Link to={blogLink} className="block relative aspect-video overflow-hidden bg-slate-100">
-                      <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-brand-primary z-10 shadow-sm">
-                        {formattedCategory}
-                      </div>
+                      {uniqueCategories.length > 0 && (
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-brand-primary z-10 shadow-sm">
+                          {uniqueCategories.join(' • ')}
+                        </div>
+                      )}
                       <img 
                         src={getMediaUrl(post.image)} 
                         alt={`${post.title} - VetNova`}

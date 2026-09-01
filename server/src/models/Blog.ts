@@ -18,7 +18,7 @@ const blogSchema = new mongoose.Schema({
   author: { type: String, required: true },
   authorRole: { type: String, default: 'Veterinary Specialist' },
   authorImage: { type: String },
-  category: { type: String, default: 'General' },
+  category: { type: String, default: '' },
   categories: [{ type: String }],
   relatedPrograms: [{ type: String }],
   tags: [{ type: String }],
@@ -39,8 +39,8 @@ blogSchema.pre('validate', function(this: any, next: any) {
   }
 
   // Ensure categories array and legacy category field remain synced
-  if (Array.isArray(this.categories) && this.categories.length > 0) {
-    this.category = this.categories[0];
+  if (Array.isArray(this.categories)) {
+    this.category = this.categories[0] || '';
   } else if (this.category) {
     this.categories = [this.category];
   }

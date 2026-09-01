@@ -55,7 +55,15 @@ export const BlogDetails = () => {
   }
 
   const title = blog.title || 'Untitled Article';
-  const category = (blog.category || 'Clinical Updates').toUpperCase();
+  const rawCategories = Array.isArray(blog.categories) && blog.categories.length > 0
+    ? blog.categories
+    : (blog.category ? [blog.category] : []);
+  const uniqueCategories = [...new Set(
+    rawCategories
+      .filter(Boolean)
+      .map((c: any) => String(c).trim().toUpperCase())
+  )];
+  const displayCategory = uniqueCategories.join(' • ');
   const authorName = typeof blog.author === 'string' ? blog.author : blog.author?.name || 'VetNova Specialist';
   const authorRole = blog.authorRole || 'Veterinary Specialist';
   const readingTime = blog.readTime || '5 min read';
@@ -82,9 +90,11 @@ export const BlogDetails = () => {
                 <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Back to All Articles
               </Link>
             </div>
-            <span className="inline-block px-3 py-1 bg-brand-primary/10 text-brand-primary text-xs font-bold uppercase tracking-wider rounded-full mb-6">
-              {category}
-            </span>
+            {displayCategory && (
+              <span className="inline-block px-3 py-1 bg-brand-primary/10 text-brand-primary text-xs font-bold uppercase tracking-wider rounded-full mb-6">
+                {displayCategory}
+              </span>
+            )}
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

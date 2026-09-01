@@ -64,8 +64,8 @@ export const BlogManagement = () => {
       slug: '',
       excerpt: '',
       content: '',
-      category: 'GENERAL',
-      categories: ['GENERAL'],
+      category: '',
+      categories: [],
       relatedPrograms: [],
       author: 'Dr. Amit Kulkarni',
       authorRole: 'Senior Veterinary Surgeon',
@@ -172,14 +172,13 @@ export const BlogManagement = () => {
   };
 
   const openAddModal = () => {
-    const defaultCat = categories && categories.length > 0 ? (categories[0].slug || categories[0].name) : 'GENERAL';
     reset({
       title: '',
       slug: '',
       excerpt: '',
       content: '',
-      category: defaultCat,
-      categories: [defaultCat],
+      category: '',
+      categories: [],
       relatedPrograms: [],
       author: 'Dr. Amit Kulkarni',
       authorRole: 'Senior Veterinary Surgeon',
@@ -194,9 +193,9 @@ export const BlogManagement = () => {
   };
 
   const openEditModal = (blog: any) => {
-    const assignedCats = Array.isArray(blog.categories) && blog.categories.length > 0
+    const assignedCats = Array.isArray(blog.categories)
       ? blog.categories
-      : [blog.category || 'GENERAL'];
+      : (blog.category ? [blog.category] : []);
 
     const assignedProgs = Array.isArray(blog.relatedPrograms) ? blog.relatedPrograms : [];
 
@@ -205,7 +204,7 @@ export const BlogManagement = () => {
       slug: blog.slug || '',
       excerpt: blog.excerpt || '',
       content: blog.content || '',
-      category: assignedCats[0],
+      category: assignedCats[0] || '',
       categories: assignedCats,
       relatedPrograms: assignedProgs,
       author: blog.author || '',
@@ -228,17 +227,27 @@ export const BlogManagement = () => {
     setEditingCatId(cat._id);
   };
 
-  const handleCategoryToggle = (catIdentifier: string) => {
+  const handleCategoryToggle = (catObj: any) => {
+    const targetName = typeof catObj === 'string' ? catObj : (catObj.name || catObj.slug);
+    const targetSlug = typeof catObj === 'string' ? slugify(catObj) : (catObj.slug || slugify(catObj.name));
     const current = watchedCategories;
+
+    const isCurrentlySelected = current.some(
+      (c: string) => c.toLowerCase() === targetName.toLowerCase() || c.toLowerCase() === targetSlug.toLowerCase()
+    );
+
     let next: string[];
-    if (current.includes(catIdentifier)) {
-      next = current.filter(c => c !== catIdentifier);
-      if (next.length === 0) next = ['GENERAL'];
+    if (isCurrentlySelected) {
+      next = current.filter(
+        (c: string) => c.toLowerCase() !== targetName.toLowerCase() && c.toLowerCase() !== targetSlug.toLowerCase()
+      );
     } else {
-      next = [...current, catIdentifier];
+      next = [...current, targetName];
     }
-    setValue('categories', Array.from(new Set(next)));
-    setValue('category', next[0] || 'GENERAL');
+
+    const uniqueNext = Array.from(new Set(next));
+    setValue('categories', uniqueNext);
+    setValue('category', uniqueNext[0] || '');
   };
 
   const handleRelatedProgramToggle = (progId: string) => {
@@ -254,14 +263,14 @@ export const BlogManagement = () => {
 
   const onSubmit = (data: BlogForm) => {
     const finalSlug = slugify(data.slug || data.title);
-    const selectedCats = Array.isArray(data.categories) && data.categories.length > 0 ? data.categories : [data.category || 'GENERAL'];
+    const selectedCats = Array.isArray(data.categories) ? data.categories : (data.category ? [data.category] : []);
     const payload = {
       ...data,
       slug: finalSlug,
-      category: selectedCats[0],
+      category: selectedCats[0] || '',
       categories: Array.from(new Set(selectedCats)),
       relatedPrograms: Array.from(new Set(data.relatedPrograms || [])),
-      tags: data.tags.split(',').map(t => t.trim()).filter(Boolean)
+      tags: typeof data.tags === 'string' ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : (data.tags || [])
     };
     if (editingId) {
       updateMutation.mutate({ id: editingId, data: payload });
@@ -336,9 +345,9 @@ export const BlogManagement = () => {
             ) : blogs?.length === 0 ? (
               <tr><td colSpan={6} className="text-center py-8 text-slate-500">No blog posts found.</td></tr>
             ) : blogs?.map((blog: any) => {
-              const displayCategories = Array.isArray(blog.categories) && blog.categories.length > 0
+              const displayCategories = Array.isArray(blog.categories)
                 ? blog.categories
-                : [blog.category || 'GENERAL'];
+                : (blog.category ? [blog.category] : []);
               const displayPrograms = Array.isArray(blog.relatedPrograms) ? blog.relatedPrograms : [];
 
               return (
@@ -454,14 +463,17 @@ export const BlogManagement = () => {
             <p className="text-xs text-slate-500">Select one or more categories for this article to appear in.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
               {categories?.map((cat: any) => {
-                const catIdentifier = cat.slug || cat.name;
-                const isChecked = watchedCategories.includes(catIdentifier) || watchedCategories.includes(cat.name);
+                const targetName = cat.name;
+                const targetSlug = cat.slug || slugify(targetName);
+                const isChecked = watchedCategories.some(
+                  (c: string) => c.toLowerCase() === targetName.toLowerCase() || c.toLowerCase() === targetSlug.toLowerCase()
+                );
                 return (
                   <label key={cat._id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 hover:border-brand-primary/50 cursor-pointer text-xs font-medium text-slate-700">
                     <input
                       type="checkbox"
                       checked={isChecked}
-                      onChange={() => handleCategoryToggle(catIdentifier)}
+                      onChange={() => handleCategoryToggle(cat)}
                       className="rounded text-brand-primary focus:ring-brand-primary"
                     />
                     <span>{cat.name}</span>
