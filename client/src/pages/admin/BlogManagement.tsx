@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, Loader2, Sparkles, FolderPlus, Link as LinkIcon, GraduationCap } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Loader2, Sparkles, FolderPlus, Link as LinkIcon, GraduationCap, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
@@ -196,9 +196,21 @@ export const BlogManagement = () => {
   };
 
   const openEditModal = (blog: any) => {
-    const assignedCats = Array.isArray(blog.categories)
+    const rawCats = Array.isArray(blog.categories) && blog.categories.length > 0
       ? blog.categories
       : (blog.category ? [blog.category] : []);
+
+    const seen = new Set<string>();
+    const assignedCats: string[] = [];
+    for (const c of rawCats) {
+      if (c && typeof c === 'string' && c.trim()) {
+        const key = c.trim().toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          assignedCats.push(c.trim());
+        }
+      }
+    }
 
     const assignedProgs = Array.isArray(blog.relatedPrograms) ? blog.relatedPrograms : [];
 
@@ -232,26 +244,37 @@ export const BlogManagement = () => {
   };
 
   const handleCategoryToggle = (catObj: any) => {
-    const targetName = typeof catObj === 'string' ? catObj : (catObj.name || catObj.slug);
-    const targetSlug = typeof catObj === 'string' ? slugify(catObj) : (catObj.slug || slugify(catObj.name));
+    const targetName = (typeof catObj === 'string' ? catObj : (catObj.name || catObj.slug)).trim();
+    const targetSlug = slugify(targetName);
     const current = watchedCategories;
 
     const isCurrentlySelected = current.some(
-      (c: string) => c.toLowerCase() === targetName.toLowerCase() || c.toLowerCase() === targetSlug.toLowerCase()
+      (c: string) => c.trim().toLowerCase() === targetName.toLowerCase() || c.trim().toLowerCase() === targetSlug.toLowerCase()
     );
 
     let next: string[];
     if (isCurrentlySelected) {
       next = current.filter(
-        (c: string) => c.toLowerCase() !== targetName.toLowerCase() && c.toLowerCase() !== targetSlug.toLowerCase()
+        (c: string) => c.trim().toLowerCase() !== targetName.toLowerCase() && c.trim().toLowerCase() !== targetSlug.toLowerCase()
       );
     } else {
       next = [...current, targetName];
     }
 
-    const uniqueNext = Array.from(new Set(next));
-    setValue('categories', uniqueNext);
-    setValue('category', uniqueNext[0] || '');
+    const uniqueNext: string[] = [];
+    const seen = new Set<string>();
+    for (const c of next) {
+      if (c && c.trim()) {
+        const key = c.trim().toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueNext.push(c.trim());
+        }
+      }
+    }
+
+    setValue('categories', uniqueNext, { shouldDirty: true, shouldTouch: true });
+    setValue('category', uniqueNext[0] || '', { shouldDirty: true, shouldTouch: true });
   };
 
   const handleRelatedProgramToggle = (progId: string) => {
@@ -262,7 +285,7 @@ export const BlogManagement = () => {
     } else {
       next = [...current, progId];
     }
-    setValue('relatedPrograms', Array.from(new Set(next)));
+    setValue('relatedPrograms', Array.from(new Set(next)), { shouldDirty: true, shouldTouch: true });
   };
 
   const onSubmit = (data: BlogForm) => {
@@ -285,7 +308,7 @@ export const BlogManagement = () => {
       slug: finalSlug,
       category: uniqueSelectedCats[0] || '',
       categories: uniqueSelectedCats,
-      readTime: data.readTime || '5 Min Read',
+      readTime: data.readTime?.trim() || '5 Min Read',
       relatedPrograms: Array.from(new Set(data.relatedPrograms || [])),
       tags: typeof data.tags === 'string' ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : (data.tags || [])
     };
@@ -350,7 +373,7 @@ export const BlogManagement = () => {
             <tr className="text-sm font-medium text-slate-500 border-b border-slate-100">
               <th className="px-6 py-4">Article</th>
               <th className="px-6 py-4">Assigned Categories</th>
-              <th className="px-6 py-4">Related Programs</th>
+              <th className="px-6 py-4">Reading Time</th>
               <th className="px-6 py-4">Author</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4 text-right">Actions</th>
@@ -362,10 +385,10 @@ export const BlogManagement = () => {
             ) : blogs?.length === 0 ? (
               <tr><td colSpan={6} className="text-center py-8 text-slate-500">No blog posts found.</td></tr>
             ) : blogs?.map((blog: any) => {
-              const displayCategories = Array.isArray(blog.categories)
+              const rawCats = Array.isArray(blog.categories) && blog.categories.length > 0
                 ? blog.categories
                 : (blog.category ? [blog.category] : []);
-              const displayPrograms = Array.isArray(blog.relatedPrograms) ? blog.relatedPrograms : [];
+              const displayCategories: string[] = Array.from(new Set(rawCats.map((c: any) => String(c).trim()))).filter(Boolean) as string[];
 
               return (
                 <tr key={blog._id} className="hover:bg-slate-50 transition-colors">
@@ -380,16 +403,18 @@ export const BlogManagement = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1">
-                      {displayCategories.map((cat: string, idx: number) => (
+                      {displayCategories.length > 0 ? displayCategories.map((cat: string, idx: number) => (
                         <span key={idx} className="px-2 py-0.5 bg-slate-100 rounded text-xs font-semibold uppercase text-slate-700">
                           {cat}
                         </span>
-                      ))}
+                      )) : (
+                        <span className="text-xs text-slate-400 font-italic">Uncategorized</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-slate-100 rounded text-xs font-mono font-medium text-slate-700">
-                      {displayPrograms.length > 0 ? `${displayPrograms.length} Program(s)` : 'Auto Fallback'}
+                    <span className="px-2 py-1 bg-slate-100 rounded text-xs font-medium text-slate-700 flex items-center gap-1 w-fit">
+                      <Clock className="w-3 h-3 text-brand-primary" /> {blog.readTime || '5 Min Read'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-slate-600">
@@ -423,7 +448,7 @@ export const BlogManagement = () => {
 
       {/* Article Create/Edit Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingId ? 'Edit Blog Article' : 'Create New Article'}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto pr-1">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-h-[85vh] overflow-y-auto pr-1">
           <Controller name="title" control={control} rules={{ required: true }} render={({ field }) => (
             <div>
               <label className="block text-sm font-medium mb-1 text-slate-700">Article Title *</label>
@@ -436,7 +461,7 @@ export const BlogManagement = () => {
                   }
                 }}
                 placeholder="e.g. Advanced Feline Abdominal Ultrasound Techniques"
-                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none"
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none font-semibold"
               />
             </div>
           )} />
@@ -480,18 +505,20 @@ export const BlogManagement = () => {
             <p className="text-xs text-slate-500">Select one or more categories for this article to appear in.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
               {categories?.map((cat: any) => {
-                const targetName = cat.name;
-                const targetSlug = cat.slug || slugify(targetName);
+                const targetName = cat.name.trim();
+                const targetSlug = (cat.slug || slugify(targetName)).trim();
                 const isChecked = watchedCategories.some(
-                  (c: string) => c.toLowerCase() === targetName.toLowerCase() || c.toLowerCase() === targetSlug.toLowerCase()
+                  (c: string) => c.trim().toLowerCase() === targetName.toLowerCase() || c.trim().toLowerCase() === targetSlug.toLowerCase()
                 );
                 return (
-                  <label key={cat._id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 hover:border-brand-primary/50 cursor-pointer text-xs font-medium text-slate-700">
+                  <label key={cat._id} className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer text-xs font-semibold transition-all ${
+                    isChecked ? 'bg-brand-primary/10 border-brand-primary text-brand-primary shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}>
                     <input
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => handleCategoryToggle(cat)}
-                      className="rounded text-brand-primary focus:ring-brand-primary"
+                      className="rounded text-brand-primary focus:ring-brand-primary w-4 h-4"
                     />
                     <span>{cat.name}</span>
                   </label>
@@ -510,12 +537,14 @@ export const BlogManagement = () => {
               {AVAILABLE_PROGRAMS.map((prog: any) => {
                 const isChecked = watchedRelatedPrograms.includes(prog.id);
                 return (
-                  <label key={prog.id} className="flex items-center gap-2 p-2 rounded-lg bg-white border border-slate-200 hover:border-brand-primary/50 cursor-pointer text-xs font-medium text-slate-700">
+                  <label key={prog.id} className={`flex items-center gap-2 p-2.5 rounded-lg border cursor-pointer text-xs font-semibold transition-all ${
+                    isChecked ? 'bg-brand-primary/10 border-brand-primary text-brand-primary shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'
+                  }`}>
                     <input
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => handleRelatedProgramToggle(prog.id)}
-                      className="rounded text-brand-primary focus:ring-brand-primary"
+                      className="rounded text-brand-primary focus:ring-brand-primary w-4 h-4"
                     />
                     <span>{prog.title}</span>
                   </label>
@@ -532,7 +561,7 @@ export const BlogManagement = () => {
           )} />
 
           <Controller name="content" control={control} rules={{ required: true }} render={({ field }) => (
-            <RichTextEditor value={field.value} onChange={field.onChange} label="Full Article Content *" placeholder="Write article content with bold, italic, headings, lists, and hyperlinks..." />
+            <RichTextEditor value={field.value} onChange={field.onChange} label="Full Article Content *" placeholder="Write article content with bold, italic, headings, lists, images, tables, and hyperlinks..." />
           )} />
 
           <div className="grid grid-cols-3 gap-4">
@@ -548,10 +577,13 @@ export const BlogManagement = () => {
                 <input {...field} placeholder="e.g. Veterinary Surgeon" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
+            {/* Editable Reading Time Field */}
             <Controller name="readTime" control={control} render={({ field }) => (
               <div>
-                <label className="block text-sm font-medium mb-1 text-slate-700">Reading Time</label>
-                <input {...field} placeholder="e.g. 5 Min Read" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <label className="block text-sm font-bold mb-1 text-slate-800 flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5 text-brand-primary" /> Reading Time *
+                </label>
+                <input {...field} placeholder="e.g. 5 Min Read" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none font-medium" />
               </div>
             )} />
           </div>
@@ -566,7 +598,7 @@ export const BlogManagement = () => {
             <Controller name="status" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Status</label>
-                <select {...field} className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-brand-primary/50 outline-none">
+                <select {...field} className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-white focus:ring-2 focus:ring-brand-primary/50 outline-none font-semibold">
                   <option value="Published">Published</option>
                   <option value="Draft">Draft</option>
                 </select>
@@ -659,3 +691,4 @@ export const BlogManagement = () => {
     </div>
   );
 };
+
