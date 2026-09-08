@@ -13,6 +13,7 @@ const programRoutes_1 = __importDefault(require("./routes/programRoutes"));
 const uploadRoutes_1 = __importDefault(require("./routes/uploadRoutes"));
 const statsRoutes_1 = __importDefault(require("./routes/statsRoutes"));
 const footerRoutes_1 = __importDefault(require("./routes/footerRoutes"));
+const enquiryRoutes_1 = __importDefault(require("./routes/enquiryRoutes"));
 const generateRouter_1 = require("./utils/generateRouter");
 const crudFactory_1 = require("./utils/crudFactory");
 const Expert_1 = require("./models/Expert");
@@ -68,6 +69,7 @@ app.use('/api/auth', authRoutes_1.default);
 app.use('/api/programs', programRoutes_1.default);
 app.use('/api/upload', uploadRoutes_1.default);
 app.use('/api/settings/footer', footerRoutes_1.default);
+app.use('/api/enquiries', enquiryRoutes_1.default);
 // Dynamic Generic Routes
 app.use('/api/experts', (0, generateRouter_1.generateRouter)(Expert_1.Expert));
 app.use('/api/faculty', (0, generateRouter_1.generateRouter)(Expert_1.Expert));

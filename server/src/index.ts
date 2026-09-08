@@ -9,6 +9,7 @@ import programRoutes from './routes/programRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import statsRoutes from './routes/statsRoutes';
 import footerRoutes from './routes/footerRoutes';
+import enquiryRoutes from './routes/enquiryRoutes';
 import { generateRouter } from './utils/generateRouter';
 import { crudFactory } from './utils/crudFactory';
 
@@ -74,6 +75,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/programs', programRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings/footer', footerRoutes);
+app.use('/api/enquiries', enquiryRoutes);
 
 // Dynamic Generic Routes
 app.use('/api/experts', generateRouter(Expert));

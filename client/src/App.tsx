@@ -15,6 +15,7 @@ const AdvisoryBoardManagement = lazy(() => import('./pages/admin/AdvisoryBoardMa
 const BlogManagement = lazy(() => import('./pages/admin/BlogManagement').then(m => ({ default: m.BlogManagement })));
 const UsersRolesManagement = lazy(() => import('./pages/admin/UsersRolesManagement').then(m => ({ default: m.UsersRolesManagement })));
 const MediaLibrary = lazy(() => import('./pages/admin/MediaLibrary').then(m => ({ default: m.MediaLibrary })));
+const EnquiriesManagement = lazy(() => import('./pages/admin/EnquiriesManagement').then(m => ({ default: m.EnquiriesManagement })));
 
 const SuspenseFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -38,6 +39,7 @@ function App() {
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="enquiries" element={<EnquiriesManagement />} />
                   <Route path="faculty" element={<FacultyManagement />} />
                   <Route path="advisory-board" element={<AdvisoryBoardManagement />} />
                   <Route path="blog" element={<BlogManagement />} />

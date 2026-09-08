@@ -9,11 +9,12 @@ const AdvisoryBoard_1 = require("../models/AdvisoryBoard");
 const BlogCategory_1 = require("../models/BlogCategory");
 const Event_1 = require("../models/Event");
 const Blog_1 = require("../models/Blog");
+const Enquiry_1 = require("../models/Enquiry");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const router = (0, express_1.Router)();
 router.get('/', authMiddleware_1.protect, authMiddleware_1.admin, async (req, res) => {
     try {
-        const [programsCount, applicationsCount, usersCount, expertsCount, advisoryBoardCount, categoriesCount, eventsCount, blogsCount] = await Promise.all([
+        const [programsCount, applicationsCount, usersCount, expertsCount, advisoryBoardCount, categoriesCount, eventsCount, blogsCount, enquiriesCount, newEnquiriesCount] = await Promise.all([
             Program_1.Program.countDocuments(),
             Application_1.Application.countDocuments(),
             User_1.User.countDocuments(),
@@ -21,7 +22,9 @@ router.get('/', authMiddleware_1.protect, authMiddleware_1.admin, async (req, re
             AdvisoryBoard_1.AdvisoryBoard.countDocuments(),
             BlogCategory_1.BlogCategory.countDocuments(),
             Event_1.Event.countDocuments(),
-            Blog_1.Blog.countDocuments()
+            Blog_1.Blog.countDocuments(),
+            Enquiry_1.Enquiry.countDocuments(),
+            Enquiry_1.Enquiry.countDocuments({ status: 'New' })
         ]);
         res.json({
             programsCount,
@@ -32,7 +35,9 @@ router.get('/', authMiddleware_1.protect, authMiddleware_1.admin, async (req, re
             advisoryBoardCount,
             categoriesCount,
             eventsCount,
-            blogsCount
+            blogsCount,
+            enquiriesCount,
+            newEnquiriesCount
         });
     }
     catch (error) {
