@@ -3,11 +3,11 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
   LayoutDashboard, 
-  Inbox,
   Users, 
   Award,
   FileText, 
   FileImage,
+  Inbox,
   LogOut
 } from 'lucide-react';
 
@@ -17,11 +17,11 @@ export const AdminLayout = () => {
   
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Enquiries', path: '/admin/enquiries', icon: Inbox },
     { name: 'Faculty', path: '/admin/faculty', icon: Users },
     { name: 'Advisory Board', path: '/admin/advisory-board', icon: Award },
     { name: 'Blog', path: '/admin/blog', icon: FileText },
     { name: 'Media Library', path: '/admin/media', icon: FileImage },
+    { name: 'Enquiries', path: '/admin/enquiries', icon: Inbox },
     { name: 'Users', path: '/admin/users', icon: Users },
   ];
 
