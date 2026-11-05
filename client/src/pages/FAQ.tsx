@@ -11,7 +11,7 @@ const faqCategories = [
 ];
 
 const faqs = [
-  { category: 'Admissions', q: 'How do I apply for a course?', a: 'You can apply by visiting the Apply Now page, selecting your desired course, and filling out the application form with your details.' },
+  { category: 'Admissions', q: 'How do I apply for a course?', a: 'You can apply by visiting the Book free Counselling  page, selecting your desired course, and filling out the application form with your details.' },
   { category: 'Admissions', q: 'What is the eligibility criteria?', a: 'Eligibility varies by program. Veterinarian programs require a valid veterinary degree, while nurse programs require a diploma.' },
   { category: 'Programs', q: 'Are the programs available online?', a: 'Yes, we offer hybrid learning models. Theoretical modules are online, while clinical skills require in-person attendance at our Pune campus.' },
   { category: 'Programs', q: 'Do you offer short courses?', a: 'Yes, we have 2-day and 5-day short courses focusing on specific clinical skills like Ultrasound, Orthopedics, and Soft Tissue Surgery.' },
@@ -37,19 +37,19 @@ export const FAQ = () => {
     <div className="min-h-screen flex flex-col bg-slate-50 font-inter">
       <SEO title="Frequently Asked Questions - VetNova" description="Find answers to commonly asked questions about VetNova Training Institute admissions, programs, fees, and more." />
       <Navbar />
-      
+
       <main className="flex-grow pt-[100px]">
         {/* Hero Section */}
         <section className="bg-brand-primary text-white py-20">
           <div className="container mx-auto px-6 md:px-12 text-center max-w-4xl">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl md:text-5xl font-bold font-poppins mb-6"
             >
               How can we help you?
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -57,17 +57,17 @@ export const FAQ = () => {
             >
               Search our knowledge base or browse categories below to find answers.
             </motion.p>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="relative max-w-2xl mx-auto"
             >
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input 
-                type="text" 
-                placeholder="Search for answers..." 
+              <input
+                type="text"
+                placeholder="Search for answers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full h-14 pl-12 pr-4 rounded-full text-slate-900 focus:outline-none focus:ring-4 focus:ring-brand-secondary/30 text-lg shadow-lg"
@@ -80,7 +80,7 @@ export const FAQ = () => {
         <section className="py-20">
           <div className="container mx-auto px-6 md:px-12">
             <div className="flex flex-col lg:flex-row gap-12">
-              
+
               {/* Sidebar Categories */}
               <div className="lg:w-1/4">
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-32">
@@ -105,12 +105,12 @@ export const FAQ = () => {
                   <h2 className="text-2xl font-bold font-poppins text-slate-900 mb-8">
                     {searchQuery ? 'Search Results' : activeCategory === 'All' ? 'All Questions' : `${activeCategory} Questions`}
                   </h2>
-                  
+
                   {filteredFaqs.length > 0 ? (
                     <div className="flex flex-col gap-4">
                       {filteredFaqs.map((faq, index) => (
                         <div key={index} className="border border-slate-100 rounded-xl overflow-hidden transition-all duration-300 hover:border-brand-primary/30">
-                          <button 
+                          <button
                             className="w-full flex items-center justify-between p-5 text-left bg-white focus:outline-none"
                             onClick={() => setOpenIndex(openIndex === index ? null : index)}
                           >
@@ -137,11 +137,11 @@ export const FAQ = () => {
                   ) : (
                     <div className="text-center py-12">
                       <p className="text-slate-500 mb-4">No questions found matching your criteria.</p>
-                      <Button variant="outline" onClick={() => {setSearchQuery(''); setActiveCategory('All');}}>Clear Filters</Button>
+                      <Button variant="outline" onClick={() => { setSearchQuery(''); setActiveCategory('All'); }}>Clear Filters</Button>
                     </div>
                   )}
                 </div>
-                
+
                 {/* Related CTA */}
                 <div className="mt-8 bg-brand-secondary/10 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 border border-brand-secondary/20">
                   <div className="flex items-center gap-4">
@@ -163,7 +163,7 @@ export const FAQ = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

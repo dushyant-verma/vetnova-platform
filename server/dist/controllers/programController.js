@@ -1,12 +1,48 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteProgram = exports.updateProgram = exports.createProgram = exports.getProgramById = exports.getPrograms = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const Program_1 = require("../models/Program");
+const Batch_1 = require("../models/Batch");
+function slugify(text) {
+    return text
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
 const getPrograms = async (req, res) => {
     try {
-        const { search } = req.query;
-        const query = search ? { title: { $regex: search, $options: 'i' } } : {};
-        const programs = await Program_1.Program.find(query).populate('faculty', 'name specialization image');
+        const { search, category, status, syllabusStatus, all } = req.query;
+        const filter = {};
+        if (search) {
+            filter.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } }
+            ];
+        }
+        if (category && category !== "all") {
+            filter.category = category;
+        }
+        if (syllabusStatus && syllabusStatus !== "all") {
+            filter.syllabusStatus = syllabusStatus;
+        }
+        // If "all" is requested (e.g. from admin), allow drafts; otherwise default to Published
+        if (status) {
+            if (status !== "all")
+                filter.status = status;
+        }
+        else if (all !== "true" && !req.user) {
+            filter.status = "Published";
+        }
+        const programs = await Program_1.Program.find(filter)
+            .sort({ order: 1, title: 1 })
+            .populate("faculty", "name specialization department image experience status programs");
         res.json(programs);
     }
     catch (error) {
@@ -16,12 +52,20 @@ const getPrograms = async (req, res) => {
 exports.getPrograms = getPrograms;
 const getProgramById = async (req, res) => {
     try {
-        const program = await Program_1.Program.findById(req.params.id).populate('faculty');
+        const param = req.params.id;
+        let query;
+        if (mongoose_1.default.isValidObjectId(String(param))) {
+            query = { $or: [{ _id: param }, { slug: param }] };
+        }
+        else {
+            query = { slug: String(param).toLowerCase() };
+        }
+        const program = await Program_1.Program.findOne(query).populate("faculty");
         if (program) {
             res.json(program);
         }
         else {
-            res.status(404).json({ message: 'Program not found' });
+            res.status(404).json({ message: "Program not found" });
         }
     }
     catch (error) {
@@ -31,7 +75,51 @@ const getProgramById = async (req, res) => {
 exports.getProgramById = getProgramById;
 const createProgram = async (req, res) => {
     try {
-        const program = new Program_1.Program(req.body);
+        const data = { ...req.body };
+        delete data._id;
+        delete data.__v;
+        delete data.createdAt;
+        delete data.updatedAt;
+        if (!data.title || !String(data.title).trim()) {
+            return res.status(400).json({ message: "Program title is required" });
+        }
+        if (!data.slug || !String(data.slug).trim()) {
+            data.slug = slugify(data.title);
+        }
+        else {
+            data.slug = slugify(data.slug);
+        }
+        // Check for duplicate slug
+        const existingSlug = await Program_1.Program.findOne({ slug: data.slug });
+        if (existingSlug) {
+            data.slug = `${data.slug}-${Date.now().toString().slice(-4)}`;
+        }
+        if (!data.description && data.shortDescription) {
+            data.description = data.shortDescription;
+        }
+        if (!data.shortDescription && data.description) {
+            data.shortDescription = data.description;
+        }
+        if (!data.description) {
+            data.description = data.title;
+            data.shortDescription = data.title;
+        }
+        if (!data.duration) {
+            data.duration = "3 Days";
+        }
+        if (!data.availability) {
+            data.availability = "24 Hours";
+        }
+        if (data.status === "Draft") {
+            data.isActive = false;
+        }
+        else {
+            data.isActive = true;
+        }
+        if (Array.isArray(data.faculty)) {
+            data.faculty = data.faculty.filter((f) => f && mongoose_1.default.isValidObjectId(String(f)));
+        }
+        const program = new Program_1.Program(data);
         const createdProgram = await program.save();
         res.status(201).json(createdProgram);
     }
@@ -42,7 +130,45 @@ const createProgram = async (req, res) => {
 exports.createProgram = createProgram;
 const updateProgram = async (req, res) => {
     try {
-        const program = await Program_1.Program.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const param = req.params.id;
+        const data = { ...req.body };
+        delete data._id;
+        delete data.__v;
+        delete data.createdAt;
+        delete data.updatedAt;
+        if (data.slug) {
+            data.slug = slugify(data.slug);
+            const queryParam = mongoose_1.default.isValidObjectId(param) ? { _id: { $ne: param } } : { slug: { $ne: String(param) } };
+            const conflict = await Program_1.Program.findOne({ slug: data.slug, ...queryParam });
+            if (conflict) {
+                return res.status(400).json({ message: `A program with the slug "${data.slug}" already exists` });
+            }
+        }
+        if (!data.description && data.shortDescription) {
+            data.description = data.shortDescription;
+        }
+        if (!data.shortDescription && data.description) {
+            data.shortDescription = data.description;
+        }
+        if (data.status === "Draft") {
+            data.isActive = false;
+        }
+        else if (data.status === "Published") {
+            data.isActive = true;
+        }
+        if (Array.isArray(data.faculty)) {
+            data.faculty = data.faculty.filter((f) => f && mongoose_1.default.isValidObjectId(String(f)));
+        }
+        let program;
+        if (mongoose_1.default.isValidObjectId(param)) {
+            program = await Program_1.Program.findByIdAndUpdate(param, data, { new: true, runValidators: true });
+        }
+        else {
+            program = await Program_1.Program.findOneAndUpdate({ slug: String(param) }, data, { new: true, runValidators: true });
+        }
+        if (!program) {
+            return res.status(404).json({ message: "Program not found" });
+        }
         res.json(program);
     }
     catch (error) {
@@ -52,8 +178,24 @@ const updateProgram = async (req, res) => {
 exports.updateProgram = updateProgram;
 const deleteProgram = async (req, res) => {
     try {
-        await Program_1.Program.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Program removed' });
+        const param = req.params.id;
+        let deleted;
+        if (mongoose_1.default.isValidObjectId(param)) {
+            deleted = await Program_1.Program.findByIdAndDelete(param);
+            if (deleted) {
+                await Batch_1.Batch.updateMany({ programId: param }, { $unset: { programId: 1 } });
+            }
+        }
+        else {
+            deleted = await Program_1.Program.findOneAndDelete({ slug: String(param) });
+            if (deleted) {
+                await Batch_1.Batch.updateMany({ programId: deleted._id }, { $unset: { programId: 1 } });
+            }
+        }
+        if (!deleted) {
+            return res.status(404).json({ message: "Program not found" });
+        }
+        res.json({ message: "Program removed successfully" });
     }
     catch (error) {
         res.status(400).json({ message: error.message });

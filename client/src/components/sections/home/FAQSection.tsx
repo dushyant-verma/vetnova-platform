@@ -27,7 +27,7 @@ const faqs = [
   {
     id: 'faq-5',
     question: 'How do I register?',
-    answer: 'You can register by navigating to the specific program page and clicking the "Apply Now" button. Alternatively, you can fill out the enquiry form on this page, and our admissions team will guide you through the process.'
+    answer: 'You can register by navigating to the specific program page and clicking the "Book free Counselling " button. Alternatively, you can fill out the enquiry form on this page, and our admissions team will guide you through the process.'
   }
 ];
 
@@ -42,7 +42,7 @@ export const FAQSection = () => {
     <section className="py-24 md:py-32 bg-slate-50 relative">
       <div className="container mx-auto px-6 md:px-12">
         <div className="max-w-4xl mx-auto text-center mb-24">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -51,15 +51,15 @@ export const FAQSection = () => {
             <HelpCircle className="w-4 h-4" />
             Support
           </motion.div>
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-4xl md:text-5xl lg:text-7xl font-black font-poppins text-slate-900 mb-8 tracking-tight"
           >
-            Common questions <br className="hidden md:block"/> before joining.
+            Common questions <br className="hidden md:block" /> before joining.
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -75,8 +75,8 @@ export const FAQSection = () => {
             {faqs.map((faq, idx) => {
               const isOpen = openId === faq.id;
               return (
-                <motion.div 
-                  key={faq.id} 
+                <motion.div
+                  key={faq.id}
                   className={`border-b-2 transition-colors duration-300 ${isOpen ? 'border-brand-primary' : 'border-slate-200 hover:border-slate-300'}`}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -92,8 +92,8 @@ export const FAQSection = () => {
                       {faq.question}
                     </span>
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ml-6 transition-colors duration-300 ${isOpen ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'}`}>
-                      <ChevronDown 
-                        className={`w-6 h-6 transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`} 
+                      <ChevronDown
+                        className={`w-6 h-6 transition-transform duration-500 ${isOpen ? 'rotate-180' : ''}`}
                       />
                     </div>
                   </button>

@@ -36,14 +36,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Enquiry = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const enquirySchema = new mongoose_1.Schema({
+    leadId: {
+        type: String,
+        unique: true,
+        sparse: true,
+        trim: true
+    },
+    persona: {
+        type: String,
+        enum: ['student', 'practitioner', 'nurse', 'partner', 'general'],
+        default: 'general',
+        index: true
+    },
     name: {
         type: String,
         required: [true, 'Name is required'],
         trim: true
     },
-    countryCode: {
+    designation: {
         type: String,
         default: '',
+        trim: true
+    },
+    organization: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    countryCode: {
+        type: String,
+        default: '+91',
         trim: true
     },
     phone: {
@@ -53,7 +75,7 @@ const enquirySchema = new mongoose_1.Schema({
     },
     email: {
         type: String,
-        required: [true, 'Email is required'],
+        default: '',
         trim: true,
         lowercase: true
     },
@@ -72,6 +94,17 @@ const enquirySchema = new mongoose_1.Schema({
         default: '',
         trim: true
     },
+    formData: {
+        type: mongoose_1.Schema.Types.Mixed,
+        default: {}
+    },
+    notes: [
+        {
+            text: { type: String, required: true },
+            author: { type: String, default: 'Admin' },
+            createdAt: { type: Date, default: Date.now }
+        }
+    ],
     source: {
         type: String,
         default: 'website',
@@ -82,17 +115,30 @@ const enquirySchema = new mongoose_1.Schema({
         default: '',
         trim: true
     },
+    formId: {
+        type: String,
+        default: '',
+        trim: true
+    },
     status: {
         type: String,
-        enum: ['New', 'Contacted', 'Converted', 'Closed'],
-        default: 'New'
+        enum: ['New', 'Contacted', 'Follow-up Required', 'Qualified', 'Closed', 'Converted'],
+        default: 'New',
+        index: true
+    },
+    notificationStatus: {
+        type: String,
+        enum: ['Sent', 'Failed', 'NotConfigured'],
+        default: 'NotConfigured'
     }
 }, {
     timestamps: true
 });
 enquirySchema.index({ createdAt: -1 });
 enquirySchema.index({ status: 1 });
+enquirySchema.index({ persona: 1 });
 enquirySchema.index({ email: 1 });
 enquirySchema.index({ phone: 1 });
+enquirySchema.index({ organization: 1 });
 exports.Enquiry = mongoose_1.default.model('Enquiry', enquirySchema);
 //# sourceMappingURL=Enquiry.js.map

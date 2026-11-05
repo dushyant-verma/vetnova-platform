@@ -88,7 +88,7 @@ export const EnquirySection = () => {
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-brand-secondary uppercase tracking-wider mb-1">Phone</h4>
-                      <p className="text-white/90 text-lg font-light">+91 20 1234 5678</p>
+                      <p className="text-white/90 text-lg font-light">+91 92725 61089</p>
                     </div>
                   </motion.div>
 

@@ -22,14 +22,14 @@ export const Contact = () => {
         <section className="bg-slate-900 text-white py-20 relative overflow-hidden">
           <div className="absolute inset-0 bg-brand-primary/20"></div>
           <div className="container mx-auto px-6 md:px-12 relative z-10 text-center max-w-3xl">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl md:text-5xl font-bold font-poppins mb-6"
             >
               Get in Touch
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -45,11 +45,11 @@ export const Contact = () => {
           <div className="container mx-auto px-6 md:px-12">
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                { icon: Phone, title: 'Admissions Office', text: '+91 20 1234 5678', sub: 'Mon-Fri, 9am - 6pm' },
-                { icon: Mail, title: 'Email Us', text: 'hello@vetnova.in', sub: 'We reply within 24hrs' },
+                { icon: Phone, title: 'Admissions Office', text: '+91 92725 61089', sub: 'Mon-Fri, 9am - 6pm' },
+                { icon: Mail, title: 'Email Us', text: 'contact@vetnovainstitute.com', sub: 'We reply within 24hrs' },
                 { icon: MapPin, title: 'Campus', text: 'Pune, Maharashtra', sub: 'India 411001' }
               ].map((card, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -73,7 +73,7 @@ export const Contact = () => {
         <section className="py-16">
           <div className="container mx-auto px-6 md:px-12">
             <div className="grid lg:grid-cols-2 gap-16">
-              
+
               {/* Form Side */}
               <div>
                 <h2 className="text-3xl font-bold font-poppins text-slate-900 mb-6">Send us a Message</h2>
@@ -121,7 +121,7 @@ export const Contact = () => {
                   <h3 className="text-2xl font-bold font-poppins text-slate-900 mb-6">Department Contacts</h3>
                   <div className="space-y-4">
                     {[
-                      { name: 'Admissions Office', email: 'admissions@vetnova.in', phone: '+91 20 1234 5678' },
+                      { name: 'Admissions Office', email: 'admissions@vetnova.in', phone: '+91 92725 61089' },
                       { name: 'Student Support', email: 'support@vetnova.in', phone: '+91 20 1234 5679' },
                       { name: 'Animal Welfare', email: 'welfare@vetnova.in', phone: '+91 20 1234 5680' }
                     ].map((dept, i) => (
@@ -176,13 +176,13 @@ export const Contact = () => {
 
         {/* Google Map */}
         <section className="h-[400px] w-full bg-slate-200 relative">
-           <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3783.2798991823933!2d73.85501861540673!3d18.52043518740924!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c07a0c80c655%3A0x6b8bc827988b4887!2sPune%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1689264350123!5m2!1sen!2sin" 
-            width="100%" 
-            height="100%" 
-            style={{ border: 0 }} 
-            allowFullScreen 
-            loading="lazy" 
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3783.2798991823933!2d73.85501861540673!3d18.52043518740924!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c07a0c80c655%3A0x6b8bc827988b4887!2sPune%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1689264350123!5m2!1sen!2sin"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             title="VetNova Campus Map"
           ></iframe>

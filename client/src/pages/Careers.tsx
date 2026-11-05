@@ -48,14 +48,14 @@ export const Careers = () => {
         <section className="bg-slate-900 text-white py-24 relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1594824436951-7f12bc5a6d25?w=1600&q=80')] bg-cover bg-center opacity-20"></div>
           <div className="container mx-auto px-6 md:px-12 relative z-10 max-w-4xl text-center">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl md:text-6xl font-bold font-poppins mb-6"
             >
               Shape the Future of <span className="text-brand-primary">Veterinary Care</span>
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -78,7 +78,7 @@ export const Careers = () => {
               <h2 className="text-3xl font-bold font-poppins text-slate-900 mb-4">Why Work With VetNova?</h2>
               <p className="text-slate-600 text-lg">We invest heavily in our team so they can invest in our students.</p>
             </div>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {perks.map((perk, i) => (
                 <div key={i} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-shadow duration-300">
@@ -143,7 +143,7 @@ export const Careers = () => {
                     </div>
                   </div>
                   <Button variant="outline" className="rounded-full shrink-0 group-hover:bg-brand-primary group-hover:text-white border-slate-200">
-                    Apply Now <ChevronRight className="w-4 h-4 ml-1" />
+                    Book free Counselling  <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
               ))}
@@ -160,7 +160,7 @@ export const Careers = () => {
             <div className="space-y-4">
               {faqs.map((faq, i) => (
                 <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                  <button 
+                  <button
                     className="w-full px-6 py-4 flex justify-between items-center text-left font-bold text-slate-800"
                     onClick={() => setActiveFaq(activeFaq === i ? null : i)}
                   >
@@ -190,7 +190,7 @@ export const Careers = () => {
               <div className="relative z-10">
                 <h2 className="text-3xl font-bold font-poppins text-white mb-4">Don't see a fit?</h2>
                 <p className="text-slate-300 mb-8">Send us your resume, and we'll keep you in mind for future opportunities.</p>
-                
+
                 <form className="space-y-4" onSubmit={e => e.preventDefault()}>
                   <div className="grid md:grid-cols-2 gap-4">
                     <input type="text" placeholder="First Name" className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-primary" />

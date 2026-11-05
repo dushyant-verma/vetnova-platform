@@ -125,13 +125,13 @@ export const Navbar = () => {
               <MapPin size={14} className="text-brand-primary" />
               <span>Pune, Maharashtra</span>
             </div>
-            <a href="mailto:hello@vetnova.in" className="flex items-center gap-2 hover:text-white transition-colors">
+            <a href="mailto:contact@vetnovainstitute.com" className="flex items-center gap-2 hover:text-white transition-colors">
               <Mail size={14} className="text-brand-primary" />
-              <span>hello@vetnova.in</span>
+              <span>contact@vetnovainstitute.com</span>
             </a>
-            <a href="tel:+912012345678" className="flex items-center gap-2 hover:text-white transition-colors">
+            <a href="tel:+919272561089" className="flex items-center gap-2 hover:text-white transition-colors">
               <Phone size={14} className="text-brand-primary" />
-              <span>+91 20 1234 5678</span>
+              <span>+91 92725 61089</span>
             </a>
           </div>
           <div className="flex items-center gap-6 font-medium">
@@ -178,7 +178,7 @@ export const Navbar = () => {
               Browse Courses
             </Button>
             <Button variant="default" className="rounded-full px-6 shadow-md shadow-brand-primary/20" onClick={() => navigate('/apply')}>
-              Apply Now
+              Book free Counselling
             </Button>
           </div>
 
@@ -232,7 +232,7 @@ export const Navbar = () => {
                     Browse Courses
                   </Button>
                   <Button className="w-full rounded-full shadow-md" onClick={() => { navigate('/apply'); closeMenu(); }}>
-                    Apply Now
+                    Book free Counselling
                   </Button>
                 </div>
 

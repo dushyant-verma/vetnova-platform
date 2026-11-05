@@ -5,39 +5,108 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.crudFactory = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+const sanitize_html_1 = __importDefault(require("sanitize-html"));
+const escapeRegex = (text) => {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+};
+const getParamId = (req) => {
+    const rawId = req.params.id;
+    return Array.isArray(rawId) ? rawId[0] : String(rawId || '');
+};
+const sanitizeRichHtml = (htmlContent) => {
+    return (0, sanitize_html_1.default)(htmlContent, {
+        allowedTags: sanitize_html_1.default.defaults.allowedTags.concat([
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'table', 'thead', 'tbody',
+            'tr', 'th', 'td', 'u', 'sub', 'sup', 'figure', 'figcaption'
+        ]),
+        allowedAttributes: {
+            '*': ['class', 'style', 'id', 'align'],
+            'a': ['href', 'name', 'target', 'rel'],
+            'img': ['src', 'srcset', 'alt', 'title', 'width', 'height', 'loading']
+        },
+        allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+        allowedSchemesByTag: {
+            a: ['http', 'https', 'mailto', 'tel'],
+            img: ['http', 'https', 'data']
+        },
+        allowProtocolRelative: false
+    });
+};
+const sanitizeInputBody = (body) => {
+    if (!body || typeof body !== 'object')
+        return body;
+    const sanitized = Array.isArray(body) ? [...body] : { ...body };
+    for (const key of Object.keys(sanitized)) {
+        if (typeof sanitized[key] === 'string') {
+            if (['content', 'bio', 'description', 'message', 'body', 'html'].includes(key)) {
+                sanitized[key] = sanitizeRichHtml(sanitized[key]);
+            }
+        }
+        else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
+            sanitized[key] = sanitizeInputBody(sanitized[key]);
+        }
+    }
+    return sanitized;
+};
+const cleanModelFields = (body, schema) => {
+    if (!body || typeof body !== 'object')
+        return body;
+    const cleaned = { ...body };
+    delete cleaned._id;
+    delete cleaned.__v;
+    delete cleaned.createdAt;
+    delete cleaned.updatedAt;
+    if (schema && typeof schema.eachPath === 'function') {
+        schema.eachPath((pathName, schematype) => {
+            const val = cleaned[pathName];
+            if (val === '' || val === null) {
+                const instance = schematype.instance;
+                if (instance === 'ObjectID' || instance === 'Date') {
+                    delete cleaned[pathName];
+                }
+            }
+        });
+    }
+    return cleaned;
+};
 const crudFactory = (model, populateOpts) => {
     return {
         getAll: async (req, res) => {
             try {
                 const { search, searchFields, category, status, featured, program, public: isPublic } = req.query;
                 let query = {};
-                if (status) {
-                    query.status = { $regex: new RegExp(`^${status}$`, 'i') };
+                if (status && typeof status === 'string') {
+                    query.status = { $regex: new RegExp(`^${escapeRegex(status.trim())}$`, 'i') };
                 }
                 else if (isPublic === 'true') {
                     query.status = 'Published';
                 }
-                if (category && category !== 'all') {
+                if (category && category !== 'all' && typeof category === 'string') {
+                    const safeCategory = escapeRegex(category.trim());
                     query.$or = [
-                        { category: { $regex: new RegExp(`^${category}$`, 'i') } },
-                        { categories: { $regex: new RegExp(`^${category}$`, 'i') } }
+                        { category: { $regex: new RegExp(`^${safeCategory}$`, 'i') } },
+                        { categories: { $regex: new RegExp(`^${safeCategory}$`, 'i') } }
                     ];
                 }
-                if (program && program !== 'all') {
-                    query.programs = { $regex: new RegExp(`^${program}$`, 'i') };
+                if (program && program !== 'all' && typeof program === 'string') {
+                    query.programs = { $regex: new RegExp(`^${escapeRegex(program.trim())}$`, 'i') };
                 }
                 if (featured !== undefined) {
-                    query.isFeatured = featured === 'true';
+                    query.isFeatured = String(featured) === 'true';
                 }
-                if (search) {
+                if (search && typeof search === 'string') {
+                    const safeSearch = escapeRegex(search.trim());
                     const fields = searchFields ? searchFields.split(',') : ['name', 'title', 'excerpt', 'content', 'category', 'specialization', 'department', 'designation'];
                     query.$or = fields.map((field) => ({
-                        [field]: { $regex: search, $options: 'i' }
+                        [field]: { $regex: safeSearch, $options: 'i' }
                     }));
                 }
                 const hasDisplayOrder = model.schema.path('displayOrder') !== undefined;
                 const sortOptions = hasDisplayOrder ? { displayOrder: 1, createdAt: -1 } : { createdAt: -1 };
                 let dbQuery = model.find(query).sort(sortOptions);
+                if (model.modelName === 'User') {
+                    dbQuery = dbQuery.select('-password');
+                }
                 if (populateOpts) {
                     dbQuery = dbQuery.populate(populateOpts);
                 }
@@ -45,82 +114,127 @@ const crudFactory = (model, populateOpts) => {
                 res.json(docs);
             }
             catch (error) {
-                res.status(500).json({ message: error.message });
+                res.status(500).json({ message: 'Error retrieving records' });
             }
         },
         getOne: async (req, res) => {
             try {
-                const idOrSlug = String(req.params.id);
+                const idOrSlug = getParamId(req).trim();
                 let doc = null;
                 if (mongoose_1.default.Types.ObjectId.isValid(idOrSlug)) {
                     let dbQuery = model.findById(idOrSlug);
+                    if (model.modelName === 'User') {
+                        dbQuery = dbQuery.select('-password');
+                    }
                     if (populateOpts) {
                         dbQuery = dbQuery.populate(populateOpts);
                     }
                     doc = await dbQuery;
                 }
-                if (!doc) {
+                if (!doc && idOrSlug) {
+                    const safeSlug = escapeRegex(idOrSlug);
                     let dbQuery = model.findOne({ slug: idOrSlug });
+                    if (model.modelName === 'User') {
+                        dbQuery = dbQuery.select('-password');
+                    }
                     if (populateOpts) {
                         dbQuery = dbQuery.populate(populateOpts);
                     }
                     doc = await dbQuery;
-                }
-                if (!doc) {
-                    let dbQuery = model.findOne({ slug: { $regex: new RegExp(`^${idOrSlug}$`, 'i') } });
-                    if (populateOpts) {
-                        dbQuery = dbQuery.populate(populateOpts);
+                    if (!doc) {
+                        let dbQuery = model.findOne({ slug: { $regex: new RegExp(`^${safeSlug}$`, 'i') } });
+                        if (model.modelName === 'User') {
+                            dbQuery = dbQuery.select('-password');
+                        }
+                        if (populateOpts) {
+                            dbQuery = dbQuery.populate(populateOpts);
+                        }
+                        doc = await dbQuery;
                     }
-                    doc = await dbQuery;
                 }
                 if (doc)
                     res.json(doc);
                 else
-                    res.status(404).json({ message: 'Not found' });
+                    res.status(404).json({ message: 'Record not found' });
             }
             catch (error) {
-                res.status(500).json({ message: error.message });
+                res.status(500).json({ message: 'Error retrieving record details' });
             }
         },
         createOne: async (req, res) => {
             try {
-                const doc = await model.create(req.body);
-                res.status(201).json(doc);
+                let sanitizedBody = sanitizeInputBody(req.body);
+                sanitizedBody = cleanModelFields(sanitizedBody, model.schema);
+                if (model.modelName === 'User' && sanitizedBody.role === 'super_admin') {
+                    sanitizedBody.role = 'admin';
+                }
+                const doc = await model.create(sanitizedBody);
+                const resultDoc = doc.toObject();
+                if (resultDoc.password) {
+                    delete resultDoc.password;
+                }
+                res.status(201).json(resultDoc);
             }
             catch (error) {
-                res.status(400).json({ message: error.message });
+                res.status(400).json({ message: error.message || 'Error creating record' });
             }
         },
         updateOne: async (req, res) => {
             try {
-                const doc = await model.findByIdAndUpdate(req.params.id, req.body, { new: true });
+                const id = getParamId(req);
+                if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
+                    return res.status(400).json({ message: 'Invalid ID format' });
+                }
+                let sanitizedBody = sanitizeInputBody(req.body);
+                sanitizedBody = cleanModelFields(sanitizedBody, model.schema);
+                if (model.modelName === 'User' && sanitizedBody.role) {
+                    const reqUserRole = req.user?.role;
+                    if (sanitizedBody.role === 'super_admin' && reqUserRole !== 'super_admin') {
+                        return res.status(403).json({ message: 'Only Super Admin can assign Super Admin role' });
+                    }
+                }
+                const doc = await model.findByIdAndUpdate(id, sanitizedBody, { new: true, runValidators: true }).select('-password');
+                if (!doc) {
+                    return res.status(404).json({ message: 'Record not found' });
+                }
                 res.json(doc);
             }
             catch (error) {
-                res.status(400).json({ message: error.message });
+                res.status(400).json({ message: error.message || 'Error updating record' });
             }
         },
         deleteOne: async (req, res) => {
             try {
-                const docToDelete = await model.findById(req.params.id);
-                if (!docToDelete) {
-                    return res.status(404).json({ message: 'Not found' });
+                const id = getParamId(req);
+                if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
+                    return res.status(400).json({ message: 'Invalid ID format' });
                 }
-                // Safe cleanup when deleting a BlogCategory
+                const docToDelete = await model.findById(id);
+                if (!docToDelete) {
+                    return res.status(404).json({ message: 'Record not found' });
+                }
+                if (model.modelName === 'User') {
+                    const reqUserId = req.user?._id?.toString();
+                    const reqUserRole = req.user?.role;
+                    if (docToDelete._id.toString() === reqUserId) {
+                        return res.status(400).json({ message: 'Cannot delete your own user account' });
+                    }
+                    if (docToDelete.role === 'super_admin' && reqUserRole !== 'super_admin') {
+                        return res.status(403).json({ message: 'Only Super Admin can delete a Super Admin user' });
+                    }
+                }
                 if (model.modelName === 'BlogCategory') {
                     const BlogModel = mongoose_1.default.models.Blog;
                     const CategoryModel = model;
                     if (BlogModel) {
-                        const catName = docToDelete.name;
-                        const catSlug = docToDelete.slug;
-                        // Reassign affected blogs to GENERAL
+                        const catName = escapeRegex(docToDelete.name);
+                        const catSlug = escapeRegex(docToDelete.slug);
                         await BlogModel.updateMany({
                             $or: [
                                 { category: { $regex: new RegExp(`^${catName}$`, 'i') } },
                                 { category: { $regex: new RegExp(`^${catSlug}$`, 'i') } }
                             ]
                         }, { $set: { category: 'GENERAL' } });
-                        // Ensure GENERAL category exists in database
                         const generalExists = await CategoryModel.findOne({ name: { $regex: /^GENERAL$/i } });
                         if (!generalExists) {
                             await CategoryModel.create({
@@ -132,11 +246,11 @@ const crudFactory = (model, populateOpts) => {
                         }
                     }
                 }
-                await model.findByIdAndDelete(req.params.id);
+                await model.findByIdAndDelete(id);
                 res.json({ message: 'Removed successfully' });
             }
             catch (error) {
-                res.status(400).json({ message: error.message });
+                res.status(400).json({ message: error.message || 'Error deleting record' });
             }
         }
     };

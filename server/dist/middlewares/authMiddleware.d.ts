@@ -4,4 +4,5 @@ export interface AuthRequest extends Request {
 }
 export declare const protect: (req: AuthRequest, res: Response, next: NextFunction) => Promise<void>;
 export declare const admin: (req: AuthRequest, res: Response, next: NextFunction) => void;
+export declare const superAdmin: (req: AuthRequest, res: Response, next: NextFunction) => void;
 //# sourceMappingURL=authMiddleware.d.ts.map

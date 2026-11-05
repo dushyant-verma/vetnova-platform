@@ -21,15 +21,15 @@ export const Testimonials = () => {
 
   return (
     <div className="min-h-screen bg-brand-background text-foreground font-inter">
-      <SEO 
+      <SEO
         title="Testimonials"
         description="Learn more about Testimonials at VetNova Training Institute."
       />
       <Navbar />
-      
+
       <main className="pt-32 pb-24 min-h-[70vh]">
         <div className="container mx-auto px-6 md:px-12">
-          
+
           {/* Breadcrumb */}
           <nav className="text-sm text-slate-500 mb-8 font-medium">
             <Link to="/" className="hover:text-brand-primary">Home</Link> &gt; <span>Testimonials</span>
@@ -59,7 +59,7 @@ export const Testimonials = () => {
           )}
 
           {data && !isLoading && !isError && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-white p-8 md:p-12 rounded-[2rem] shadow-sm border border-slate-100"
@@ -82,14 +82,14 @@ export const Testimonials = () => {
 
           {/* CTA Section */}
           <div className="mt-20 bg-brand-primary text-white p-12 rounded-[3rem] text-center relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-brand-secondary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
-             <div className="relative z-10">
-               <h2 className="text-3xl font-bold font-poppins mb-4">Ready to advance your career?</h2>
-               <p className="text-white/80 mb-8 max-w-xl mx-auto text-lg">Join India's premier veterinary training institute and gain practical skills that set you apart.</p>
-               <Link to="/apply">
-                 <Button className="bg-white text-brand-primary hover:bg-slate-100 rounded-full px-8 py-6 text-lg font-bold shadow-xl">Apply Now</Button>
-               </Link>
-             </div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-secondary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl font-bold font-poppins mb-4">Ready to advance your career?</h2>
+              <p className="text-white/80 mb-8 max-w-xl mx-auto text-lg">Join India's premier veterinary training institute and gain practical skills that set you apart.</p>
+              <Link to="/apply">
+                <Button className="bg-white text-brand-primary hover:bg-slate-100 rounded-full px-8 py-6 text-lg font-bold shadow-xl">Book free Counselling </Button>
+              </Link>
+            </div>
           </div>
 
         </div>

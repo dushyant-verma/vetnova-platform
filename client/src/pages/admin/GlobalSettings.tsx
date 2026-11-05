@@ -9,8 +9,8 @@ export const GlobalSettings = () => {
   const [formData, setFormData] = useState({
     siteName: 'VetNova Training Institute',
     siteDescription: 'Premium veterinary clinical training',
-    contactEmail: 'hello@vetnova.in',
-    contactPhone: '+91 20 1234 5678',
+    contactEmail: 'contact@vetnovainstitute.com',
+    contactPhone: '+91 92725 61089',
     address: 'Pune, Maharashtra',
     logoUrl: '/logo.png',
     facebookUrl: '',
@@ -73,7 +73,7 @@ export const GlobalSettings = () => {
           <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2">
             <Globe className="w-5 h-5 text-brand-primary" /> Basic Information
           </h3>
-          
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">Site Name</label>
             <input type="text" name="siteName" value={formData.siteName} onChange={handleChange} className="w-full h-10 px-3 rounded-md border border-slate-300 focus:outline-none focus:border-brand-primary" />
@@ -93,7 +93,7 @@ export const GlobalSettings = () => {
           <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2">
             <FileText className="w-5 h-5 text-brand-primary" /> Contact & Social
           </h3>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Contact Email</label>
@@ -104,7 +104,7 @@ export const GlobalSettings = () => {
               <input type="text" name="contactPhone" value={formData.contactPhone} onChange={handleChange} className="w-full h-10 px-3 rounded-md border border-slate-300 focus:outline-none focus:border-brand-primary" />
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">Primary Address</label>
             <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full h-10 px-3 rounded-md border border-slate-300 focus:outline-none focus:border-brand-primary" />

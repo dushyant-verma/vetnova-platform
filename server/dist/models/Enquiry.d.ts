@@ -1,15 +1,30 @@
 import mongoose, { Document } from 'mongoose';
+export interface INote {
+    text: string;
+    author?: string;
+    createdAt: Date;
+}
+export type LeadPersona = 'student' | 'practitioner' | 'nurse' | 'partner' | 'general';
+export type LeadStatus = 'New' | 'Contacted' | 'Follow-up Required' | 'Qualified' | 'Closed' | 'Converted';
 export interface IEnquiry extends Document {
+    leadId: string;
+    persona: LeadPersona;
     name: string;
+    designation?: string;
+    organization?: string;
     countryCode?: string;
     phone: string;
-    email: string;
+    email?: string;
     profile?: string;
     course?: string;
     message?: string;
+    formData?: Record<string, any>;
+    notes: INote[];
     source?: string;
     sourcePage?: string;
-    status: 'New' | 'Contacted' | 'Converted' | 'Closed';
+    formId?: string;
+    status: LeadStatus;
+    notificationStatus?: 'Sent' | 'Failed' | 'NotConfigured';
     createdAt: Date;
     updatedAt: Date;
 }

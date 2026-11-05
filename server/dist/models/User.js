@@ -12,8 +12,8 @@ const userSchema = new mongoose_1.default.Schema({
     password: { type: String, required: true },
     role: {
         type: String,
-        enum: ['admin', 'expert', 'student', 'guest'],
-        default: 'student'
+        enum: ['super_admin', 'admin', 'expert', 'student', 'guest'],
+        default: 'admin'
     },
 }, { timestamps: true });
 // Password hash middleware

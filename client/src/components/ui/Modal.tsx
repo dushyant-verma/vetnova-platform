@@ -1,15 +1,16 @@
-import React, { ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import React, { ReactNode } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
 interface ModalProps {
+  maxWidth?: string;
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
 }
 
-export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
+export const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-2xl" }: ModalProps) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -26,12 +27,12 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto"
+            className={`relative w-full ${maxWidth} bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto`}
           >
-            <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+            <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center z-10">
               <h2 className="text-xl font-bold">{title}</h2>
 
-              <button onClick={onClose}>
+              <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg">
                 <X className="w-5 h-5" />
               </button>
             </div>

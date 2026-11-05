@@ -1,113 +1,329 @@
 import { Request, Response } from 'express';
-import { Enquiry } from '../models/Enquiry';
+import mongoose from 'mongoose';
+import { Enquiry, IEnquiry, LeadPersona, LeadStatus } from '../models/Enquiry';
+import { sendLeadNotifications } from '../services/emailService';
 
-// Email regex pattern
-const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
-// Basic phone regex pattern supporting international formats (5-20 characters: digits, +, -, space, brackets)
-const PHONE_REGEX = /^[+\d\s\-()]{5,20}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^(?:\+?\d{1,4}[\s-]?)?(?:\d[\s-]?){7,14}\d$/;
+const INDIAN_MOBILE_REGEX = /^(?:\+?91[\s-]?)?[6-9]\d{9}$/;
 
-/**
- * @desc    Create a new Enquiry (Public submission)
- * @route   POST /api/enquiries
- * @access  Public
- */
+const escapeRegex = (text: string): string => {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+};
+
+const getParamId = (req: Request): string => {
+  const rawId = req.params.id;
+  return Array.isArray(rawId) ? rawId[0] : String(rawId || '');
+};
+
+const generateLeadId = (): string => {
+  const dateStr = Date.now().toString(36).toUpperCase();
+  const rand = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return `VN-LEAD-${dateStr}-${rand}`;
+};
+
+const THANK_YOU_MESSAGES: Record<LeadPersona, { title: string; message: string }> = {
+  student: {
+    title: 'Thank You for Connecting with VetNova!',
+    message: "Your veterinary journey deserves more than knowledge alone—it deserves the confidence to apply it. We're here to help you bridge the gap between learning and clinical practice.\n\nLet's build your skills for a confident future in veterinary care. We'll be in touch soon!"
+  },
+  practitioner: {
+    title: 'Thank You for Connecting with VetNova!',
+    message: "Every clinician has the potential to grow, advance and make a greater difference. We look forward to exploring practical learning opportunities that strengthen your skills and elevate your clinical practice.\n\nLet's take veterinary excellence forward—together. We'll be in touch soon!"
+  },
+  nurse: {
+    title: 'Thank You for Exploring Your Journey with VetNova!',
+    message: "Every skilled veterinary nurse makes a difference in an animal's life. We're excited to help you explore practical skills that turn your passion for animal care into meaningful capability.\n\nYour journey towards better animal care starts here. We'll be in touch soon!"
+  },
+  partner: {
+    title: 'Thank You for Your Interest in Partnering with VetNova!',
+    message: "Together, we can bridge the gap between veterinary education and clinical practice, empower veterinary professionals, and contribute to better animal healthcare.\n\nWe look forward to exploring a meaningful collaboration where shared goals create lasting impact. We'll be in touch soon!"
+  },
+  general: {
+    title: 'Thank You for Contacting VetNova!',
+    message: 'We have received your enquiry and our admissions team will get in touch with you shortly.'
+  }
+};
+
 export const createEnquiry = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, countryCode, phone, email, profile, course, message, source, sourcePage } = req.body;
+    const {
+      persona = 'general',
+      name,
+      designation,
+      organization,
+      phone,
+      countryCode = '+91',
+      email,
+      profile,
+      course,
+      message,
+      source = 'website',
+      sourcePage = '',
+      formId = '',
+      currentStage,
+      areaOfInterest,
+      skillToDevelop,
+      yearsOfExperience,
+      currentRole,
+      areaToStrengthen,
+      preferredTrainingLevel,
+      background,
+      lookingFor,
+      skillsInterest,
+      preferredLearningMode,
+      explorationGoal,
+      formData = {}
+    } = req.body;
 
-    // Validation
+    // 1. Validate Persona
+    const validPersonas: LeadPersona[] = ['student', 'practitioner', 'nurse', 'partner', 'general'];
+    const safePersona: LeadPersona = validPersonas.includes(persona as LeadPersona)
+      ? (persona as LeadPersona)
+      : 'general';
+
+    // 2. Validate Name
     const trimmedName = typeof name === 'string' ? name.trim() : '';
-    const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+    if (!trimmedName || trimmedName.length < 2) {
+      res.status(400).json({ success: false, message: 'Please enter a valid Full Name (minimum 2 characters)' });
+      return;
+    }
+
+    // 3. Validate Phone Number (Preserve entered format, ensure valid phone / Indian mobile)
     const trimmedPhone = typeof phone === 'string' ? phone.trim() : '';
-    const trimmedCountryCode = typeof countryCode === 'string' ? countryCode.trim() : '';
-
-    if (!trimmedName) {
-      res.status(400).json({ success: false, message: 'Full Name is required' });
-      return;
-    }
-
     if (!trimmedPhone) {
-      res.status(400).json({ success: false, message: 'Phone Number is required' });
+      res.status(400).json({ success: false, message: 'Mobile Number / WhatsApp is required' });
       return;
     }
 
-    if (!PHONE_REGEX.test(trimmedPhone)) {
-      res.status(400).json({ success: false, message: 'Please provide a valid phone number' });
+    const cleanDigits = trimmedPhone.replace(/[\s-]/g, '');
+    const isIndian = INDIAN_MOBILE_REGEX.test(cleanDigits) || INDIAN_MOBILE_REGEX.test(trimmedPhone);
+    const isValidGeneralPhone = PHONE_REGEX.test(trimmedPhone);
+
+    if (!isIndian && !isValidGeneralPhone) {
+      res.status(400).json({
+        success: false,
+        message: 'Please provide a valid 10-digit mobile number'
+      });
       return;
     }
 
-    if (!trimmedEmail) {
-      res.status(400).json({ success: false, message: 'Email Address is required' });
+    // 4. Validate Email (Required for Sponsor/Partner, optional for others but validated if provided)
+    const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+    if (safePersona === 'partner') {
+      if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
+        res.status(400).json({ success: false, message: 'A valid Work Email address is required for partnership inquiries' });
+        return;
+      }
+    } else if (trimmedEmail && !EMAIL_REGEX.test(trimmedEmail)) {
+      res.status(400).json({ success: false, message: 'The email address provided is invalid' });
       return;
     }
 
-    if (!EMAIL_REGEX.test(trimmedEmail)) {
-      res.status(400).json({ success: false, message: 'Please provide a valid email address' });
-      return;
+    // 5. Build structured persona formData
+    const aggregatedData: Record<string, any> = { ...formData };
+
+    if (safePersona === 'student') {
+      const stage = currentStage || formData.currentStage || profile || '';
+      const interest = areaOfInterest || formData.areaOfInterest || course || '';
+      const skill = skillToDevelop || formData.skillToDevelop || 'Surgery and clinical procedures';
+
+      if (!stage) {
+        res.status(400).json({ success: false, message: 'Please select your current stage (Veterinary student, Intern, or Fresh graduate)' });
+        return;
+      }
+      if (!interest) {
+        res.status(400).json({ success: false, message: 'Please select your area of interest' });
+        return;
+      }
+
+      aggregatedData.currentStage = stage;
+      aggregatedData.areaOfInterest = interest;
+      aggregatedData.skillToDevelop = skill;
+    } else if (safePersona === 'practitioner') {
+      const exp = yearsOfExperience || formData.yearsOfExperience || '';
+      const role = currentRole || formData.currentRole || '';
+      const strengthen = areaToStrengthen || formData.areaToStrengthen || '';
+      const level = preferredTrainingLevel || formData.preferredTrainingLevel || '';
+
+      if (!exp) {
+        res.status(400).json({ success: false, message: 'Please select your years of clinical experience' });
+        return;
+      }
+      if (!role) {
+        res.status(400).json({ success: false, message: 'Please select your current role' });
+        return;
+      }
+      if (!strengthen) {
+        res.status(400).json({ success: false, message: 'Please select the area you would like to strengthen' });
+        return;
+      }
+      if (!level) {
+        res.status(400).json({ success: false, message: 'Please select your preferred training level' });
+        return;
+      }
+
+      aggregatedData.yearsOfExperience = exp;
+      aggregatedData.currentRole = role;
+      aggregatedData.areaToStrengthen = strengthen;
+      aggregatedData.preferredTrainingLevel = level;
+    } else if (safePersona === 'nurse') {
+      const bg = background || formData.background || '';
+      const looking = lookingFor || formData.lookingFor || '';
+      const skills = skillsInterest || formData.skillsInterest || '';
+      const mode = preferredLearningMode || formData.preferredLearningMode || '';
+
+      if (!bg) {
+        res.status(400).json({ success: false, message: 'Please select your background' });
+        return;
+      }
+      if (!looking) {
+        res.status(400).json({ success: false, message: 'Please select what you are looking for' });
+        return;
+      }
+      if (!skills) {
+        res.status(400).json({ success: false, message: 'Please select which skills interest you most' });
+        return;
+      }
+      if (!mode) {
+        res.status(400).json({ success: false, message: 'Please select your preferred learning mode' });
+        return;
+      }
+
+      aggregatedData.background = bg;
+      aggregatedData.lookingFor = looking;
+      aggregatedData.skillsInterest = skills;
+      aggregatedData.preferredLearningMode = mode;
+    } else if (safePersona === 'partner') {
+      const org = organization || formData.organization || '';
+      const interest = areaOfInterest || formData.areaOfInterest || '';
+      const explore = explorationGoal || message || formData.explorationGoal || '';
+
+      if (!org) {
+        res.status(400).json({ success: false, message: 'Organization / Company name is required' });
+        return;
+      }
+      if (!interest) {
+        res.status(400).json({ success: false, message: 'Please select an area of partnership interest' });
+        return;
+      }
+
+      aggregatedData.organization = org;
+      aggregatedData.areaOfInterest = interest;
+      if (explore) aggregatedData.explorationGoal = String(explore).slice(0, 1000);
     }
 
-    // Sanitize lengths
+    const leadId = generateLeadId();
+    const safeCountryCode = typeof countryCode === 'string' ? countryCode.trim().slice(0, 10) : '+91';
     const safeMessage = typeof message === 'string' ? message.trim().slice(0, 2000) : '';
-    const safeProfile = typeof profile === 'string' ? profile.trim().slice(0, 100) : '';
-    const safeCourse = typeof course === 'string' ? course.trim().slice(0, 150) : '';
-    const safeSource = typeof source === 'string' && source.trim() ? source.trim().slice(0, 100) : 'website';
-    const safeSourcePage = typeof sourcePage === 'string' ? sourcePage.trim().slice(0, 300) : '';
+    const safeDesignation = typeof designation === 'string' ? designation.trim().slice(0, 150) : '';
+    const safeOrganization = typeof organization === 'string'
+      ? organization.trim().slice(0, 200)
+      : (aggregatedData.organization ? String(aggregatedData.organization).slice(0, 200) : '');
 
-    const enquiry = await Enquiry.create({
-      name: trimmedName.slice(0, 100),
-      countryCode: trimmedCountryCode.slice(0, 10),
+    const safeProfile = typeof profile === 'string'
+      ? profile.trim().slice(0, 100)
+      : (aggregatedData.currentStage || aggregatedData.currentRole || aggregatedData.background || safePersona);
+
+    const safeCourse = typeof course === 'string'
+      ? course.trim().slice(0, 150)
+      : (aggregatedData.areaOfInterest || aggregatedData.areaToStrengthen || aggregatedData.lookingFor || '');
+
+    // 6. Create Lead in MongoDB
+    const lead = await Enquiry.create({
+      leadId,
+      persona: safePersona,
+      name: trimmedName.slice(0, 120),
+      designation: safeDesignation,
+      organization: safeOrganization,
+      countryCode: safeCountryCode,
       phone: trimmedPhone,
-      email: trimmedEmail.slice(0, 100),
+      email: trimmedEmail.slice(0, 120).toLowerCase(),
       profile: safeProfile,
       course: safeCourse,
       message: safeMessage,
-      source: safeSource,
-      sourcePage: safeSourcePage,
-      status: 'New'
+      formData: aggregatedData,
+      source: typeof source === 'string' ? source.slice(0, 100) : 'website',
+      sourcePage: typeof sourcePage === 'string' ? sourcePage.slice(0, 300) : '',
+      formId: typeof formId === 'string' ? formId.slice(0, 100) : '',
+      status: 'New',
+      notes: []
     });
+
+    // 7. Dispatch asynchronous notification (does not block response)
+    sendLeadNotifications(lead).catch((err) => {
+      console.error('[Notification Dispatch Error]:', err);
+    });
+
+    const thankYou = THANK_YOU_MESSAGES[safePersona] || THANK_YOU_MESSAGES.general;
 
     res.status(201).json({
       success: true,
       message: 'Enquiry submitted successfully',
-      data: enquiry
+      data: {
+        _id: lead._id,
+        leadId: lead.leadId,
+        persona: lead.persona,
+        status: lead.status,
+        thankYou
+      }
     });
   } catch (error: any) {
-    console.error('Error creating enquiry:', error);
+    console.error('[createEnquiry Error]:', error);
     res.status(500).json({
       success: false,
-      message: 'Unable to submit enquiry. Please try again later.'
+      message: 'Unable to submit your enquiry at this time. Please try again or reach out on WhatsApp.'
     });
   }
 };
 
-/**
- * @desc    Get all Enquiries with search, filter, and pagination
- * @route   GET /api/enquiries
- * @access  Private/Admin
- */
 export const getEnquiries = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { search, status, course, page = '1', limit = '20' } = req.query;
-
+    const { search, status, persona, course, startDate, endDate, page = '1', limit = '20' } = req.query;
     const query: any = {};
 
-    // Filter by Status
-    if (status && status !== 'all') {
-      query.status = { $regex: new RegExp(`^${status}$`, 'i') };
+    if (status && status !== 'all' && typeof status === 'string') {
+      query.status = { $regex: new RegExp(`^${escapeRegex(status.trim())}$`, 'i') };
     }
 
-    // Filter by Course
-    if (course && course !== 'all') {
-      query.course = { $regex: new RegExp(String(course), 'i') };
+    if (persona && persona !== 'all' && typeof persona === 'string') {
+      query.persona = persona.trim().toLowerCase();
     }
 
-    // Search term across fields
-    if (search) {
-      const searchRegex = new RegExp(String(search), 'i');
+    if (course && course !== 'all' && typeof course === 'string') {
+      query.course = { $regex: new RegExp(escapeRegex(course.trim()), 'i') };
+    }
+
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate && typeof startDate === 'string') {
+        const start = new Date(startDate);
+        if (!isNaN(start.getTime())) {
+          query.createdAt.$gte = start;
+        }
+      }
+      if (endDate && typeof endDate === 'string') {
+        const end = new Date(endDate);
+        if (!isNaN(end.getTime())) {
+          end.setHours(23, 59, 59, 999);
+          query.createdAt.$lte = end;
+        }
+      }
+      if (Object.keys(query.createdAt).length === 0) {
+        delete query.createdAt;
+      }
+    }
+
+    if (search && typeof search === 'string') {
+      const safeSearch = escapeRegex(search.trim());
+      const searchRegex = new RegExp(safeSearch, 'i');
       query.$or = [
+        { leadId: searchRegex },
         { name: searchRegex },
         { email: searchRegex },
         { phone: searchRegex },
+        { organization: searchRegex },
+        { designation: searchRegex },
         { profile: searchRegex },
         { course: searchRegex },
         { message: searchRegex },
@@ -135,19 +351,22 @@ export const getEnquiries = async (req: Request, res: Response): Promise<void> =
       data: enquiries
     });
   } catch (error: any) {
-    console.error('Error fetching enquiries:', error);
+    console.error('[getEnquiries Error]:', error);
     res.status(500).json({ success: false, message: 'Server error while fetching enquiries' });
   }
 };
 
-/**
- * @desc    Get single Enquiry by ID
- * @route   GET /api/enquiries/:id
- * @access  Private/Admin
- */
 export const getEnquiryById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const enquiry = await Enquiry.findById(req.params.id);
+    const id = getParamId(req);
+    let enquiry: IEnquiry | null = null;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      enquiry = await Enquiry.findById(id);
+    } else {
+      enquiry = await Enquiry.findOne({ leadId: id });
+    }
+
     if (!enquiry) {
       res.status(404).json({ success: false, message: 'Enquiry not found' });
       return;
@@ -158,38 +377,43 @@ export const getEnquiryById = async (req: Request, res: Response): Promise<void>
   }
 };
 
-/**
- * @desc    Update Enquiry (e.g., status, notes)
- * @route   PATCH /api/enquiries/:id or PUT /api/enquiries/:id
- * @access  Private/Admin
- */
 export const updateEnquiry = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { status, name, phone, email, profile, course, message, source, sourcePage } = req.body;
+    const id = getParamId(req);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({ success: false, message: 'Invalid enquiry ID' });
+      return;
+    }
 
-    const enquiry = await Enquiry.findById(req.params.id);
+    const { status, name, phone, email, profile, course, message, organization, designation, notes } = req.body;
+
+    const enquiry = await Enquiry.findById(id);
     if (!enquiry) {
       res.status(404).json({ success: false, message: 'Enquiry not found' });
       return;
     }
 
     if (status) {
-      const validStatuses = ['New', 'Contacted', 'Converted', 'Closed'];
-      if (!validStatuses.includes(status)) {
-        res.status(400).json({ success: false, message: `Invalid status. Must be one of ${validStatuses.join(', ')}` });
+      const validStatuses: LeadStatus[] = ['New', 'Contacted', 'Follow-up Required', 'Qualified', 'Closed', 'Converted'];
+      if (!validStatuses.includes(status as LeadStatus)) {
+        res.status(400).json({ success: false, message: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
         return;
       }
-      enquiry.status = status;
+      enquiry.status = status as LeadStatus;
     }
 
-    if (name !== undefined) enquiry.name = String(name).trim();
+    if (name !== undefined) enquiry.name = String(name).trim().slice(0, 120);
     if (phone !== undefined) enquiry.phone = String(phone).trim();
-    if (email !== undefined) enquiry.email = String(email).trim().toLowerCase();
-    if (profile !== undefined) enquiry.profile = String(profile).trim();
-    if (course !== undefined) enquiry.course = String(course).trim();
-    if (message !== undefined) enquiry.message = String(message).trim();
-    if (source !== undefined) enquiry.source = String(source).trim();
-    if (sourcePage !== undefined) enquiry.sourcePage = String(sourcePage).trim();
+    if (email !== undefined) enquiry.email = String(email).trim().toLowerCase().slice(0, 120);
+    if (organization !== undefined) enquiry.organization = String(organization).trim().slice(0, 200);
+    if (designation !== undefined) enquiry.designation = String(designation).trim().slice(0, 150);
+    if (profile !== undefined) enquiry.profile = String(profile).trim().slice(0, 100);
+    if (course !== undefined) enquiry.course = String(course).trim().slice(0, 150);
+    if (message !== undefined) enquiry.message = String(message).trim().slice(0, 2000);
+
+    if (Array.isArray(notes)) {
+      enquiry.notes = notes;
+    }
 
     const updatedEnquiry = await enquiry.save();
 
@@ -199,26 +423,146 @@ export const updateEnquiry = async (req: Request, res: Response): Promise<void> 
       data: updatedEnquiry
     });
   } catch (error: any) {
-    console.error('Error updating enquiry:', error);
-    res.status(400).json({ success: false, message: error.message || 'Error updating enquiry' });
+    res.status(400).json({ success: false, message: 'Error updating enquiry' });
   }
 };
 
-/**
- * @desc    Delete Enquiry
- * @route   DELETE /api/enquiries/:id
- * @access  Private/Admin
- */
+export const addEnquiryNote = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = getParamId(req);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({ success: false, message: 'Invalid enquiry ID' });
+      return;
+    }
+
+    const { text, author } = req.body;
+    if (!text || typeof text !== 'string' || !text.trim()) {
+      res.status(400).json({ success: false, message: 'Note text cannot be empty' });
+      return;
+    }
+
+    const enquiry = await Enquiry.findById(id);
+    if (!enquiry) {
+      res.status(404).json({ success: false, message: 'Enquiry not found' });
+      return;
+    }
+
+    const userObj = (req as any).user;
+    const authorName = author || userObj?.name || 'Admin';
+
+    enquiry.notes.push({
+      text: text.trim().slice(0, 1000),
+      author: authorName,
+      createdAt: new Date()
+    });
+
+    await enquiry.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Note added successfully',
+      data: enquiry.notes
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Error adding internal note' });
+  }
+};
+
 export const deleteEnquiry = async (req: Request, res: Response): Promise<void> => {
   try {
-    const enquiry = await Enquiry.findByIdAndDelete(req.params.id);
+    const id = getParamId(req);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({ success: false, message: 'Invalid enquiry ID' });
+      return;
+    }
+
+    const enquiry = await Enquiry.findByIdAndDelete(id);
     if (!enquiry) {
       res.status(404).json({ success: false, message: 'Enquiry not found' });
       return;
     }
     res.json({ success: true, message: 'Enquiry removed successfully' });
   } catch (error: any) {
-    console.error('Error deleting enquiry:', error);
     res.status(500).json({ success: false, message: 'Error deleting enquiry' });
+  }
+};
+
+export const exportEnquiriesCSV = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { persona, status, startDate, endDate } = req.query;
+    const query: any = {};
+
+    if (status && status !== 'all' && typeof status === 'string') {
+      query.status = status.trim();
+    }
+    if (persona && persona !== 'all' && typeof persona === 'string') {
+      query.persona = persona.trim().toLowerCase();
+    }
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate && typeof startDate === 'string') query.createdAt.$gte = new Date(startDate);
+      if (endDate && typeof endDate === 'string') {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = end;
+      }
+    }
+
+    const leads = await Enquiry.find(query).sort({ createdAt: -1 });
+
+    const headers = [
+      'Lead ID',
+      'Persona',
+      'Full Name',
+      'Designation',
+      'Organization',
+      'Phone Number',
+      'Email Address',
+      'Status',
+      'Submitted Date',
+      'Form Responses',
+      'Notes Count',
+      'Latest Note'
+    ];
+
+    const escapeCsv = (val: any): string => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const rows = leads.map((l) => {
+      const formattedResponses = l.formData
+        ? Object.entries(l.formData).map(([k, v]) => `${k}: ${v}`).join('; ')
+        : (l.course || l.profile || '');
+
+      const latestNote = l.notes && l.notes.length > 0
+        ? l.notes[l.notes.length - 1].text
+        : '';
+
+      return [
+        escapeCsv(l.leadId || l._id),
+        escapeCsv(l.persona || 'general'),
+        escapeCsv(l.name),
+        escapeCsv(l.designation || ''),
+        escapeCsv(l.organization || ''),
+        escapeCsv((l.countryCode ? l.countryCode + ' ' : '') + l.phone),
+        escapeCsv(l.email || ''),
+        escapeCsv(l.status),
+        escapeCsv(new Date(l.createdAt).toISOString()),
+        escapeCsv(formattedResponses),
+        escapeCsv(l.notes ? l.notes.length : 0),
+        escapeCsv(latestNote)
+      ].join(',');
+    });
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="vetnova-leads-${Date.now()}.csv"`);
+    res.status(200).send(csvContent);
+  } catch (error: any) {
+    console.error('[exportEnquiriesCSV Error]:', error);
+    res.status(500).json({ success: false, message: 'Failed to generate CSV export' });
   }
 };

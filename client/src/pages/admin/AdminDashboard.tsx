@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Award, FileText, FolderPlus, ArrowUpRight, Inbox } from 'lucide-react';
+import { Users, Award, FileText, FolderPlus, ArrowUpRight, Inbox, Calendar, BookOpen } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from '@/lib/axios';
@@ -17,10 +17,10 @@ export const AdminDashboard = () => {
   });
 
   const statCards = [
-    { name: 'Website Enquiries', value: stats?.enquiriesCount || 0, icon: Inbox, change: `${stats?.newEnquiriesCount || 0} New`, color: 'text-indigo-600', bg: 'bg-indigo-100' },
-    { name: 'Active Faculty', value: stats?.facultyCount || stats?.expertsCount || 0, icon: Users, change: 'Active', color: 'text-purple-600', bg: 'bg-purple-100' },
-    { name: 'Advisory Board', value: stats?.advisoryBoardCount || 0, icon: Award, change: 'Global Council', color: 'text-amber-600', bg: 'bg-amber-100' },
-    { name: 'Published Blogs', value: stats?.blogsCount || 0, icon: FileText, change: 'Live', color: 'text-green-600', bg: 'bg-green-100' },
+    { name: 'Website Enquiries', value: stats?.enquiriesCount || 0, icon: Inbox, change: `${stats?.newEnquiriesCount || 0} New`, color: 'text-indigo-600', bg: 'bg-indigo-100', path: '/admin/enquiries' },
+    { name: 'Clinical Programs', value: stats?.programsCount || 28, icon: BookOpen, change: 'Active', color: 'text-purple-600', bg: 'bg-purple-100', path: '/admin/programs' },
+    { name: 'Advisory Board', value: stats?.advisoryBoardCount || 0, icon: Award, change: 'Global Council', color: 'text-amber-600', bg: 'bg-amber-100', path: '/admin/advisory-board' },
+    { name: 'Published Blogs', value: stats?.blogsCount || 0, icon: FileText, change: 'Live', color: 'text-green-600', bg: 'bg-green-100', path: '/admin/blog' },
   ];
 
   return (
@@ -34,7 +34,7 @@ export const AdminDashboard = () => {
         {statCards.map((stat, idx) => {
           const Icon = stat.icon;
           return (
-            <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => stat.name.includes('Enquiries') && navigate('/admin/enquiries')}>
+            <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => stat.path && navigate(stat.path)}>
               <div className="flex justify-between items-start mb-4">
                 <div className={`p-3 rounded-xl ${stat.bg} ${stat.color}`}>
                   <Icon className="w-6 h-6" />
@@ -71,10 +71,10 @@ export const AdminDashboard = () => {
             </div>
             <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100">
               <div>
-                <h4 className="font-semibold text-slate-800 text-sm">Faculty & Experts Module</h4>
-                <p className="text-xs text-slate-500">Manage teaching faculty members, specializations, and bios.</p>
+                <h4 className="font-semibold text-slate-800 text-sm">Upcoming &amp; Ongoing Batches Module</h4>
+                <p className="text-xs text-slate-500">Schedule clinical training intakes, assign faculty leads, and sync website schedules.</p>
               </div>
-              <button onClick={() => navigate('/admin/faculty')} className="px-3 py-1.5 bg-white border border-slate-200 text-xs font-medium rounded-lg text-brand-primary hover:bg-brand-primary/5">
+              <button onClick={() => navigate('/admin/batches?tab=upcoming')} className="px-3 py-1.5 bg-white border border-slate-200 text-xs font-medium rounded-lg text-brand-primary hover:bg-brand-primary/5">
                 Manage
               </button>
             </div>
@@ -108,8 +108,8 @@ export const AdminDashboard = () => {
               <span className="font-medium text-slate-700 group-hover:text-brand-primary">View New Enquiries</span>
               <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-brand-primary" />
             </button>
-            <button onClick={() => navigate('/admin/faculty')} className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-brand-primary hover:bg-brand-primary/5 transition-colors group">
-              <span className="font-medium text-slate-700 group-hover:text-brand-primary">Add Faculty Member</span>
+            <button onClick={() => navigate('/admin/batches?tab=upcoming')} className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-brand-primary hover:bg-brand-primary/5 transition-colors group">
+              <span className="font-medium text-slate-700 group-hover:text-brand-primary">Schedule New Batch</span>
               <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-brand-primary" />
             </button>
             <button onClick={() => navigate('/admin/advisory-board')} className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-brand-primary hover:bg-brand-primary/5 transition-colors group">

@@ -8,6 +8,9 @@ import {
   FileText, 
   FileImage,
   Inbox,
+  BookOpen,
+  Calendar,
+  Clock,
   LogOut
 } from 'lucide-react';
 
@@ -17,11 +20,13 @@ export const AdminLayout = () => {
   
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Faculty', path: '/admin/faculty', icon: Users },
+    { name: 'Programs (28)', path: '/admin/programs', icon: BookOpen },
+    { name: 'Upcoming Batches', path: '/admin/batches?tab=upcoming', icon: Calendar },
+    { name: 'Ongoing Batches', path: '/admin/batches?tab=ongoing', icon: Clock },
     { name: 'Advisory Board', path: '/admin/advisory-board', icon: Award },
     { name: 'Blog', path: '/admin/blog', icon: FileText },
     { name: 'Media Library', path: '/admin/media', icon: FileImage },
-    { name: 'Enquiries', path: '/admin/enquiries', icon: Inbox },
+    { name: 'Leads & Inquiries', path: '/admin/enquiries', icon: Inbox },
     { name: 'Users', path: '/admin/users', icon: Users },
   ];
 
@@ -37,7 +42,10 @@ export const AdminLayout = () => {
         <nav className="flex-grow p-4 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            const currentFull = location.pathname + location.search;
+            const isActive = item.path.includes('?')
+              ? currentFull === item.path || (location.pathname === item.path.split('?')[0] && !location.search && item.path.includes('upcoming'))
+              : location.pathname === item.path;
             return (
               <Link
                 key={item.name}

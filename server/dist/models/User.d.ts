@@ -3,14 +3,14 @@ export declare const User: mongoose.Model<{
     name: string;
     email: string;
     password: string;
-    role: "admin" | "expert" | "guest" | "student";
+    role: "admin" | "expert" | "guest" | "student" | "super_admin";
 } & mongoose.DefaultTimestampProps, {}, {}, {
     id: string;
 }, mongoose.Document<unknown, {}, {
     name: string;
     email: string;
     password: string;
-    role: "admin" | "expert" | "guest" | "student";
+    role: "admin" | "expert" | "guest" | "student" | "super_admin";
 } & mongoose.DefaultTimestampProps, {
     id: string;
 }, {
@@ -19,7 +19,7 @@ export declare const User: mongoose.Model<{
     name: string;
     email: string;
     password: string;
-    role: "admin" | "expert" | "guest" | "student";
+    role: "admin" | "expert" | "guest" | "student" | "super_admin";
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -32,12 +32,12 @@ export declare const User: mongoose.Model<{
     name: string;
     email: string;
     password: string;
-    role: "admin" | "expert" | "guest" | "student";
+    role: "admin" | "expert" | "guest" | "student" | "super_admin";
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
     name: string;
     email: string;
     password: string;
-    role: "admin" | "expert" | "guest" | "student";
+    role: "admin" | "expert" | "guest" | "student" | "super_admin";
 } & mongoose.DefaultTimestampProps, {
     id: string;
 }, Omit<mongoose.DefaultSchemaOptions, "timestamps"> & {
@@ -46,7 +46,7 @@ export declare const User: mongoose.Model<{
     name: string;
     email: string;
     password: string;
-    role: "admin" | "expert" | "guest" | "student";
+    role: "admin" | "expert" | "guest" | "student" | "super_admin";
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -59,7 +59,7 @@ export declare const User: mongoose.Model<{
     name: string;
     email: string;
     password: string;
-    role: "admin" | "expert" | "guest" | "student";
+    role: "admin" | "expert" | "guest" | "student" | "super_admin";
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -70,7 +70,7 @@ export declare const User: mongoose.Model<{
     name: string;
     email: string;
     password: string;
-    role: "admin" | "expert" | "guest" | "student";
+    role: "admin" | "expert" | "guest" | "student" | "super_admin";
 } & {
     _id: mongoose.Types.ObjectId;
 } & {

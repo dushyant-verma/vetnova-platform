@@ -10,12 +10,13 @@ import { AdminLayout } from './components/layout/AdminLayout';
 // Admin Portal Pages (Lazy Loaded)
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
-const FacultyManagement = lazy(() => import('./pages/admin/FacultyManagement').then(m => ({ default: m.FacultyManagement })));
 const AdvisoryBoardManagement = lazy(() => import('./pages/admin/AdvisoryBoardManagement').then(m => ({ default: m.AdvisoryBoardManagement })));
 const BlogManagement = lazy(() => import('./pages/admin/BlogManagement').then(m => ({ default: m.BlogManagement })));
 const UsersRolesManagement = lazy(() => import('./pages/admin/UsersRolesManagement').then(m => ({ default: m.UsersRolesManagement })));
 const MediaLibrary = lazy(() => import('./pages/admin/MediaLibrary').then(m => ({ default: m.MediaLibrary })));
 const EnquiriesManagement = lazy(() => import('./pages/admin/EnquiriesManagement').then(m => ({ default: m.EnquiriesManagement })));
+const ProgramManagement = lazy(() => import('./pages/admin/ProgramManagement').then(m => ({ default: m.ProgramManagement })));
+const BatchManagement = lazy(() => import('./pages/admin/BatchManagement').then(m => ({ default: m.BatchManagement })));
 
 const SuspenseFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -40,7 +41,9 @@ function App() {
                   <Route index element={<AdminDashboard />} />
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="enquiries" element={<EnquiriesManagement />} />
-                  <Route path="faculty" element={<FacultyManagement />} />
+                  <Route path="programs" element={<ProgramManagement />} />
+                  <Route path="batches" element={<BatchManagement />} />
+                  <Route path="faculty" element={<Navigate to="/admin/programs" replace />} />
                   <Route path="advisory-board" element={<AdvisoryBoardManagement />} />
                   <Route path="blog" element={<BlogManagement />} />
                   <Route path="blog/categories" element={<BlogManagement />} />

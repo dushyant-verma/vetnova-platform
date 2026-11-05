@@ -7,10 +7,12 @@ const router = (0, express_1.Router)();
 // Public submission route
 router.post('/', enquiryController_1.createEnquiry);
 // Protected Admin management routes
+router.get('/export/csv', authMiddleware_1.protect, authMiddleware_1.admin, enquiryController_1.exportEnquiriesCSV);
 router.get('/', authMiddleware_1.protect, authMiddleware_1.admin, enquiryController_1.getEnquiries);
 router.get('/:id', authMiddleware_1.protect, authMiddleware_1.admin, enquiryController_1.getEnquiryById);
 router.patch('/:id', authMiddleware_1.protect, authMiddleware_1.admin, enquiryController_1.updateEnquiry);
 router.put('/:id', authMiddleware_1.protect, authMiddleware_1.admin, enquiryController_1.updateEnquiry);
+router.post('/:id/notes', authMiddleware_1.protect, authMiddleware_1.admin, enquiryController_1.addEnquiryNote);
 router.delete('/:id', authMiddleware_1.protect, authMiddleware_1.admin, enquiryController_1.deleteEnquiry);
 exports.default = router;
 //# sourceMappingURL=enquiryRoutes.js.map
