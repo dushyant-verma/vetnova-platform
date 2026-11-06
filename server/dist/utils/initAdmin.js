@@ -3,12 +3,77 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.seedDefaultBatches = seedDefaultBatches;
 exports.ensureSuperAdminExists = ensureSuperAdminExists;
 const mongoose_1 = __importDefault(require("mongoose"));
 const User_1 = require("../models/User");
 const Program_1 = require("../models/Program");
+const Batch_1 = require("../models/Batch");
 const seedWebsiteContent_1 = require("../scripts/seedWebsiteContent");
 const seed28Programs_1 = require("../scripts/seed28Programs");
+async function seedDefaultBatches() {
+    const defaultBatches = [
+        {
+            batchTitle: 'Soft Tissue Surgery Intensive Cohort 1',
+            programName: 'Soft Tissue Surgery Track',
+            programSlug: 'soft-tissue-surgery',
+            facultyName: 'Dr. Amit Kulkarni',
+            startDate: new Date('2026-11-23'),
+            endDate: new Date('2026-11-26'),
+            duration: '3 Days',
+            status: 'Upcoming',
+            seatStatus: '🟢 Admissions Open',
+            location: 'Pune Campus',
+            maxSeats: 12,
+            displayOrder: 1
+        },
+        {
+            batchTitle: 'Veterinary Skill-Up Hands-on Cohort 2',
+            programName: 'Veterinary Skill-Up Program',
+            programSlug: 'veterinary-skill-up',
+            facultyName: 'Dr. Priya Sharma',
+            startDate: new Date('2026-12-07'),
+            endDate: new Date('2026-12-09'),
+            duration: '3 Days',
+            status: 'Upcoming',
+            seatStatus: '🔥 4 Seats Remaining',
+            location: 'Pune Campus',
+            maxSeats: 12,
+            displayOrder: 2
+        },
+        {
+            batchTitle: 'Pet Emergency & Critical Care ICU Cohort',
+            programName: 'Pet Emergency & Critical Care',
+            programSlug: 'emergency-and-critical-care',
+            facultyName: 'Dr. Rajesh Verma',
+            startDate: new Date('2026-11-04'),
+            endDate: new Date('2026-11-07'),
+            duration: '3 Days',
+            status: 'Ongoing',
+            seatStatus: '🟢 In Session',
+            location: 'Pune Campus',
+            maxSeats: 12,
+            displayOrder: 1
+        },
+        {
+            batchTitle: 'Veterinary Dermatology Clinical Cohort',
+            programName: 'Veterinary Dermatology Track',
+            programSlug: 'veterinary-dermatology',
+            facultyName: 'Dr. Sneha Nair',
+            startDate: new Date('2026-11-01'),
+            endDate: new Date('2026-11-08'),
+            duration: '3 Days',
+            status: 'Ongoing',
+            seatStatus: '🟢 In Session',
+            location: 'Pune Campus',
+            maxSeats: 12,
+            displayOrder: 2
+        }
+    ];
+    for (const b of defaultBatches) {
+        await Batch_1.Batch.findOneAndUpdate({ batchTitle: b.batchTitle }, { $setOnInsert: b }, { upsert: true, new: true });
+    }
+}
 async function ensureSuperAdminExists() {
     try {
         const adminEmail = (process.env.ADMIN_EMAIL || 'admin@vetnova.edu.in').trim().toLowerCase();
@@ -61,6 +126,18 @@ async function ensureSuperAdminExists() {
         }
         catch (seedErr) {
             console.warn('[Bootstrap Warning] Auto-seeding catalog skipped:', seedErr.message);
+        }
+        // Auto-bootstrap batches if collection is empty
+        try {
+            const batchCount = await Batch_1.Batch.countDocuments();
+            if (batchCount === 0) {
+                console.log('[Bootstrap] No batches found in DB. Seeding initial practical training batches...');
+                await seedDefaultBatches();
+                console.log('[Bootstrap] Initial practical training batches seeded successfully.');
+            }
+        }
+        catch (batchErr) {
+            console.warn('[Bootstrap Warning] Auto-seeding batches skipped:', batchErr.message);
         }
         console.log(`[Database Health] Initializer complete. Database connection readyState: ${mongoose_1.default.connection.readyState}`);
     }

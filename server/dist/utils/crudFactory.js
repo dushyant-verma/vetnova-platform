@@ -79,7 +79,7 @@ const crudFactory = (model, populateOpts) => {
                 if (status && typeof status === 'string') {
                     query.status = { $regex: new RegExp(`^${escapeRegex(status.trim())}$`, 'i') };
                 }
-                else if (isPublic === 'true') {
+                else if (isPublic === 'true' && model.modelName !== 'Batch') {
                     query.status = 'Published';
                 }
                 if (category && category !== 'all' && typeof category === 'string') {
@@ -90,7 +90,16 @@ const crudFactory = (model, populateOpts) => {
                     ];
                 }
                 if (program && program !== 'all' && typeof program === 'string') {
-                    query.programs = { $regex: new RegExp(`^${escapeRegex(program.trim())}$`, 'i') };
+                    const safeProgram = escapeRegex(program.trim());
+                    if (model.modelName === 'Batch') {
+                        query.$or = [
+                            { programSlug: { $regex: new RegExp(`^${safeProgram}$`, 'i') } },
+                            { programName: { $regex: new RegExp(`^${safeProgram}$`, 'i') } }
+                        ];
+                    }
+                    else {
+                        query.programs = { $regex: new RegExp(`^${safeProgram}$`, 'i') };
+                    }
                 }
                 if (featured !== undefined) {
                     query.isFeatured = String(featured) === 'true';
