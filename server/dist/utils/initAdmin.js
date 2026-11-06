@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ensureSuperAdminExists = ensureSuperAdminExists;
+const mongoose_1 = __importDefault(require("mongoose"));
 const User_1 = require("../models/User");
 const Program_1 = require("../models/Program");
 const seedWebsiteContent_1 = require("../scripts/seedWebsiteContent");
@@ -58,6 +62,7 @@ async function ensureSuperAdminExists() {
         catch (seedErr) {
             console.warn('[Bootstrap Warning] Auto-seeding catalog skipped:', seedErr.message);
         }
+        console.log(`[Database Health] Initializer complete. Database connection readyState: ${mongoose_1.default.connection.readyState}`);
     }
     catch (error) {
         console.error('[Auth Init Error] Failed to initialize Super Admin account:', error.message);

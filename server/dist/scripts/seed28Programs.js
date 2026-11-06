@@ -817,11 +817,14 @@ async function seed28Programs() {
     const finalPrograms = await Program_1.Program.find({}).sort({ order: 1 });
     console.log(`\nMigration complete! Total programs in DB: ${finalPrograms.length}`);
     console.log(`Updated: ${updatedCount}, Created: ${createdCount}`);
-    await mongoose_1.default.disconnect();
 }
 if (require.main === module) {
-    seed28Programs()
-        .then(() => process.exit(0))
+    (0, db_1.connectDB)()
+        .then(async () => {
+        await seed28Programs();
+        await mongoose_1.default.disconnect();
+        process.exit(0);
+    })
         .catch((err) => {
         console.error("Migration failed:", err);
         process.exit(1);

@@ -846,13 +846,15 @@ export async function seed28Programs() {
   const finalPrograms = await Program.find({}).sort({ order: 1 });
   console.log(`\nMigration complete! Total programs in DB: ${finalPrograms.length}`);
   console.log(`Updated: ${updatedCount}, Created: ${createdCount}`);
-
-  await mongoose.disconnect();
 }
 
 if (require.main === module) {
-  seed28Programs()
-    .then(() => process.exit(0))
+  connectDB()
+    .then(async () => {
+      await seed28Programs();
+      await mongoose.disconnect();
+      process.exit(0);
+    })
     .catch((err) => {
       console.error("Migration failed:", err);
       process.exit(1);

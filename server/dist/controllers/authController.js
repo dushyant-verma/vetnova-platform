@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyToken = exports.refreshToken = exports.getMe = exports.registerUser = exports.authUser = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const User_1 = require("../models/User");
 const generateToken_1 = require("../utils/generateToken");
 const authUser = async (req, res) => {
@@ -16,6 +20,12 @@ const authUser = async (req, res) => {
             res.status(400).json({ success: false, message: 'Email and password cannot be empty' });
             return;
         }
+        // Check database connection state
+        if (mongoose_1.default.connection.readyState !== 1) {
+            console.error(`[Auth Error] Database connection is not ready. Current state: ${mongoose_1.default.connection.readyState}`);
+            res.status(503).json({ success: false, message: 'Database service unavailable. Please try again shortly.' });
+            return;
+        }
         const user = await User_1.User.findOne({ email: cleanEmail });
         if (!user) {
             res.status(401).json({ success: false, message: 'Invalid email or password' });
@@ -25,14 +35,31 @@ const authUser = async (req, res) => {
             res.status(401).json({ success: false, message: 'Account has been deactivated' });
             return;
         }
-        const isMatch = await user.matchPassword(cleanPassword);
+        let isMatch = false;
+        try {
+            isMatch = await user.matchPassword(cleanPassword);
+        }
+        catch (pwError) {
+            console.error(`[Auth Error] Password comparison error for user ${cleanEmail}:`, pwError.message || pwError);
+            res.status(500).json({ success: false, message: 'Authentication verification failed' });
+            return;
+        }
         if (isMatch) {
+            let token;
+            try {
+                token = (0, generateToken_1.generateToken)(user._id.toString(), user.role);
+            }
+            catch (jwtError) {
+                console.error(`[Auth Error] Token generation failed for user ${cleanEmail}:`, jwtError.message || jwtError);
+                res.status(500).json({ success: false, message: 'Token generation failed' });
+                return;
+            }
             res.json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                token: (0, generateToken_1.generateToken)(user._id.toString(), user.role),
+                token,
             });
         }
         else {
@@ -40,7 +67,7 @@ const authUser = async (req, res) => {
         }
     }
     catch (error) {
-        console.error('Authentication error:', error.message || error);
+        console.error('[Auth Error] Unexpected error during login process:', error.message || error);
         res.status(500).json({ success: false, message: 'Authentication error' });
     }
 };

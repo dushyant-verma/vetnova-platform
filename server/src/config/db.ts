@@ -5,6 +5,19 @@ const sanitizeMongoUri = (uri?: string): string => {
   return uri.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@');
 };
 
+// Global connection state listeners
+mongoose.connection.on('disconnected', () => {
+  console.warn('[Database Warning] Mongoose disconnected from MongoDB.');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('[Database] Mongoose reconnected to MongoDB.');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('[Database Error] Mongoose connection error:', err.message);
+});
+
 export const connectDB = async () => {
   // Support both MONGO_URI and MONGODB_URI across hosting providers
   const primaryUri = process.env.MONGO_URI || process.env.MONGODB_URI;

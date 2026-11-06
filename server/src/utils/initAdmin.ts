@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { User } from '../models/User';
 import { Program } from '../models/Program';
 import { seedWebsiteContent } from '../scripts/seedWebsiteContent';
@@ -56,6 +57,8 @@ export async function ensureSuperAdminExists(): Promise<void> {
     } catch (seedErr: any) {
       console.warn('[Bootstrap Warning] Auto-seeding catalog skipped:', seedErr.message);
     }
+
+    console.log(`[Database Health] Initializer complete. Database connection readyState: ${mongoose.connection.readyState}`);
   } catch (error: any) {
     console.error('[Auth Init Error] Failed to initialize Super Admin account:', error.message);
   }

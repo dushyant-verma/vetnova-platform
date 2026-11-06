@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { User } from '../models/User';
 import { generateToken } from '../utils/generateToken';
 
@@ -18,6 +19,13 @@ export const authUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Check database connection state
+    if (mongoose.connection.readyState !== 1) {
+      console.error(`[Auth Error] Database connection is not ready. Current state: ${mongoose.connection.readyState}`);
+      res.status(503).json({ success: false, message: 'Database service unavailable. Please try again shortly.' });
+      return;
+    }
+
     const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
@@ -30,21 +38,37 @@ export const authUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const isMatch = await (user as any).matchPassword(cleanPassword);
+    let isMatch = false;
+    try {
+      isMatch = await (user as any).matchPassword(cleanPassword);
+    } catch (pwError: any) {
+      console.error(`[Auth Error] Password comparison error for user ${cleanEmail}:`, pwError.message || pwError);
+      res.status(500).json({ success: false, message: 'Authentication verification failed' });
+      return;
+    }
 
     if (isMatch) {
+      let token: string;
+      try {
+        token = generateToken(user._id.toString(), user.role);
+      } catch (jwtError: any) {
+        console.error(`[Auth Error] Token generation failed for user ${cleanEmail}:`, jwtError.message || jwtError);
+        res.status(500).json({ success: false, message: 'Token generation failed' });
+        return;
+      }
+
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id.toString(), user.role),
+        token,
       });
     } else {
       res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
   } catch (error: any) {
-    console.error('Authentication error:', error.message || error);
+    console.error('[Auth Error] Unexpected error during login process:', error.message || error);
     res.status(500).json({ success: false, message: 'Authentication error' });
   }
 };
