@@ -231,9 +231,14 @@ export const Navbar = () => {
                   <Button variant="outline" className="w-full rounded-full text-brand-primary border-brand-primary" onClick={() => { navigate('/programs'); closeMenu(); }}>
                     Browse Courses
                   </Button>
-                  <Button className="w-full rounded-full shadow-md" onClick={() => { navigate('/apply'); closeMenu(); }}>
-                    Book Free Counselling
-                  </Button>
+                  <a
+                    href="tel:+919272561089"
+                    className="w-full rounded-full shadow-md bg-brand-primary text-white py-2.5 font-medium flex items-center justify-center gap-2 hover:bg-brand-primary/90 transition-colors"
+                    onClick={closeMenu}
+                  >
+                    <Phone size={16} />
+                    Call Now
+                  </a>
                 </div>
 
                 {/* Mobile Top Bar Links */}
