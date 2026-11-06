@@ -46,14 +46,19 @@ const THANK_YOU_MESSAGES = {
 };
 const createEnquiry = async (req, res) => {
     try {
-        const { persona = 'general', name, designation, organization, phone, countryCode = '+91', email, profile, course, message, source = 'website', sourcePage = '', formId = '', currentStage, areaOfInterest, skillToDevelop, yearsOfExperience, currentRole, areaToStrengthen, preferredTrainingLevel, background, lookingFor, skillsInterest, preferredLearningMode, explorationGoal, formData = {} } = req.body;
+        const { persona = 'general', name, firstName, lastName, audience, programName, designation, organization, phone, countryCode = '+91', email, profile, course, message, source = 'Counselling Form', sourcePage = '', formId = '', currentStage, areaOfInterest, skillToDevelop, yearsOfExperience, currentRole, areaToStrengthen, preferredTrainingLevel, background, lookingFor, skillsInterest, preferredLearningMode, explorationGoal, formData = {} } = req.body;
         // 1. Validate Persona
         const validPersonas = ['student', 'practitioner', 'nurse', 'partner', 'general'];
         const safePersona = validPersonas.includes(persona)
             ? persona
             : 'general';
-        // 2. Validate Name
-        const trimmedName = typeof name === 'string' ? name.trim() : '';
+        // 2. Validate Name & First/Last Names
+        const safeFirstName = typeof firstName === 'string' ? firstName.trim().slice(0, 60) : '';
+        const safeLastName = typeof lastName === 'string' ? lastName.trim().slice(0, 60) : '';
+        let trimmedName = typeof name === 'string' ? name.trim() : '';
+        if (!trimmedName && (safeFirstName || safeLastName)) {
+            trimmedName = `${safeFirstName} ${safeLastName}`.trim();
+        }
         if (!trimmedName || trimmedName.length < 2) {
             res.status(400).json({ success: false, message: 'Please enter a valid Full Name (minimum 2 characters)' });
             return;
@@ -74,11 +79,12 @@ const createEnquiry = async (req, res) => {
             });
             return;
         }
-        // 4. Validate Email (Required for Sponsor/Partner, optional for others but validated if provided)
+        // 4. Validate Email (Required for Sponsor/Partner and Counselling Form, optional for others but validated if provided)
         const trimmedEmail = typeof email === 'string' ? email.trim() : '';
-        if (safePersona === 'partner') {
+        const isCounselling = source === 'Counselling Form' || (formData && (formData.role || formData.whoAreYou || formData.audience));
+        if (safePersona === 'partner' || isCounselling) {
             if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
-                res.status(400).json({ success: false, message: 'A valid Work Email address is required for partnership inquiries' });
+                res.status(400).json({ success: false, message: 'A valid Email address is required' });
                 return;
             }
         }
@@ -180,17 +186,38 @@ const createEnquiry = async (req, res) => {
         const safeOrganization = typeof organization === 'string'
             ? organization.trim().slice(0, 200)
             : (aggregatedData.organization ? String(aggregatedData.organization).slice(0, 200) : '');
-        const safeProfile = typeof profile === 'string'
+        const safeAudience = typeof audience === 'string' && audience.trim()
+            ? audience.trim().slice(0, 100)
+            : (typeof profile === 'string' && profile.trim() ? profile.trim().slice(0, 100) : (aggregatedData.audience || aggregatedData.role || aggregatedData.whoAreYou || ''));
+        const safeProgramName = typeof programName === 'string' && programName.trim()
+            ? programName.trim().slice(0, 150)
+            : (typeof course === 'string' && course.trim() ? course.trim().slice(0, 150) : (aggregatedData.programName || aggregatedData.interestedProgram || ''));
+        const safeProfile = safeAudience || (typeof profile === 'string'
             ? profile.trim().slice(0, 100)
-            : (aggregatedData.currentStage || aggregatedData.currentRole || aggregatedData.background || safePersona);
-        const safeCourse = typeof course === 'string'
+            : (aggregatedData.currentStage || aggregatedData.currentRole || aggregatedData.background || safePersona));
+        const safeCourse = safeProgramName || (typeof course === 'string'
             ? course.trim().slice(0, 150)
-            : (aggregatedData.areaOfInterest || aggregatedData.areaToStrengthen || aggregatedData.lookingFor || '');
+            : (aggregatedData.areaOfInterest || aggregatedData.areaToStrengthen || aggregatedData.lookingFor || ''));
+        const safeSource = typeof source === 'string' && source.trim() ? source.trim().slice(0, 100) : 'Counselling Form';
+        aggregatedData.firstName = safeFirstName;
+        aggregatedData.lastName = safeLastName;
+        aggregatedData.audience = safeAudience;
+        aggregatedData.programName = safeProgramName;
+        if (safeAudience && !aggregatedData.role)
+            aggregatedData.role = safeAudience;
+        if (safeAudience && !aggregatedData.whoAreYou)
+            aggregatedData.whoAreYou = safeAudience;
+        if (safeProgramName && !aggregatedData.interestedProgram)
+            aggregatedData.interestedProgram = safeProgramName;
         // 6. Create Lead in MongoDB
         const lead = await Enquiry_1.Enquiry.create({
             leadId,
             persona: safePersona,
             name: trimmedName.slice(0, 120),
+            firstName: safeFirstName,
+            lastName: safeLastName,
+            audience: safeAudience,
+            programName: safeProgramName,
             designation: safeDesignation,
             organization: safeOrganization,
             countryCode: safeCountryCode,
@@ -200,7 +227,7 @@ const createEnquiry = async (req, res) => {
             course: safeCourse,
             message: safeMessage,
             formData: aggregatedData,
-            source: typeof source === 'string' ? source.slice(0, 100) : 'website',
+            source: safeSource,
             sourcePage: typeof sourcePage === 'string' ? sourcePage.slice(0, 300) : '',
             formId: typeof formId === 'string' ? formId.slice(0, 100) : '',
             status: 'New',
@@ -234,16 +261,44 @@ const createEnquiry = async (req, res) => {
 exports.createEnquiry = createEnquiry;
 const getEnquiries = async (req, res) => {
     try {
-        const { search, status, persona, course, startDate, endDate, page = '1', limit = '20' } = req.query;
+        const { search, status, persona, audience, course, source, startDate, endDate, page = '1', limit = '20' } = req.query;
         const query = {};
         if (status && status !== 'all' && typeof status === 'string') {
             query.status = { $regex: new RegExp(`^${escapeRegex(status.trim())}$`, 'i') };
         }
         if (persona && persona !== 'all' && typeof persona === 'string') {
-            query.persona = persona.trim().toLowerCase();
+            if (persona.trim().toLowerCase() === 'counselling') {
+                query.source = { $regex: /counselling/i };
+            }
+            else {
+                query.persona = persona.trim().toLowerCase();
+            }
+        }
+        if (audience && audience !== 'all' && typeof audience === 'string') {
+            const audRegex = new RegExp(escapeRegex(audience.trim()), 'i');
+            query.$or = [
+                { audience: audRegex },
+                { profile: audRegex },
+                { 'formData.audience': audRegex },
+                { 'formData.role': audRegex },
+                { 'formData.whoAreYou': audRegex }
+            ];
+        }
+        if (source && source !== 'all' && typeof source === 'string') {
+            query.source = { $regex: new RegExp(escapeRegex(source.trim()), 'i') };
         }
         if (course && course !== 'all' && typeof course === 'string') {
-            query.course = { $regex: new RegExp(escapeRegex(course.trim()), 'i') };
+            const courseRegex = new RegExp(escapeRegex(course.trim()), 'i');
+            if (query.$or) {
+                query.$and = [
+                    { $or: query.$or },
+                    { $or: [{ course: courseRegex }, { programName: courseRegex }] }
+                ];
+                delete query.$or;
+            }
+            else {
+                query.$or = [{ course: courseRegex }, { programName: courseRegex }];
+            }
         }
         if (startDate || endDate) {
             query.createdAt = {};
@@ -267,11 +322,15 @@ const getEnquiries = async (req, res) => {
         if (search && typeof search === 'string') {
             const safeSearch = escapeRegex(search.trim());
             const searchRegex = new RegExp(safeSearch, 'i');
-            query.$or = [
+            const searchConditions = [
                 { leadId: searchRegex },
                 { name: searchRegex },
+                { firstName: searchRegex },
+                { lastName: searchRegex },
                 { email: searchRegex },
                 { phone: searchRegex },
+                { audience: searchRegex },
+                { programName: searchRegex },
                 { organization: searchRegex },
                 { designation: searchRegex },
                 { profile: searchRegex },
@@ -280,6 +339,19 @@ const getEnquiries = async (req, res) => {
                 { source: searchRegex },
                 { sourcePage: searchRegex }
             ];
+            if (query.$or) {
+                query.$and = (query.$and || []).concat([
+                    { $or: query.$or },
+                    { $or: searchConditions }
+                ]);
+                delete query.$or;
+            }
+            else if (query.$and) {
+                query.$and.push({ $or: searchConditions });
+            }
+            else {
+                query.$or = searchConditions;
+            }
         }
         const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
         const limitNum = Math.min(100, Math.max(1, parseInt(String(limit), 10) || 20));
@@ -332,7 +404,7 @@ const updateEnquiry = async (req, res) => {
             res.status(400).json({ success: false, message: 'Invalid enquiry ID' });
             return;
         }
-        const { status, name, phone, email, profile, course, message, organization, designation, notes } = req.body;
+        const { status, name, firstName, lastName, audience, programName, source, phone, email, profile, course, message, organization, designation, notes } = req.body;
         const enquiry = await Enquiry_1.Enquiry.findById(id);
         if (!enquiry) {
             res.status(404).json({ success: false, message: 'Enquiry not found' });
@@ -348,6 +420,16 @@ const updateEnquiry = async (req, res) => {
         }
         if (name !== undefined)
             enquiry.name = String(name).trim().slice(0, 120);
+        if (firstName !== undefined)
+            enquiry.firstName = String(firstName).trim().slice(0, 60);
+        if (lastName !== undefined)
+            enquiry.lastName = String(lastName).trim().slice(0, 60);
+        if (audience !== undefined)
+            enquiry.audience = String(audience).trim().slice(0, 100);
+        if (programName !== undefined)
+            enquiry.programName = String(programName).trim().slice(0, 150);
+        if (source !== undefined)
+            enquiry.source = String(source).trim().slice(0, 100);
         if (phone !== undefined)
             enquiry.phone = String(phone).trim();
         if (email !== undefined)
@@ -455,12 +537,17 @@ const exportEnquiriesCSV = async (req, res) => {
         const leads = await Enquiry_1.Enquiry.find(query).sort({ createdAt: -1 });
         const headers = [
             'Lead ID',
+            'Source',
             'Persona',
+            'Audience / Role',
             'Full Name',
-            'Designation',
-            'Organization',
+            'First Name',
+            'Last Name',
             'Phone Number',
             'Email Address',
+            'Interested Program',
+            'Organization',
+            'Designation',
             'Status',
             'Submitted Date',
             'Form Responses',
@@ -476,18 +563,23 @@ const exportEnquiriesCSV = async (req, res) => {
         const rows = leads.map((l) => {
             const formattedResponses = l.formData
                 ? Object.entries(l.formData).map(([k, v]) => `${k}: ${v}`).join('; ')
-                : (l.course || l.profile || '');
+                : (l.programName || l.course || l.audience || l.profile || '');
             const latestNote = l.notes && l.notes.length > 0
                 ? l.notes[l.notes.length - 1].text
                 : '';
             return [
                 escapeCsv(l.leadId || l._id),
+                escapeCsv(l.source || 'Counselling Form'),
                 escapeCsv(l.persona || 'general'),
+                escapeCsv(l.audience || l.profile || (l.formData ? (l.formData.role || l.formData.whoAreYou) : '') || ''),
                 escapeCsv(l.name),
-                escapeCsv(l.designation || ''),
-                escapeCsv(l.organization || ''),
+                escapeCsv(l.firstName || ''),
+                escapeCsv(l.lastName || ''),
                 escapeCsv((l.countryCode ? l.countryCode + ' ' : '') + l.phone),
                 escapeCsv(l.email || ''),
+                escapeCsv(l.programName || l.course || ''),
+                escapeCsv(l.organization || ''),
+                escapeCsv(l.designation || ''),
                 escapeCsv(l.status),
                 escapeCsv(new Date(l.createdAt).toISOString()),
                 escapeCsv(formattedResponses),

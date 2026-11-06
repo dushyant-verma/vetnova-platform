@@ -10,6 +10,10 @@ export interface IEnquiry extends Document {
     leadId: string;
     persona: LeadPersona;
     name: string;
+    firstName?: string;
+    lastName?: string;
+    audience?: string;
+    programName?: string;
     designation?: string;
     organization?: string;
     countryCode?: string;

@@ -22,16 +22,15 @@ export async function seedWebsiteContent() {
 
   try {
     // 1. Seed Blog Categories from blog.html
+    await BlogCategory.deleteMany({
+      slug: { $in: ['surgery', 'radiology', 'emergency', 'pet-care', 'welfare', 'nurse', 'general'] }
+    });
+
     const categoriesData = [
-      { name: 'SURGERY', slug: 'surgery', description: 'Soft tissue and orthopedic surgical protocols', status: 'Published' },
-      { name: 'RADIOLOGY & IMAGING', slug: 'radiology', description: 'X-Ray, ultrasound and diagnostic imaging', status: 'Published' },
-      { name: 'EMERGENCY CARE', slug: 'emergency', description: 'Critical care, triage and ICU protocols', status: 'Published' },
       { name: 'CLINICAL SKILLS', slug: 'clinical-skills', description: 'Hands-on clinical skills and procedures', status: 'Published' },
-      { name: 'PET CARE & WELLNESS', slug: 'pet-care', description: 'Pet health, nutrition and preventative care', status: 'Published' },
-      { name: 'ANIMAL WELFARE', slug: 'welfare', description: 'Shelter medicine, ethics and animal welfare', status: 'Published' },
-      { name: 'VET NURSES', slug: 'nurse', description: 'Veterinary nursing and assistant workflows', status: 'Published' },
-      { name: 'CAREER ADVICE', slug: 'career', description: 'Career development and clinic management', status: 'Published' },
-      { name: 'GENERAL', slug: 'general', description: 'General articles and clinical announcements', status: 'Published' }
+      { name: 'CONTINUING EDUCATION', slug: 'continuing-education', description: 'Lifelong learning and modular upskilling for practising clinicians', status: 'Published' },
+      { name: 'TRAINING PHILOSOPHY', slug: 'training-philosophy', description: 'Bridging classroom theory with supervised practical competence', status: 'Published' },
+      { name: 'CAREER ADVICE', slug: 'career', description: 'Career development and clinic management', status: 'Published' }
     ];
 
     for (const cat of categoriesData) {
@@ -45,7 +44,7 @@ export async function seedWebsiteContent() {
 
     // 2. Seed Advisory Board Members from about.html#advisory-board
     await AdvisoryBoard.deleteMany({
-      name: { $in: ['Dr. Ramesh Deshmukh', 'Dr. Sunita Rao', 'Dr. Vikram Patil', 'Dr. Ananya Joshi'] }
+      name: { $in: ['Dr. Ramesh Deshmukh', 'Dr. Sunita Rao', 'Dr. Vikram Patil', 'Dr. Ananya Joshi', 'Dr. Shantibhushan "Shanti" Jha'] }
     });
 
     const advisoryData = [
@@ -234,32 +233,38 @@ export async function seedWebsiteContent() {
       },
       {
         name: 'Kallahalli Umesh, MVSc, MSc (England)',
-        designation: 'Small Animal Clinician, Educator & Scientific Communicator | President, National Veterinary Foundation',
-        organization: 'National Veterinary Foundation (NVF) & Mars Petcare',
-        qualification: 'MVSc, MSc (RVC England), Diplomate CE',
-        bio: 'International clinician and educator with over 1,250 invited lectures, pioneer of Asia\'s premier continuing veterinary education program (MCVPD), former Scientific Affairs Manager at Mars Petcare, and President of the National Veterinary Foundation (NVF).',
+        designation: 'Small Animal Clinician | Veterinary Educator | Scientific Communicator',
+        organization: 'NVF Foundation & Mars Petcare',
+        qualification: 'MVSc, MSc (England)',
+        bio: 'Kallahalli Umesh is an internationally respected small animal clinician, educator, and scientific communicator with over three decades of experience in small animal medicine, recognized for evidence-based practice and continuing clinical education across Asia.',
         fullBio: [
-          'Dr. Kallahalli G. Umesh (Dr. K. G. Umesh) is a celebrated small animal clinician, educator, and scientific communicator based in Bangalore. Formerly on the faculty of the Department of Clinical Medicine at Bangalore Veterinary College, he went on to serve as Scientific Affairs Manager and Director of Scientific Communications at Mars Petcare (Waltham).',
-          'He has dedicated his career to modernizing pet healthcare standards, clinical nutrition, and evidence-based practice across South Asia. Dr. Umesh has delivered clinical lectures and masterclasses in more than 30 countries and continues to spearhead veterinary capacity-building programs across India.'
+          'Kallahalli Umesh is an internationally respected small animal clinician, educator, and scientific communicator with over three decades of experience in small animal medicine. A postgraduate in Clinical Medicine and former faculty member at Bangalore Veterinary College, he is widely recognized for his contributions to evidence-based veterinary practice, continuing professional development, and clinical education across Asia.',
+          'As Director of Scientific Affairs (Waltham) at Mars Petcare, Umesh pioneered the Mars Continuing Veterinary Professional Development (MCVPD) programme, the first structured continuing education initiative of its kind in the region. The programme contributed significantly to veterinary education by providing small animal practitioners with expert-led lectures, hands-on wet laboratories, and practical clinical workshops.',
+          'Umesh currently practices as a Small Animal Consultant in Bangalore, India, managing referral cases with special interests in Internal Medicine, Clinical Nutrition, and Dermatology.',
+          'A passionate educator and scientific communicator, Umesh has delivered more than 1,250 invited lectures at national and international conferences, continuing education programmes, and specialist meetings. His ability to translate scientific evidence into practical clinical applications has made him a sought-after speaker in India, across Asia, and internationally.',
+          'He serves as President of the NVF Foundation, which organizes Vetopia, one of India’s leading veterinary educational conferences. He has played an important role in developing educational initiatives for veterinarians and pet owners across the region and continues to advise veterinary start-ups and multinational pet companies in the areas of clinical education, professional training, and wet-lab learning.',
+          'Umesh has received numerous awards recognizing his contributions to veterinary medicine and education, including the Outstanding Veterinarian Award from the Veterinary Council of India (Government of India), Innovation Award, Best Teacher Award, Guru Ratna Award, Dermatology Teaching Award from the Indian Association of Veterinary Dermatology (IAVD), and Fellowship of the Animal Nutrition Association.',
+          'An advocate of evidence-based medicine, he has authored hundreds of scientific articles, clinical reviews, educational manuals, and research publications for veterinarians and pet owners. He is also an active contributor to print, electronic, and digital media, promoting scientific advances and awareness in companion animal health.',
+          'Dr. Umesh is an active member of several national and international professional organizations and represents India at international veterinary conferences and professional associations, particularly in the field of veterinary dermatology.'
         ],
         qualifications: [
           { degree: 'B.V.Sc.', field: 'Veterinary Science & Animal Husbandry', institution: 'Veterinary College, Hebbal, UAS Bangalore', year: '1988' },
           { degree: 'M.V.Sc.', field: 'Veterinary Clinical Medicine', institution: 'Veterinary College, UAS Bangalore', year: '1991' },
           { degree: 'M.Sc. (Clinical Studies)', field: 'Small Animal Internal Medicine & Dermatology', institution: 'Royal Veterinary College (RVC), University of London, England', year: '1998' },
-          { degree: 'Diplomate / Fellow (CE)', field: 'Continuing Veterinary Professional Development', institution: 'Mars / Waltham Centre for Pet Nutrition, UK', year: '2003' }
+          { degree: 'Fellowship (ANA)', field: 'Animal Nutrition & Clinical Dietetics', institution: 'Animal Nutrition Association', year: 'Fellow' }
         ],
         achievements: [
-          '<strong>President, National Veterinary Foundation (NVF):</strong> Steers the apex non-profit organization dedicated to advancing companion animal welfare, continuing education, and veterinary standards in India.',
-          '<strong>1,250+ Invited Scientific Lectures:</strong> Delivered more than 1,250 academic lectures, clinical workshops, and keynotes at state, national, and international veterinary conferences across five continents.',
-          '<strong>MCVPD Founder:</strong> Architect of the Mars Continuing Veterinary Professional Development (MCVPD) programme—widely recognized as Asia’s first structured, multi-module continuing education program for practicing veterinarians.',
-          '<strong>Veterinary Council of India (VCI) Outstanding Vet Award:</strong> Conferred top national recognition by the VCI and Indian veterinary associations for revolutionary contributions to companion animal clinical education and pet nutrition advocacy.',
-          '<strong>Author & Editorial Authority:</strong> Authored standard clinical handbooks on canine dermatology, clinical medicine algorithms, and clinical dietetics used by veterinary students and clinicians throughout India.'
+          '<strong>Outstanding Veterinarian Award:</strong> Conferred by the Veterinary Council of India (VCI), Government of India.',
+          '<strong>Innovation Award:</strong> Recognized for advancing clinical learning methodologies and continuing professional development.',
+          '<strong>Best Teacher Award &amp; Guru Ratna Award:</strong> Prestigious national honours recognizing lifetime excellence in veterinary teaching and mentorship.',
+          '<strong>Dermatology Teaching Award:</strong> Conferred by the Indian Association of Veterinary Dermatology (IAVD).',
+          '<strong>Fellowship of the Animal Nutrition Association:</strong> Conferred for distinguished contributions to animal clinical nutrition.'
         ],
         researchInterests: [
-          'Small Animal Dermatology & Allergic Skin Disease Protocols',
-          'Clinical Dietetics, Canine & Feline Therapeutic Nutrition',
-          'Evidence-Based Small Animal Internal Medicine Algorithms',
-          'Continuing Professional Development & Practitioner Capacity Building'
+          'Small Animal Medicine &amp; Internal Medicine Referral Care',
+          'Clinical Nutrition &amp; Evidence-Based Dietetics Protocols',
+          'Veterinary Dermatology &amp; Allergic Skin Disease Protocols',
+          'Continuing Veterinary Professional Development &amp; Wet-Lab Workshops'
         ],
         image: 'assets/images/about/about-advisor-06.webp',
         displayOrder: 6,

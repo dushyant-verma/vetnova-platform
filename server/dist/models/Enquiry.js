@@ -53,6 +53,27 @@ const enquirySchema = new mongoose_1.Schema({
         required: [true, 'Name is required'],
         trim: true
     },
+    firstName: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    lastName: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    audience: {
+        type: String,
+        default: '',
+        trim: true,
+        index: true
+    },
+    programName: {
+        type: String,
+        default: '',
+        trim: true
+    },
     designation: {
         type: String,
         default: '',
@@ -135,8 +156,6 @@ const enquirySchema = new mongoose_1.Schema({
     timestamps: true
 });
 enquirySchema.index({ createdAt: -1 });
-enquirySchema.index({ status: 1 });
-enquirySchema.index({ persona: 1 });
 enquirySchema.index({ email: 1 });
 enquirySchema.index({ phone: 1 });
 enquirySchema.index({ organization: 1 });

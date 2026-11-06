@@ -50,7 +50,24 @@ const getPrograms = async (req, res) => {
         const programs = await Program_1.Program.find(filter)
             .sort({ order: 1, title: 1 })
             .populate("faculty", "name specialization department image experience status programs");
-        res.json(programs);
+        // Clean legacy/broken image paths and self-heal in MongoDB
+        Program_1.Program.updateMany({ slug: 'orthopaedics', image: { $regex: 'facility-diagnostics-room' } }, { $set: { image: 'assets/images/programs/program-orthopaedics.webp' } }).exec().catch(() => { });
+        Program_1.Program.updateMany({ slug: 'veterinary-dentistry', image: { $regex: 'facility-diagnostics-room' } }, { $set: { image: 'assets/images/programs/program-dentistry.webp' } }).exec().catch(() => { });
+        Program_1.Program.updateMany({ slug: 'nephrology-and-urology', image: { $regex: 'facility-diagnostics-room' } }, { $set: { image: 'assets/images/programs/program-nephrology.webp' } }).exec().catch(() => { });
+        const cleaned = programs.map((p) => {
+            const obj = p.toObject ? p.toObject() : { ...p };
+            if (obj.slug === 'orthopaedics' && (!obj.image || obj.image.includes('facility-diagnostics-room'))) {
+                obj.image = 'assets/images/programs/program-orthopaedics.webp';
+            }
+            else if (obj.slug === 'veterinary-dentistry' && (!obj.image || obj.image.includes('facility-diagnostics-room'))) {
+                obj.image = 'assets/images/programs/program-dentistry.webp';
+            }
+            else if (obj.slug === 'nephrology-and-urology' && (!obj.image || obj.image.includes('facility-diagnostics-room'))) {
+                obj.image = 'assets/images/programs/program-nephrology.webp';
+            }
+            return obj;
+        });
+        res.json(cleaned);
     }
     catch (error) {
         res.status(500).json({ message: error.message });

@@ -40,6 +40,10 @@ export interface IEnquiryData {
   leadId?: string;
   persona?: LeadPersona;
   name: string;
+  firstName?: string;
+  lastName?: string;
+  audience?: string;
+  programName?: string;
   designation?: string;
   organization?: string;
   countryCode?: string;
@@ -62,6 +66,7 @@ export const EnquiriesManagement = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [personaFilter, setPersonaFilter] = useState<string>("all");
+  const [audienceFilter, setAudienceFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
@@ -78,13 +83,20 @@ export const EnquiriesManagement = () => {
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
-  // Fetch enquiries with search, persona, status, date range & pagination
+  // Fetch enquiries with search, persona, audience, status, date range & pagination
   const { data: responseData, isLoading, isRefetching, refetch } = useQuery({
-    queryKey: ["admin-enquiries", searchTerm, personaFilter, statusFilter, startDate, endDate, currentPage],
+    queryKey: ["admin-enquiries", searchTerm, personaFilter, audienceFilter, statusFilter, startDate, endDate, currentPage],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append("search", searchTerm);
-      if (personaFilter !== "all") params.append("persona", personaFilter);
+      if (personaFilter !== "all") {
+        if (personaFilter === "counselling") {
+          params.append("source", "Counselling Form");
+        } else {
+          params.append("persona", personaFilter);
+        }
+      }
+      if (audienceFilter !== "all") params.append("audience", audienceFilter);
       if (statusFilter !== "all") params.append("status", statusFilter);
       if (startDate) params.append("startDate", startDate);
       if (endDate) params.append("endDate", endDate);
@@ -193,7 +205,14 @@ export const EnquiriesManagement = () => {
     try {
       setIsExporting(true);
       const params = new URLSearchParams();
-      if (personaFilter !== "all") params.append("persona", personaFilter);
+      if (personaFilter !== "all") {
+        if (personaFilter === "counselling") {
+          params.append("source", "Counselling Form");
+        } else {
+          params.append("persona", personaFilter);
+        }
+      }
+      if (audienceFilter !== "all") params.append("audience", audienceFilter);
       if (statusFilter !== "all") params.append("status", statusFilter);
       if (startDate) params.append("startDate", startDate);
       if (endDate) params.append("endDate", endDate);
@@ -274,6 +293,7 @@ export const EnquiriesManagement = () => {
 
   const personaTabs = [
     { id: "all", label: "All Inquiries", icon: Inbox },
+    { id: "counselling", label: "Counselling Form", icon: MessageSquare },
     { id: "student", label: "Students & Fresh Grads", icon: GraduationCap },
     { id: "practitioner", label: "Practising Doctors", icon: Stethoscope },
     { id: "nurse", label: "Vet Nurses", icon: ShieldCheck },
@@ -382,6 +402,25 @@ export const EnquiriesManagement = () => {
 
         {/* Filter Controls */}
         <div className="flex flex-wrap items-center gap-3">
+          {/* Audience Filter */}
+          <div className="flex items-center gap-2">
+            <GraduationCap className="w-4 h-4 text-slate-400" />
+            <select
+              value={audienceFilter}
+              onChange={(e) => {
+                setAudienceFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+            >
+              <option value="all">All Audiences</option>
+              <option value="Fresh Vets & Interns">Fresh Vets &amp; Interns</option>
+              <option value="Practising Veterinarians">Practising Veterinarians</option>
+              <option value="Specialists & Experienced Vets">Specialists &amp; Experienced Vets</option>
+              <option value="Pet Owners & Rescuers">Pet Owners &amp; Rescuers</option>
+            </select>
+          </div>
+
           {/* Status Filter */}
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-slate-400" />
@@ -453,19 +492,21 @@ export const EnquiriesManagement = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/70 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                <th className="px-5 py-3.5">Lead / Persona</th>
-                <th className="px-5 py-3.5">Applicant Name</th>
-                <th className="px-5 py-3.5">Contact Details</th>
-                <th className="px-5 py-3.5">Key Responses / Focus</th>
-                <th className="px-5 py-3.5">Status</th>
-                <th className="px-5 py-3.5">Date Submitted</th>
-                <th className="px-5 py-3.5 text-right">Actions</th>
+                <th className="px-4 py-3.5">Enquiry ID</th>
+                <th className="px-4 py-3.5">Full Name</th>
+                <th className="px-4 py-3.5">Contact Details</th>
+                <th className="px-4 py-3.5">Audience / Role</th>
+                <th className="px-4 py-3.5">Interested Program</th>
+                <th className="px-4 py-3.5">Source</th>
+                <th className="px-4 py-3.5">Status</th>
+                <th className="px-4 py-3.5">Submission Date</th>
+                <th className="px-4 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-slate-400">
+                  <td colSpan={9} className="text-center py-12 text-slate-400">
                     <div className="inline-flex items-center gap-2">
                       <RefreshCw className="w-5 h-5 animate-spin text-brand-primary" /> Loading inquiries...
                     </div>
@@ -473,32 +514,34 @@ export const EnquiriesManagement = () => {
                 </tr>
               ) : enquiries.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-slate-400">
+                  <td colSpan={9} className="text-center py-12 text-slate-400">
                     <div className="max-w-xs mx-auto space-y-2">
                       <Inbox className="w-8 h-8 text-slate-300 mx-auto" />
                       <p className="font-medium text-slate-600">No leads found</p>
-                      <p className="text-xs text-slate-400">Try adjusting your search terms or persona filters.</p>
+                      <p className="text-xs text-slate-400">Try adjusting your search terms or filters.</p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 enquiries.map((enquiry) => {
                   const hasNotes = enquiry.notes && enquiry.notes.length > 0;
+                  const fullName = enquiry.name || [enquiry.firstName, enquiry.lastName].filter(Boolean).join(" ") || "Unknown";
+                  const audienceRole = enquiry.audience || enquiry.profile || enquiry.formData?.role || enquiry.formData?.whoAreYou || (enquiry.persona ? enquiry.persona.toUpperCase() : "—");
+                  const program = enquiry.programName || enquiry.course || enquiry.formData?.interestedProgram || enquiry.formData?.areaOfInterest || enquiry.formData?.skillToDevelop || "General";
+                  const source = enquiry.source || (enquiry.persona === "partner" ? "Partner Form" : "Counselling Form");
+
                   return (
                     <tr key={enquiry._id} className="hover:bg-slate-50/80 transition-colors">
-                      {/* Lead ID & Persona */}
-                      <td className="px-5 py-4">
-                        <div className="font-mono text-xs font-semibold text-slate-600">
+                      {/* Enquiry ID */}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className="font-mono text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-1 rounded">
                           {enquiry.leadId || enquiry._id.slice(-6).toUpperCase()}
-                        </div>
-                        <div className="mt-1">
-                          {getPersonaBadge(enquiry.persona)}
-                        </div>
+                        </span>
                       </td>
 
-                      {/* Applicant Name & Organization */}
-                      <td className="px-5 py-4">
-                        <div className="font-bold text-slate-900">{enquiry.name}</div>
+                      {/* Full Name */}
+                      <td className="px-4 py-4">
+                        <div className="font-bold text-slate-900">{fullName}</div>
                         {enquiry.designation && (
                           <div className="text-xs text-slate-500 mt-0.5">{enquiry.designation}</div>
                         )}
@@ -509,8 +552,8 @@ export const EnquiriesManagement = () => {
                         )}
                       </td>
 
-                      {/* Contact */}
-                      <td className="px-5 py-4">
+                      {/* Contact Details */}
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-1.5 text-slate-800 text-xs">
                           <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                           <a 
@@ -531,76 +574,43 @@ export const EnquiriesManagement = () => {
                             </a>
                           </div>
                         ) : (
-                          <div className="text-[11px] text-slate-400 italic mt-0.5">No email provided</div>
+                          <div className="text-[11px] text-slate-400 italic mt-0.5">No email</div>
                         )}
                       </td>
 
-                      {/* Key Responses / Summary */}
-                      <td className="px-5 py-4 max-w-xs">
-                        {enquiry.formData ? (
-                          <div className="space-y-1 text-xs">
-                            {enquiry.formData.currentStage && (
-                              <span className="inline-block bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-medium mr-1 mb-1">
-                                Stage: {enquiry.formData.currentStage}
-                              </span>
-                            )}
-                            {enquiry.formData.areaOfInterest && (
-                              <div className="text-slate-800 font-medium truncate" title={enquiry.formData.areaOfInterest}>
-                                {enquiry.formData.areaOfInterest}
-                              </div>
-                            )}
-                            {enquiry.formData.skillToDevelop && (
-                              <div className="text-slate-500 text-[11px] truncate">
-                                Skill: {enquiry.formData.skillToDevelop}
-                              </div>
-                            )}
-                            {enquiry.formData.yearsOfExperience && (
-                              <span className="inline-block bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-medium mr-1 mb-1">
-                                Exp: {enquiry.formData.yearsOfExperience}
-                              </span>
-                            )}
-                            {enquiry.formData.areaToStrengthen && (
-                              <div className="text-slate-800 font-medium truncate">
-                                Focus: {enquiry.formData.areaToStrengthen}
-                              </div>
-                            )}
-                            {enquiry.formData.preferredTrainingLevel && (
-                              <div className="text-slate-500 text-[11px]">
-                                Level: {enquiry.formData.preferredTrainingLevel}
-                              </div>
-                            )}
-                            {enquiry.formData.lookingFor && (
-                              <div className="text-slate-800 font-medium truncate">
-                                Looking for: {enquiry.formData.lookingFor}
-                              </div>
-                            )}
-                            {enquiry.formData.skillsInterest && (
-                              <div className="text-slate-500 text-[11px] truncate">
-                                Skills: {enquiry.formData.skillsInterest}
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="text-xs text-slate-700 font-medium">
-                            {enquiry.course || enquiry.profile || "General Inquiry"}
-                          </div>
-                        )}
+                      {/* Audience / Role */}
+                      <td className="px-4 py-4">
+                        <span className="inline-block bg-brand-primary/10 text-brand-primary font-medium px-2.5 py-1 rounded-lg text-xs">
+                          {audienceRole}
+                        </span>
+                      </td>
+
+                      {/* Interested Program */}
+                      <td className="px-4 py-4 max-w-[200px]">
+                        <div className="text-xs font-medium text-slate-800 truncate" title={program}>
+                          {program}
+                        </div>
                         {hasNotes && (
                           <div className="mt-1 flex items-center gap-1 text-[11px] text-amber-700 font-medium">
-                            <MessageSquare className="w-3 h-3" /> {enquiry.notes?.length} follow-up note(s)
+                            <MessageSquare className="w-3 h-3" /> {enquiry.notes?.length} note(s)
                           </div>
                         )}
                       </td>
 
-                      {/* Status Badge & Quick Change */}
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          {getStatusBadge(enquiry.status)}
-                        </div>
+                      {/* Source */}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-100 text-violet-800 border border-violet-200">
+                          {source}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        {getStatusBadge(enquiry.status)}
                       </td>
 
                       {/* Date Submitted */}
-                      <td className="px-5 py-4 text-xs text-slate-500">
+                      <td className="px-4 py-4 text-xs text-slate-500 whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
                           {new Date(enquiry.createdAt).toLocaleDateString(undefined, {
@@ -615,8 +625,7 @@ export const EnquiriesManagement = () => {
                       </td>
 
                       {/* Actions */}
-                      <td className="px-5 py-4 text-right space-x-1 whitespace-nowrap">
-                        {/* View Details */}
+                      <td className="px-4 py-4 text-right space-x-1 whitespace-nowrap">
                         <button
                           onClick={() => handleOpenDetailModal(enquiry)}
                           className="p-2 text-slate-600 hover:text-brand-primary hover:bg-slate-100 rounded-lg transition-colors"
@@ -624,8 +633,6 @@ export const EnquiriesManagement = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-
-                        {/* Quick Status Select */}
                         <select
                           value={enquiry.status}
                           onChange={(e) => handleStatusChange(enquiry._id, e.target.value)}
@@ -639,8 +646,6 @@ export const EnquiriesManagement = () => {
                           <option value="Closed">Closed</option>
                           <option value="Converted">Converted</option>
                         </select>
-
-                        {/* Delete Button */}
                         <button
                           onClick={() => setDeleteTarget(enquiry)}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -742,17 +747,43 @@ export const EnquiriesManagement = () => {
               {/* Applicant / Contact Details Card */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
-                  <span className="text-xs text-slate-400 font-medium">Applicant Name</span>
-                  <p className="font-bold text-slate-900 text-base">{selectedEnquiry.name}</p>
+                  <span className="text-xs text-slate-400 font-medium">Enquiry ID &amp; Source</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="font-mono text-sm font-bold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-lg">
+                      {selectedEnquiry.leadId || selectedEnquiry._id}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-100 text-violet-800 border border-violet-200">
+                      {selectedEnquiry.source || (selectedEnquiry.persona === "partner" ? "Partner Form" : "Counselling Form")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
+                  <span className="text-xs text-slate-400 font-medium">Applicant Full Name</span>
+                  <p className="font-bold text-slate-900 text-base">
+                    {selectedEnquiry.name || [selectedEnquiry.firstName, selectedEnquiry.lastName].filter(Boolean).join(" ") || "Unknown"}
+                  </p>
                   {selectedEnquiry.designation && (
                     <p className="text-xs text-slate-500">{selectedEnquiry.designation}</p>
+                  )}
+                  {selectedEnquiry.organization && (
+                    <p className="text-xs font-medium text-brand-primary flex items-center gap-1 mt-0.5">
+                      <Building2 className="w-3 h-3 shrink-0" /> {selectedEnquiry.organization}
+                    </p>
                   )}
                 </div>
 
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
-                  <span className="text-xs text-slate-400 font-medium">Organization / Clinic</span>
+                  <span className="text-xs text-slate-400 font-medium">Audience / Role</span>
+                  <p className="font-bold text-brand-primary text-base">
+                    {selectedEnquiry.audience || selectedEnquiry.profile || selectedEnquiry.formData?.role || selectedEnquiry.formData?.whoAreYou || (selectedEnquiry.persona ? selectedEnquiry.persona.toUpperCase() : "—")}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1">
+                  <span className="text-xs text-slate-400 font-medium">Interested Program</span>
                   <p className="font-bold text-slate-900 text-base">
-                    {selectedEnquiry.organization || "Independent / Individual"}
+                    {selectedEnquiry.programName || selectedEnquiry.course || selectedEnquiry.formData?.interestedProgram || selectedEnquiry.formData?.areaOfInterest || selectedEnquiry.formData?.skillToDevelop || "General"}
                   </p>
                 </div>
 
@@ -789,6 +820,21 @@ export const EnquiriesManagement = () => {
                   ) : (
                     <p className="text-xs text-slate-400 italic mt-1">Not provided on form</p>
                   )}
+                </div>
+
+                <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-1 md:col-span-2">
+                  <span className="text-xs text-slate-400 font-medium">Submission Timestamp</span>
+                  <p className="text-sm text-slate-700 font-medium">
+                    {new Date(selectedEnquiry.createdAt).toLocaleString(undefined, {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit"
+                    })}
+                  </p>
                 </div>
               </div>
 
