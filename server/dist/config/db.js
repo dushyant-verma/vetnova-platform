@@ -5,18 +5,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.connectDB = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+const sanitizeMongoUri = (uri) => {
+    if (!uri)
+        return 'undefined';
+    return uri.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@');
+};
 const connectDB = async () => {
-    const primaryUri = process.env.MONGO_URI;
+    // Support both MONGO_URI and MONGODB_URI across hosting providers
+    const primaryUri = process.env.MONGO_URI || process.env.MONGODB_URI;
     const localUri = 'mongodb://127.0.0.1:27017/vetnova';
     if (primaryUri) {
         try {
             const conn = await mongoose_1.default.connect(primaryUri);
-            console.log(`MongoDB Connected: ${conn.connection.host}`);
-            return;
+            console.log(`[Database] MongoDB Connected: ${conn.connection.host} (Database: ${conn.connection.name})`);
+            return conn;
         }
         catch (primaryError) {
-            console.error(`[Database Warning] Primary MONGO_URI failed (${primaryError.message}).`);
+            console.error(`[Database Warning] Primary MongoDB connection failed (${sanitizeMongoUri(primaryUri)}): ${primaryError.message}`);
             if (process.env.NODE_ENV === 'production') {
+                console.error('[Database Fatal] Exiting production process due to primary database connection failure.');
                 process.exit(1);
             }
             console.log('[Database] Falling back to local MongoDB (127.0.0.1:27017)...');
@@ -24,10 +31,11 @@ const connectDB = async () => {
     }
     try {
         const conn = await mongoose_1.default.connect(localUri);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        console.log(`[Database] MongoDB Connected locally: ${conn.connection.host} (Database: ${conn.connection.name})`);
+        return conn;
     }
     catch (error) {
-        console.error(`Error: ${error.message}`);
+        console.error(`[Database Fatal] Local database connection failed: ${error.message}`);
         process.exit(1);
     }
 };

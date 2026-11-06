@@ -7,6 +7,7 @@ import path from 'path';
 
 import { connectDB } from './config/db';
 import { isCloudinaryConfigured } from './config/cloudinaryConfig';
+import { ensureSuperAdminExists } from './utils/initAdmin';
 
 import authRoutes from './routes/authRoutes';
 import programRoutes from './routes/programRoutes';
@@ -43,6 +44,83 @@ const app = express();
 
 // Trust reverse proxy for accurate IP resolution on Render/Vercel
 app.set('trust proxy', 1);
+
+// Production & Development CORS Configuration
+const configuredOrigins = [
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  process.env.CORS_ORIGIN,
+  'https://vetnova-platform.vercel.app',
+  'https://vetnova.in',
+  'https://www.vetnova.in',
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'http://localhost:3000',
+  'http://localhost:5500',
+  'http://localhost:5501',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:4173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5500',
+  'http://127.0.0.1:5501'
+]
+  .filter(Boolean)
+  .map(url => String(url).trim().replace(/\/+$/, '').toLowerCase());
+
+const isOriginAllowed = (origin: string): boolean => {
+  if (!origin) return true; // Server-to-server, mobile clients, curl, Postman
+  const clean = origin.trim().replace(/\/+$/, '').toLowerCase();
+
+  // 1. Direct match with configured origins
+  if (configuredOrigins.includes(clean)) {
+    return true;
+  }
+
+  // 2. Allow all localhost & 127.0.0.1 loopbacks on any port
+  if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(clean)) {
+    return true;
+  }
+
+  // 3. Allow Vercel production & preview deployment URLs for VetNova platform
+  if (/^https:\/\/vetnova-platform(-[a-z0-9-]+)?\.vercel\.app$/.test(clean)) {
+    return true;
+  }
+
+  // 4. Allow official VetNova custom domain (and subdomains)
+  if (/^https:\/\/([a-z0-9-]+\.)?vetnova\.in$/.test(clean)) {
+    return true;
+  }
+
+  return false;
+};
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`[CORS Blocked] Origin not allowed: ${origin}`);
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Authorization', 'Content-Range', 'X-Content-Range'],
+  maxAge: 86400,
+  optionsSuccessStatus: 204
+};
+
+// 1. Register CORS before all routes and body parsers
+app.use(cors(corsOptions));
+
+// 2. Explicitly handle preflight OPTIONS requests early
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 // Security Headers via Helmet
 app.use(helmet({
@@ -83,40 +161,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connect Database
-connectDB();
+// Connect Database & Initialize Administrative Bootstrap
+connectDB().then(async () => {
+  await ensureSuperAdminExists();
+}).catch((err) => {
+  console.error('[Startup Error] Database connection or init failed:', err.message || err);
+});
 
 // Storage Startup Validation
 const isCloudinaryActive = isCloudinaryConfigured();
 console.log(`[Storage] Cloudinary configured: ${isCloudinaryActive}`);
-
-// Trusted Origins Configuration
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  'https://vetnova-platform.vercel.app',
-  'https://vetnova.in',
-  'https://www.vetnova.in',
-  'http://localhost:5173',
-  'http://localhost:4173',
-  'http://localhost:3000',
-  'http://localhost:5500',
-  'http://localhost:5501',
-  'http://127.0.0.1:5500',
-  'http://127.0.0.1:5501'
-].filter(Boolean) as string[];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-      callback(null, origin || true);
-    } else {
-      callback(new Error('CORS policy violation: Origin not allowed'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-}));
 
 // Rate Limiters
 const globalLimiter = rateLimit({
@@ -124,6 +178,7 @@ const globalLimiter = rateLimit({
   max: 300, // 300 requests per IP per window
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS',
   message: { success: false, message: 'Too many requests from this IP, please try again later.' }
 });
 app.use('/api', globalLimiter);
@@ -133,6 +188,7 @@ const authLimiter = rateLimit({
   max: 10, // 10 login attempts per 15 minutes
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS',
   message: { success: false, message: 'Too many login attempts. Please try again after 15 minutes.' }
 });
 
@@ -141,6 +197,7 @@ const enquiryLimiter = rateLimit({
   max: 30, // 30 enquiry submissions per 15 minutes
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS',
   message: { success: false, message: 'Too many enquiry submissions from this IP. Please try again later.' }
 });
 

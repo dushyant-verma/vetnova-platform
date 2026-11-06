@@ -8,6 +8,7 @@ import { BlogCategory } from '../models/BlogCategory';
 import { Event } from '../models/Event';
 import { Blog } from '../models/Blog';
 import { Enquiry } from '../models/Enquiry';
+import { Batch } from '../models/Batch';
 import { protect, admin } from '../middlewares/authMiddleware';
 
 const router = Router();
@@ -24,7 +25,8 @@ router.get('/', protect, admin, async (req, res) => {
       eventsCount,
       blogsCount,
       enquiriesCount,
-      newEnquiriesCount
+      newEnquiriesCount,
+      batchesCount
     ] = await Promise.all([
       Program.countDocuments(),
       Application.countDocuments(),
@@ -35,7 +37,8 @@ router.get('/', protect, admin, async (req, res) => {
       Event.countDocuments(),
       Blog.countDocuments(),
       Enquiry.countDocuments(),
-      Enquiry.countDocuments({ status: 'New' })
+      Enquiry.countDocuments({ status: 'New' }),
+      Batch.countDocuments()
     ]);
 
     res.json({
@@ -49,7 +52,8 @@ router.get('/', protect, admin, async (req, res) => {
       eventsCount,
       blogsCount,
       enquiriesCount,
-      newEnquiriesCount
+      newEnquiriesCount,
+      batchesCount
     });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching stats' });

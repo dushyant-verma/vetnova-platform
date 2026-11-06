@@ -22,8 +22,8 @@ const importData = async () => {
         await Blog_1.Blog.deleteMany();
         await Testimonial_1.Testimonial.deleteMany();
         const createdUsers = await User_1.User.create([
-            { name: 'Super Admin', email: 'admin@vetnova.edu.in', password: 'admin123', role: 'admin' },
-            { name: 'Dr. John Doe', email: 'john@example.com', password: 'admin123', role: 'student' }
+            { name: 'Super Admin', email: 'admin@vetnova.edu.in', password: 'admin123', role: 'super_admin', isActive: true },
+            { name: 'Dr. John Doe', email: 'john@example.com', password: 'admin123', role: 'student', isActive: true }
         ]);
         const adminUser = createdUsers[0]._id;
         const createdExperts = await Expert_1.Expert.create([

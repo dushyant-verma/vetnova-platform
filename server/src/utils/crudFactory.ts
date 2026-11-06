@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import mongoose, { Model } from 'mongoose';
 import sanitizeHtml from 'sanitize-html';
+import bcrypt from 'bcryptjs';
 
 const escapeRegex = (text: string): string => {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
@@ -199,10 +200,18 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
         let sanitizedBody = sanitizeInputBody(req.body);
         sanitizedBody = cleanModelFields(sanitizedBody, model.schema);
 
-        if (model.modelName === 'User' && sanitizedBody.role) {
-          const reqUserRole = (req as any).user?.role;
-          if (sanitizedBody.role === 'super_admin' && reqUserRole !== 'super_admin') {
-            return res.status(403).json({ message: 'Only Super Admin can assign Super Admin role' });
+        if (model.modelName === 'User') {
+          if (sanitizedBody.role) {
+            const reqUserRole = (req as any).user?.role;
+            if (sanitizedBody.role === 'super_admin' && reqUserRole !== 'super_admin') {
+              return res.status(403).json({ message: 'Only Super Admin can assign Super Admin role' });
+            }
+          }
+          if (sanitizedBody.password) {
+            if (!/^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(sanitizedBody.password)) {
+              const salt = await bcrypt.genSalt(10);
+              sanitizedBody.password = await bcrypt.hash(sanitizedBody.password, salt);
+            }
           }
         }
 

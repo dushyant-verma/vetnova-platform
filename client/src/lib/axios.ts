@@ -28,10 +28,18 @@ const getApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:5001/api';
+      const devUrl = import.meta.env.VITE_DEV_API_URL || 'http://localhost:5001/api';
+      return devUrl.trim().replace(/\/+$/, '');
     }
   }
-  return import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
+  // Production or remote environment variable
+  const envUrl = import.meta.env.VITE_API_URL || 'https://vetnova-api-utnd.onrender.com/api';
+  let cleanUrl = String(envUrl).trim().replace(/\/+$/, '');
+  if (!cleanUrl.endsWith('/api')) {
+    cleanUrl = `${cleanUrl}/api`;
+  }
+  return cleanUrl;
 };
 
 const api = axios.create({

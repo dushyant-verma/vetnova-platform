@@ -10,11 +10,12 @@ const BlogCategory_1 = require("../models/BlogCategory");
 const Event_1 = require("../models/Event");
 const Blog_1 = require("../models/Blog");
 const Enquiry_1 = require("../models/Enquiry");
+const Batch_1 = require("../models/Batch");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const router = (0, express_1.Router)();
 router.get('/', authMiddleware_1.protect, authMiddleware_1.admin, async (req, res) => {
     try {
-        const [programsCount, applicationsCount, usersCount, expertsCount, advisoryBoardCount, categoriesCount, eventsCount, blogsCount, enquiriesCount, newEnquiriesCount] = await Promise.all([
+        const [programsCount, applicationsCount, usersCount, expertsCount, advisoryBoardCount, categoriesCount, eventsCount, blogsCount, enquiriesCount, newEnquiriesCount, batchesCount] = await Promise.all([
             Program_1.Program.countDocuments(),
             Application_1.Application.countDocuments(),
             User_1.User.countDocuments(),
@@ -24,7 +25,8 @@ router.get('/', authMiddleware_1.protect, authMiddleware_1.admin, async (req, re
             Event_1.Event.countDocuments(),
             Blog_1.Blog.countDocuments(),
             Enquiry_1.Enquiry.countDocuments(),
-            Enquiry_1.Enquiry.countDocuments({ status: 'New' })
+            Enquiry_1.Enquiry.countDocuments({ status: 'New' }),
+            Batch_1.Batch.countDocuments()
         ]);
         res.json({
             programsCount,
@@ -37,7 +39,8 @@ router.get('/', authMiddleware_1.protect, authMiddleware_1.admin, async (req, re
             eventsCount,
             blogsCount,
             enquiriesCount,
-            newEnquiriesCount
+            newEnquiriesCount,
+            batchesCount
         });
     }
     catch (error) {

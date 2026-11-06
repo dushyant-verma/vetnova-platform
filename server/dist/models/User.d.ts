@@ -4,6 +4,7 @@ export declare const User: mongoose.Model<{
     email: string;
     password: string;
     role: "admin" | "expert" | "guest" | "student" | "super_admin";
+    isActive: boolean;
 } & mongoose.DefaultTimestampProps, {}, {}, {
     id: string;
 }, mongoose.Document<unknown, {}, {
@@ -11,6 +12,7 @@ export declare const User: mongoose.Model<{
     email: string;
     password: string;
     role: "admin" | "expert" | "guest" | "student" | "super_admin";
+    isActive: boolean;
 } & mongoose.DefaultTimestampProps, {
     id: string;
 }, {
@@ -20,6 +22,7 @@ export declare const User: mongoose.Model<{
     email: string;
     password: string;
     role: "admin" | "expert" | "guest" | "student" | "super_admin";
+    isActive: boolean;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -33,11 +36,13 @@ export declare const User: mongoose.Model<{
     email: string;
     password: string;
     role: "admin" | "expert" | "guest" | "student" | "super_admin";
+    isActive: boolean;
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
     name: string;
     email: string;
     password: string;
     role: "admin" | "expert" | "guest" | "student" | "super_admin";
+    isActive: boolean;
 } & mongoose.DefaultTimestampProps, {
     id: string;
 }, Omit<mongoose.DefaultSchemaOptions, "timestamps"> & {
@@ -47,6 +52,7 @@ export declare const User: mongoose.Model<{
     email: string;
     password: string;
     role: "admin" | "expert" | "guest" | "student" | "super_admin";
+    isActive: boolean;
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -60,6 +66,7 @@ export declare const User: mongoose.Model<{
     email: string;
     password: string;
     role: "admin" | "expert" | "guest" | "student" | "super_admin";
+    isActive: boolean;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -71,6 +78,7 @@ export declare const User: mongoose.Model<{
     email: string;
     password: string;
     role: "admin" | "expert" | "guest" | "student" | "super_admin";
+    isActive: boolean;
 } & {
     _id: mongoose.Types.ObjectId;
 } & {

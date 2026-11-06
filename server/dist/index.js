@@ -11,6 +11,7 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const path_1 = __importDefault(require("path"));
 const db_1 = require("./config/db");
 const cloudinaryConfig_1 = require("./config/cloudinaryConfig");
+const initAdmin_1 = require("./utils/initAdmin");
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const programRoutes_1 = __importDefault(require("./routes/programRoutes"));
 const uploadRoutes_1 = __importDefault(require("./routes/uploadRoutes"));
@@ -41,6 +42,75 @@ if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
 const app = (0, express_1.default)();
 // Trust reverse proxy for accurate IP resolution on Render/Vercel
 app.set('trust proxy', 1);
+// Production & Development CORS Configuration
+const configuredOrigins = [
+    process.env.CLIENT_URL,
+    process.env.FRONTEND_URL,
+    process.env.CORS_ORIGIN,
+    'https://vetnova-platform.vercel.app',
+    'https://vetnova.in',
+    'https://www.vetnova.in',
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'http://localhost:3000',
+    'http://localhost:5500',
+    'http://localhost:5501',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:4173',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:5500',
+    'http://127.0.0.1:5501'
+]
+    .filter(Boolean)
+    .map(url => String(url).trim().replace(/\/+$/, '').toLowerCase());
+const isOriginAllowed = (origin) => {
+    if (!origin)
+        return true; // Server-to-server, mobile clients, curl, Postman
+    const clean = origin.trim().replace(/\/+$/, '').toLowerCase();
+    // 1. Direct match with configured origins
+    if (configuredOrigins.includes(clean)) {
+        return true;
+    }
+    // 2. Allow all localhost & 127.0.0.1 loopbacks on any port
+    if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(clean)) {
+        return true;
+    }
+    // 3. Allow Vercel production & preview deployment URLs for VetNova platform
+    if (/^https:\/\/vetnova-platform(-[a-z0-9-]+)?\.vercel\.app$/.test(clean)) {
+        return true;
+    }
+    // 4. Allow official VetNova custom domain (and subdomains)
+    if (/^https:\/\/([a-z0-9-]+\.)?vetnova\.in$/.test(clean)) {
+        return true;
+    }
+    return false;
+};
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || isOriginAllowed(origin)) {
+            callback(null, true);
+        }
+        else {
+            console.warn(`[CORS Blocked] Origin not allowed: ${origin}`);
+            callback(null, false);
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Authorization', 'Content-Range', 'X-Content-Range'],
+    maxAge: 86400,
+    optionsSuccessStatus: 204
+};
+// 1. Register CORS before all routes and body parsers
+app.use((0, cors_1.default)(corsOptions));
+// 2. Explicitly handle preflight OPTIONS requests early
+app.use((req, res, next) => {
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+    }
+    next();
+});
 // Security Headers via Helmet
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: {
@@ -80,44 +150,22 @@ app.use((req, res, next) => {
         sanitizeNoSqlOperators(req.params);
     next();
 });
-// Connect Database
-(0, db_1.connectDB)();
+// Connect Database & Initialize Administrative Bootstrap
+(0, db_1.connectDB)().then(async () => {
+    await (0, initAdmin_1.ensureSuperAdminExists)();
+}).catch((err) => {
+    console.error('[Startup Error] Database connection or init failed:', err.message || err);
+});
 // Storage Startup Validation
 const isCloudinaryActive = (0, cloudinaryConfig_1.isCloudinaryConfigured)();
 console.log(`[Storage] Cloudinary configured: ${isCloudinaryActive}`);
-// Trusted Origins Configuration
-const allowedOrigins = [
-    process.env.CLIENT_URL,
-    'https://vetnova-platform.vercel.app',
-    'https://vetnova.in',
-    'https://www.vetnova.in',
-    'http://localhost:5173',
-    'http://localhost:4173',
-    'http://localhost:3000',
-    'http://localhost:5500',
-    'http://localhost:5501',
-    'http://127.0.0.1:5500',
-    'http://127.0.0.1:5501'
-].filter(Boolean);
-app.use((0, cors_1.default)({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-            callback(null, origin || true);
-        }
-        else {
-            callback(new Error('CORS policy violation: Origin not allowed'));
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
-}));
 // Rate Limiters
 const globalLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 300, // 300 requests per IP per window
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
     message: { success: false, message: 'Too many requests from this IP, please try again later.' }
 });
 app.use('/api', globalLimiter);
@@ -126,6 +174,7 @@ const authLimiter = (0, express_rate_limit_1.default)({
     max: 10, // 10 login attempts per 15 minutes
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
     message: { success: false, message: 'Too many login attempts. Please try again after 15 minutes.' }
 });
 const enquiryLimiter = (0, express_rate_limit_1.default)({
@@ -133,6 +182,7 @@ const enquiryLimiter = (0, express_rate_limit_1.default)({
     max: 30, // 30 enquiry submissions per 15 minutes
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
     message: { success: false, message: 'Too many enquiry submissions from this IP. Please try again later.' }
 });
 // Routes

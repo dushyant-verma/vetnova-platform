@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.crudFactory = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const sanitize_html_1 = __importDefault(require("sanitize-html"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const escapeRegex = (text) => {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 };
@@ -187,10 +188,18 @@ const crudFactory = (model, populateOpts) => {
                 }
                 let sanitizedBody = sanitizeInputBody(req.body);
                 sanitizedBody = cleanModelFields(sanitizedBody, model.schema);
-                if (model.modelName === 'User' && sanitizedBody.role) {
-                    const reqUserRole = req.user?.role;
-                    if (sanitizedBody.role === 'super_admin' && reqUserRole !== 'super_admin') {
-                        return res.status(403).json({ message: 'Only Super Admin can assign Super Admin role' });
+                if (model.modelName === 'User') {
+                    if (sanitizedBody.role) {
+                        const reqUserRole = req.user?.role;
+                        if (sanitizedBody.role === 'super_admin' && reqUserRole !== 'super_admin') {
+                            return res.status(403).json({ message: 'Only Super Admin can assign Super Admin role' });
+                        }
+                    }
+                    if (sanitizedBody.password) {
+                        if (!/^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(sanitizedBody.password)) {
+                            const salt = await bcryptjs_1.default.genSalt(10);
+                            sanitizedBody.password = await bcryptjs_1.default.hash(sanitizedBody.password, salt);
+                        }
                     }
                 }
                 const doc = await model.findByIdAndUpdate(id, sanitizedBody, { new: true, runValidators: true }).select('-password');

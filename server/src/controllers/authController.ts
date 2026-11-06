@@ -5,15 +5,34 @@ import { generateToken } from '../utils/generateToken';
 export const authUser = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
   try {
-    if (!email || !password) {
+    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
       res.status(400).json({ success: false, message: 'Email and password are required' });
       return;
     }
 
-    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    if (!cleanEmail || !cleanPassword) {
+      res.status(400).json({ success: false, message: 'Email and password cannot be empty' });
+      return;
+    }
+
     const user = await User.findOne({ email: cleanEmail });
 
-    if (user && (await (user as any).matchPassword(password))) {
+    if (!user) {
+      res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return;
+    }
+
+    if ((user as any).isActive === false) {
+      res.status(401).json({ success: false, message: 'Account has been deactivated' });
+      return;
+    }
+
+    const isMatch = await (user as any).matchPassword(cleanPassword);
+
+    if (isMatch) {
       res.json({
         _id: user._id,
         name: user.name,
@@ -25,6 +44,7 @@ export const authUser = async (req: Request, res: Response): Promise<void> => {
       res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
   } catch (error: any) {
+    console.error('Authentication error:', error.message || error);
     res.status(500).json({ success: false, message: 'Authentication error' });
   }
 };

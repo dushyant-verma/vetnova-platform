@@ -31,11 +31,13 @@ export const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const { data } = await api.post('/auth/login', { email, password });
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanPassword = password.trim();
+      const { data } = await api.post('/auth/login', { email: cleanEmail, password: cleanPassword });
       login(data, data.token);
       navigate(redirectPath, { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials');
+      setError(err.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
