@@ -47,7 +47,10 @@ const configuredOrigins = [
     process.env.CLIENT_URL,
     process.env.FRONTEND_URL,
     process.env.CORS_ORIGIN,
+    'https://vetnova-learning-centre.vercel.app',
     'https://vetnova-platform.vercel.app',
+    'https://vetnovainstitute.com',
+    'https://www.vetnovainstitute.com',
     'https://vetnova.in',
     'https://www.vetnova.in',
     'http://localhost:5173',
@@ -75,12 +78,12 @@ const isOriginAllowed = (origin) => {
     if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(clean)) {
         return true;
     }
-    // 3. Allow Vercel production & preview deployment URLs for VetNova platform
-    if (/^https:\/\/vetnova-platform(-[a-z0-9-]+)?\.vercel\.app$/.test(clean)) {
+    // 3. Allow Vercel production & preview deployment URLs for VetNova learning centre and platform
+    if (/^https:\/\/vetnova-(learning-centre|platform)(-[a-z0-9-]+)?\.vercel\.app$/.test(clean)) {
         return true;
     }
     // 4. Allow official VetNova custom domain (and subdomains)
-    if (/^https:\/\/([a-z0-9-]+\.)?vetnova\.in$/.test(clean)) {
+    if (/^https:\/\/([a-z0-9-]+\.)?(vetnova\.in|vetnovainstitute\.com)$/.test(clean)) {
         return true;
     }
     return false;
@@ -102,9 +105,9 @@ const corsOptions = {
     maxAge: 86400,
     optionsSuccessStatus: 204
 };
-// 1. Register CORS before all routes and body parsers
+// 1. Register CORS before all routes and body parsers (handles OPTIONS preflight automatically)
 app.use((0, cors_1.default)(corsOptions));
-// 2. Explicitly handle preflight OPTIONS requests early
+// 2. Explicit preflight handler fallback for Express 5
 app.use((req, res, next) => {
     if (req.method === 'OPTIONS') {
         return res.sendStatus(204);

@@ -81,63 +81,75 @@ async function seedWebsiteContent() {
             },
             {
                 name: 'Dr. M. Chandrasekar',
-                designation: 'Professor of Veterinary Clinical Medicine | Small Animal Internal Medicine Specialist',
+                designation: 'Professor of Veterinary Clinical Medicine & Former Head of RVSS Emergency Unit, TANUVAS',
                 organization: 'Madras Veterinary College, TANUVAS',
-                qualification: 'BVSc, MVSc, PhD, VIPM Fellow',
-                bio: 'Senior academician and clinician at Madras Veterinary College (TANUVAS), renowned for performing the first-ever hyena blood transfusion in Indian zoological history and leading DBT-funded research in veterinary oncology.',
+                qualification: 'B.V.Sc., M.V.Sc., Ph.D., PGDVSR',
+                bio: 'Accomplished veterinary academic, clinician, researcher and educator with more than 24 years of service at TANUVAS, specializing in clinical medicine, therapeutics, surgery, emergency & critical care, and veterinary ethics.',
                 fullBio: [
-                    'Dr. M. Chandrasekar has served for over two decades as a Professor of Veterinary Clinical Medicine at Madras Veterinary College, TANUVAS, Chennai. A recognized authority on small animal internal medicine, cardiology, nephrology, and canine oncology, he oversees high-volume referral clinics and critical care emergency units.',
-                    'Throughout his academic tenure, Dr. Chandrasekar has spearheaded groundbreaking wildlife and companion animal emergency interventions, introduced structured diagnostic modules, and mentored numerous undergraduate, postgraduate, and doctoral veterinary scholars across India.'
+                    'Dr. M. Chandrasekar is an accomplished veterinary academic, clinician, researcher and educator with more than 24 years of professional service at the Tamil Nadu Veterinary and Animal Sciences University (TANUVAS). His expertise spans veterinary clinical medicine, therapeutics, surgery, radiology, emergency and critical care, veterinary ethics, and jurisprudence.',
+                    'He completed his Bachelor of Veterinary Science (B.V.Sc.) from Madras Veterinary College, TANUVAS, Chennai, in 1993, followed by a Master of Veterinary Science (M.V.Sc.) in Clinical Medicine and Therapeutics in 2000. He earned his Ph.D. in Veterinary Clinical Medicine, Ethics and Jurisprudence in 2009 and subsequently completed a Postgraduate Diploma in Veterinary Surgery and Radiology in 2015.',
+                    'Throughout his academic career, Dr. Chandrasekar has held several important teaching and institutional leadership positions at TANUVAS and its associated veterinary institutions. He served as Professor at TANUVAS from July 2016 to July 2022, having previously worked as an Associate Professor and Assistant Professor. His leadership responsibilities have included serving as Head of Institution at VCRI, Tirunelveli, and Head of the RVSS Emergency Unit at TANUVAS.',
+                    'His academic and research contributions include guiding postgraduate and doctoral scholars, supervising more than 20 postgraduate diploma and other research programmes, and serving as Chairman for doctoral and master\'s-level research guidance. He has been involved in several externally funded research projects as Principal Investigator and Co-Principal Investigator, supported by agencies including DBT, DST, and other research organisations.',
+                    'His research interests include canine lymphoma, chemotherapy, clinical therapeutics, veterinary emergency medicine, critical care, haemodialysis and clinical treatment innovation. His funded research work has included screening of B-cell and T-cell lymphoma in canines, commercialisation of indigenous haemodialysis cartridges, probiotic supplementation in canine chronic kidney disease, and evaluation of ventilators in rabbits.',
+                    'Dr. Chandrasekar has made significant academic contributions through his scientific publications, research guidance, teaching manuals and professional training activities. His publication record includes 10 international full-length publications, 78 national full-length publications and three book chapters, in addition to multiple popular articles and educational manuals.',
+                    'He has actively contributed to veterinary education through offline and online training programmes for practising veterinarians in India and internationally. His international professional engagements include invited lectures and hands-on practical training in emergency and critical care for veterinarians in Malaysia and Jeddah. He has also participated in international professional training programmes in the United States, Canada, Malaysia and other countries.'
                 ],
                 qualifications: [
-                    { degree: 'B.V.Sc.', field: 'Veterinary Science & Animal Husbandry', institution: 'Madras Veterinary College, TANUVAS', year: '1993' },
-                    { degree: 'M.V.Sc.', field: 'Veterinary Clinical Medicine & Therapeutics', institution: 'Madras Veterinary College, TANUVAS', year: '1996' },
-                    { degree: 'Ph.D.', field: 'Veterinary Clinical Medicine (Canine Oncology)', institution: 'Tamil Nadu Veterinary & Animal Sciences University (TANUVAS)', year: '2005' },
-                    { degree: 'Post-Doctoral / VIPM Fellowship', field: 'Veterinary Internal & Preventive Medicine', institution: 'Indian Society for Veterinary Medicine (ISVM / VIPM)', year: '2012' }
+                    { degree: 'B.V.Sc.', field: 'Veterinary Science & Animal Husbandry', institution: 'Madras Veterinary College, TANUVAS, Chennai', year: '1993' },
+                    { degree: 'M.V.Sc.', field: 'Clinical Medicine & Therapeutics', institution: 'Madras Veterinary College, TANUVAS', year: '2000' },
+                    { degree: 'Ph.D.', field: 'Veterinary Clinical Medicine, Ethics & Jurisprudence', institution: 'Tamil Nadu Veterinary and Animal Sciences University (TANUVAS)', year: '2009' },
+                    { degree: 'Postgraduate Diploma', field: 'Veterinary Surgery & Radiology', institution: 'TANUVAS', year: '2015' }
                 ],
                 achievements: [
-                    '<strong>Historic Hyena Blood Transfusion:</strong> Led the critical veterinary clinical intervention at Arignar Anna Zoological Park (Vandalur Zoo), performing India’s first successful cross-matched blood transfusion on an endangered wild striped hyena.',
-                    '<strong>DBT-Funded Canine Lymphoma Project:</strong> Principal Investigator for Department of Biotechnology (DBT, Govt. of India) initiatives focused on molecular profiling, staging protocols, and targeted chemotherapy (modified UW-Madison protocols) for canine lymphoma.',
-                    '<strong>VIPM Fellowship:</strong> Conferred the prestigious Fellowship of the Indian Society for Veterinary Medicine (VIPM / FISVM) for distinguished contributions to clinical veterinary medicine.',
-                    '<strong>TANUVAS Recognition & Teaching Programmes:</strong> Recipient of the TANUVAS Best Teacher Award and university research excellence honors; developed specialized clinical modules in emergency medicine and feline critical diagnostics.'
+                    '<strong>Extramural Grants Leadership:</strong> Principal Investigator for 7 externally funded research projects supported by national and state agencies.',
+                    '<strong>Oncology & Therapeutics Research:</strong> Pioneered clinical investigations involving canine lymphoma, targeted chemotherapy, clinical therapeutics, and treatment innovation.',
+                    '<strong>Scholarly Supervision:</strong> Research guidance for Ph.D., M.V.Sc., and supervision of over 20 postgraduate diploma and research programmes.',
+                    '<strong>Research Committee Leadership:</strong> Guided doctoral and postgraduate scholars as Chairman and research committee member.',
+                    '<strong>Scholarly Publications:</strong> Contributed extensively to veterinary literature through 10 international and 78 national indexed scientific publications.',
+                    '<strong>Academic Author:</strong> Authored 3 book chapters and multiple educational articles, laboratory guides, and clinical manuals.'
                 ],
                 researchInterests: [
-                    'Small Animal Oncology & Chemotherapy Protocol Optimization',
-                    'Wildlife & Exotic Animal Emergency Therapeutics & Transfusion Medicine',
-                    'Veterinary Nephrology & Cardiopulmonary Critical Care',
-                    'Diagnostic Cytology, Bone Marrow Biopsies & Advanced Therapeutics'
+                    'Canine Lymphoma Screening & Chemotherapeutic Protocols (DBT Funded: ₹47.97 Lakh)',
+                    'Indigenous Haemodialysis Cartridges Commercialization (DST Funded: ₹30.26 Lakh)',
+                    'Probiotic Supplementation in Canine CKD (SAVA VET Funded: ₹7.50 Lakh)',
+                    'Evaluation of Ventilator in Rabbits (Broadline Technologies Funded: ₹0.98 Lakh)',
+                    'Xanthine Oxidase Use in Canine DCM & Acidosis Puffzone Management (Co-PI)'
                 ],
                 image: 'assets/images/about/about-advisor-02.webp',
                 displayOrder: 2,
                 status: 'Published'
             },
             {
-                name: 'Dr. Shantibhushan "Shanti" Jha',
-                designation: 'Associate Professor of Small Animal Orthopedic Surgery | DACVS',
-                organization: 'Oregon State University & AO VET North America',
-                qualification: 'BVSc & AH, MS, DACVS',
-                bio: 'Board-certified veterinary surgeon (DACVS) and Associate Professor of Small Animal Orthopedics at Oregon State University, specializing in complex fracture fixation, total joint arthroplasty, and international AO VET faculty training.',
+                name: 'Shantibhushan "Shanti" Jha',
+                designation: 'Associate Professor of Small Animal Orthopedic Surgery | DACVS (Small Animal)',
+                organization: 'Oregon State University & AO VET',
+                qualification: 'BVSc & AH (Hons), MS, DACVS (Small Animal)',
+                bio: 'Associate Professor of Small Animal Orthopedic Surgery at Oregon State University’s Carlson College of Veterinary Medicine, board-certified surgeon (DACVS), and AO VET International CDC Chair-Elect specializing in minimally invasive surgery, joint health, and pedagogical AI.',
                 fullBio: [
-                    'Dr. Shantibhushan "Shanti" Jha is an Associate Professor of Small Animal Orthopedic Surgery at the Gary R. Carlson College of Veterinary Medicine, Oregon State University. Prior to joining OSU, Dr. Jha held prominent clinical leadership roles, including Chief of Surgery at leading referral hospitals and National Director of Surgery for Thrive Pet Healthcare.',
-                    'After earning his veterinary degree with honors from Nagpur Veterinary College and his Master\'s from Oregon State University, he completed his rigorous surgical residency at Tufts University Foster Hospital, becoming a Diplomate of the American College of Veterinary Surgeons (DACVS). He has trained hundreds of surgical residents, interns, and general practitioners across North America, Europe, and Asia.'
+                    'Shantibhushan "Shanti" Jha, BVSc & AH (Hons), MS, DACVS (Small Animal) is an associate professor of small animal orthopedic surgery at Oregon State University’s Carlson College of Veterinary Medicine. A board-certified surgeon since 2013, Dr. Jha earned his BVSc with honors from Nagpur Veterinary College and his MS from Oregon State University, followed by advanced surgical residency training at Tufts University.',
+                    'Dr. Jha’s research interests center on the transformation of veterinary surgical education through the integration of pedagogical AI. He focuses on how artificial intelligence can be leveraged to enhance intraoperative decision-making, refine surgical skill acquisition, and provide objective, data-driven feedback to the next generation of surgeons. By bridging the gap between traditional surgical mentorship and emerging technology, he aims to set new global standards for veterinary training. Additionally, Dr. Jha applies his surgical and biological expertise to the field of human-wildlife conflict resolution, developing interdisciplinary, community-engaged strategies to address complex health and welfare challenges at the interface of human expansion and wildlife habitats.',
+                    'At the Lois Bates Acheson Veterinary Teaching Hospital, Dr. Jha specializes in advanced orthopedics and joint health. His clinical practice is defined by a commitment to minimally invasive surgery (MIS), including arthroscopy, minimally invasive fracture management, and angular limb deformity corrections. By utilizing these advanced techniques, he prioritizes superior patient outcomes, reduced recovery times, and the preservation of joint function in complex orthopedic cases.',
+                    'A distinguished leader in the international surgical community and an AO VET Board Member, Dr. Jha serves as the International Community Development Committee (CDC) Chair-Elect for AO VET. In this prestigious role, he steers global initiatives aimed at fostering surgical excellence through community building, mentorship, and the dissemination of evidence-based orthopedic principles.'
                 ],
                 qualifications: [
-                    { degree: 'BVSc & AH (Honors)', field: 'Veterinary Science & Animal Husbandry', institution: 'Nagpur Veterinary College, India', year: '2001' },
-                    { degree: 'Master of Science (MS)', field: 'Veterinary Science & Biomechanics', institution: 'Oregon State University, USA', year: '2005' },
-                    { degree: 'Residency', field: 'Small Animal Surgery', institution: 'Tufts University Foster Hospital, USA', year: '2008–2012' },
-                    { degree: 'Board Certification (DACVS)', field: 'Diplomate, Small Animal Surgery', institution: 'American College of Veterinary Surgeons (ACVS)', year: '2013' }
+                    { degree: 'BVSc & AH (Hons)', field: 'Veterinary Science & Animal Husbandry', institution: 'Nagpur Veterinary College, India', year: 'Honors' },
+                    { degree: 'Master of Science (MS)', field: 'Veterinary Science', institution: 'Oregon State University, USA', year: 'MS' },
+                    { degree: 'Surgical Residency', field: 'Small Animal Surgery', institution: 'Tufts University, USA', year: 'Residency' },
+                    { degree: 'DACVS (Small Animal)', field: 'Board Certification in Small Animal Surgery', institution: 'American College of Veterinary Surgeons', year: '2013' },
+                    { degree: 'Associate Professor', field: 'Department of Clinical Sciences', institution: 'Lois Bates Acheson Veterinary Teaching Hospital, OSU', year: 'Faculty' }
                 ],
                 achievements: [
-                    '<strong>AO VET Leadership:</strong> Active faculty member and Chairperson of the AO VET Community Development Commission, leading global surgical education initiatives in small animal osteosynthesis.',
-                    '<strong>Total Joint Replacement Pioneer:</strong> Expert proctor in cemented and cementless canine total hip replacement (THR) systems, revision arthroplasty, and circular external skeletal fixation (Ilizarov).',
-                    '<strong>Surgical Innovation:</strong> Authored multiple textbook chapters and clinical research studies on locking plate biomechanics, angular limb deformity correction, and minimally invasive plate osteosynthesis (MIPO).',
-                    '<strong>Global Faculty Educator:</strong> Delivered keynote addresses and laboratory masterclasses at major surgical symposiums worldwide, including ACVS, VOS, and AO VET Davos courses.'
+                    '<strong>AO VET Board Member & CDC Chair-Elect:</strong> Serves as the International Community Development Committee (CDC) Chair-Elect for AO VET, steering global surgical excellence, community building, and mentorship.',
+                    '<strong>Board-Certified Surgeon (DACVS):</strong> Diplomate of the American College of Veterinary Surgeons in Small Animal Surgery since 2013.',
+                    '<strong>Pioneering Pedagogical AI in Surgery:</strong> Leading innovative research into the integration of artificial intelligence for intraoperative decision-making, skill refinement, and objective surgeon feedback.',
+                    '<strong>Minimally Invasive Orthopedic Specialist:</strong> Master clinician in arthroscopy, minimally invasive fracture repair, and complex angular limb deformity corrections at the Lois Bates Acheson Veterinary Teaching Hospital.',
+                    '<strong>Human-Wildlife Conflict Resolution:</strong> Spearheading interdisciplinary, community-engaged initiatives addressing wildlife health and welfare challenges at the human-wildlife interface.'
                 ],
                 researchInterests: [
-                    'Total Hip & Stifle Arthroplasty (Joint Replacement)',
-                    'Minimally Invasive Plate Osteosynthesis (MIPO) & Biological Fracture Fixation',
-                    'Arthroscopy, Meniscal Reconstruction & Joint Mechanics',
-                    'Angular Limb Deformity Correction & Circular Ring Fixators'
+                    'Minimally Invasive Surgery (MIS), Arthroscopy & Joint Health',
+                    'Minimally Invasive Fracture Management & Angular Limb Deformity Corrections',
+                    'Pedagogical AI Integration & Objective Veterinary Surgical Education',
+                    'Human-Wildlife Conflict Resolution & Community-Engaged Welfare Strategies'
                 ],
                 image: 'assets/images/about/about-advisor-03.webp',
                 displayOrder: 3,
