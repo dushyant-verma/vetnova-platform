@@ -25,6 +25,12 @@ export const ImageUpload = ({ value, onChange, label = "Cover Image" }: ImageUpl
   const handleUpload = async (file?: File) => {
     if (!file) return;
 
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+      setError('Only JPG, JPEG, PNG, or WEBP images are supported.');
+      return;
+    }
+
     if (file.size > 5 * 1024 * 1024) {
       setError('File size must be less than 5MB');
       return;

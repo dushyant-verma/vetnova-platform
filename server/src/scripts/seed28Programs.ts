@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
 import { Program } from "../models/Program";
+import { connectDB } from "../config/db";
 
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
@@ -11,6 +12,8 @@ export interface ProgramSeedData {
   slug: string;
   category: string;
   duration: string;
+  learningLevel?: "Beginner" | "Intermediate" | "Advanced";
+  level?: string;
   description: string;
   image: string;
   status: "Draft" | "Published";
@@ -773,12 +776,7 @@ export const programs28Data: ProgramSeedData[] = [
 ];
 
 export async function seed28Programs() {
-  const mongoUri = process.env.MONGO_URI;
-  if (!mongoUri) {
-    throw new Error("MONGO_URI not found in environment");
-  }
-
-  await mongoose.connect(mongoUri);
+  await connectDB();
   console.log("Connected to MongoDB successfully");
 
   console.log("Starting safe idempotent migration for 28 VetNova Programs...");
@@ -822,6 +820,10 @@ export async function seed28Programs() {
       match.syllabus = progData.syllabus;
       if (!match.learningOutcomes || match.learningOutcomes.length === 0) {
         match.learningOutcomes = progData.learningOutcomes;
+      }
+      if (!match.learningLevel) {
+        match.learningLevel = progData.learningLevel || "Beginner";
+        match.level = match.learningLevel;
       }
       match.isActive = true;
 

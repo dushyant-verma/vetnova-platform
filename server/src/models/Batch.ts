@@ -38,7 +38,26 @@ const batchSchema = new mongoose.Schema({
   startDate: { type: Date, required: true },
   endDate: { 
     type: Date,
-    set: (v: any) => (v === '' || !v ? undefined : v)
+    set: (v: any) => (v === '' || !v ? undefined : v),
+    validate: {
+      validator: function(this: any, val: Date) {
+        if (!val) return true;
+        let start = this?.startDate;
+        if (!start && typeof this?.getUpdate === 'function') {
+          const update = this.getUpdate();
+          start = update?.startDate || update?.$set?.startDate;
+        }
+        if (start) {
+          const s = new Date(start).getTime();
+          const e = new Date(val).getTime();
+          if (!isNaN(s) && !isNaN(e) && s > e) {
+            return false;
+          }
+        }
+        return true;
+      },
+      message: 'Batch end date cannot be earlier than start date'
+    }
   },
   duration: { type: String, default: '3 Days', trim: true },
   status: { 
@@ -53,6 +72,16 @@ const batchSchema = new mongoose.Schema({
   notes: { type: String, trim: true },
   displayOrder: { type: Number, default: 0 }
 }, { timestamps: true });
+
+batchSchema.pre('validate', function(this: any) {
+  if (this.startDate && this.endDate) {
+    const start = new Date(this.startDate).getTime();
+    const end = new Date(this.endDate).getTime();
+    if (!isNaN(start) && !isNaN(end) && start > end) {
+      this.invalidate('endDate', 'Batch end date cannot be earlier than start date');
+    }
+  }
+});
 
 export const Batch = mongoose.model<IBatch>('Batch', batchSchema);
 

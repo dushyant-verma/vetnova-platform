@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const Media_1 = require("../models/Media");
@@ -65,24 +66,45 @@ router.post('/', authMiddleware_1.protect, authMiddleware_1.admin, (req, res, ne
             message: 'Invalid file signature. File content does not match allowed image formats (JPG, PNG, WEBP).'
         });
     }
-    if (!(0, cloudinaryConfig_1.isCloudinaryConfigured)()) {
-        return res.status(500).json({
-            success: false,
-            message: 'Permanent image storage is not configured'
-        });
-    }
     try {
-        const sanitizedFilename = path_1.default.basename(req.file.originalname || 'upload').replace(/[^a-zA-Z0-9_.-]/g, '_');
+        const ext = path_1.default.extname(req.file.originalname || '.jpg').toLowerCase();
+        const baseName = path_1.default.basename(req.file.originalname || 'upload', ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+        const sanitizedFilename = `${baseName}${ext}`;
         const folder = (req.body.folder || 'vetnova/media').toString().replace(/[^a-zA-Z0-9_\-/]/g, '');
-        const cloudResult = await (0, cloudinaryConfig_1.uploadBufferToCloudinary)(req.file.buffer, folder, sanitizedFilename);
+        let imageUrl = '';
+        let publicId = '';
+        let format = ext.replace('.', '') || 'jpg';
+        let bytes = req.file.buffer.length;
+        if ((0, cloudinaryConfig_1.isCloudinaryConfigured)()) {
+            const cloudResult = await (0, cloudinaryConfig_1.uploadBufferToCloudinary)(req.file.buffer, folder, sanitizedFilename);
+            imageUrl = cloudResult.secure_url;
+            publicId = cloudResult.public_id;
+            format = cloudResult.format || format;
+            bytes = cloudResult.bytes || bytes;
+        }
+        else {
+            // Local persistent storage fallback
+            const uploadsDir = path_1.default.join(__dirname, '../../uploads');
+            if (!fs_1.default.existsSync(uploadsDir)) {
+                fs_1.default.mkdirSync(uploadsDir, { recursive: true });
+            }
+            const uniqueFilename = `${baseName}-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+            const filePath = path_1.default.join(uploadsDir, uniqueFilename);
+            fs_1.default.writeFileSync(filePath, req.file.buffer);
+            // Return server-hosted URL
+            const host = req.get('host') || 'localhost:5001';
+            const protocol = req.protocol || 'http';
+            imageUrl = `${protocol}://${host}/uploads/${uniqueFilename}`;
+            publicId = `local/${uniqueFilename}`;
+        }
         let mediaObj = null;
         try {
             const media = new Media_1.Media({
                 filename: sanitizedFilename,
-                url: cloudResult.secure_url,
-                public_id: cloudResult.public_id,
-                format: cloudResult.format,
-                size: cloudResult.bytes,
+                url: imageUrl,
+                public_id: publicId,
+                format: format,
+                size: bytes,
                 folder: folder
             });
             mediaObj = await media.save();
@@ -92,14 +114,15 @@ router.post('/', authMiddleware_1.protect, authMiddleware_1.admin, (req, res, ne
         }
         return res.status(200).json({
             success: true,
-            url: cloudResult.secure_url,
+            url: imageUrl,
             media: mediaObj
         });
     }
     catch (error) {
+        console.error('Upload handler error:', error);
         return res.status(500).json({
             success: false,
-            message: 'Error processing media upload'
+            message: error.message || 'Error processing media upload'
         });
     }
 });
@@ -113,7 +136,19 @@ router.delete('/:id', authMiddleware_1.protect, authMiddleware_1.admin, async (r
         if (!media)
             return res.status(404).json({ success: false, message: 'Media record not found' });
         if (media.public_id) {
-            await (0, cloudinaryConfig_1.deleteCloudinaryAsset)(media.public_id);
+            if (media.public_id.startsWith('local/')) {
+                const localFileName = media.public_id.replace('local/', '');
+                const localPath = path_1.default.join(__dirname, '../../uploads', localFileName);
+                if (fs_1.default.existsSync(localPath)) {
+                    try {
+                        fs_1.default.unlinkSync(localPath);
+                    }
+                    catch (e) { /* ignore */ }
+                }
+            }
+            else {
+                await (0, cloudinaryConfig_1.deleteCloudinaryAsset)(media.public_id);
+            }
         }
         await media.deleteOne();
         return res.json({ success: true, message: 'Media record deleted successfully' });

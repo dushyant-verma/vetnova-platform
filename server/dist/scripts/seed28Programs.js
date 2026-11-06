@@ -9,6 +9,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 const Program_1 = require("../models/Program");
+const db_1 = require("../config/db");
 dotenv_1.default.config({ path: path_1.default.join(__dirname, "../../.env") });
 exports.programs28Data = [
     {
@@ -758,11 +759,7 @@ exports.programs28Data = [
     }
 ];
 async function seed28Programs() {
-    const mongoUri = process.env.MONGO_URI;
-    if (!mongoUri) {
-        throw new Error("MONGO_URI not found in environment");
-    }
-    await mongoose_1.default.connect(mongoUri);
+    await (0, db_1.connectDB)();
     console.log("Connected to MongoDB successfully");
     console.log("Starting safe idempotent migration for 28 VetNova Programs...");
     const existingPrograms = await Program_1.Program.find({});
@@ -795,6 +792,10 @@ async function seed28Programs() {
             match.syllabus = progData.syllabus;
             if (!match.learningOutcomes || match.learningOutcomes.length === 0) {
                 match.learningOutcomes = progData.learningOutcomes;
+            }
+            if (!match.learningLevel) {
+                match.learningLevel = progData.learningLevel || "Beginner";
+                match.level = match.learningLevel;
             }
             match.isActive = true;
             await match.save();

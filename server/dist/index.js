@@ -8,6 +8,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
+const path_1 = __importDefault(require("path"));
 const db_1 = require("./config/db");
 const cloudinaryConfig_1 = require("./config/cloudinaryConfig");
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
@@ -135,7 +136,12 @@ const enquiryLimiter = (0, express_rate_limit_1.default)({
     message: { success: false, message: 'Too many enquiry submissions from this IP. Please try again later.' }
 });
 // Routes
-app.use('/api/auth', authLimiter, authRoutes_1.default);
+app.use('/api/auth', (req, res, next) => {
+    if (req.path === '/login' && req.method === 'POST') {
+        return authLimiter(req, res, next);
+    }
+    next();
+}, authRoutes_1.default);
 app.use('/api/enquiries', (req, res, next) => {
     if (req.method === 'POST')
         return enquiryLimiter(req, res, next);
@@ -143,6 +149,7 @@ app.use('/api/enquiries', (req, res, next) => {
 }, enquiryRoutes_1.default);
 app.use('/api/programs', programRoutes_1.default);
 app.use('/api/upload', uploadRoutes_1.default);
+app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
 app.use('/api/settings/footer', footerRoutes_1.default);
 // Dynamic Protected & Public Routes Matrix
 app.use('/api/experts', (0, generateRouter_1.generateRouter)(Expert_1.Expert));

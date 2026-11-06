@@ -18,7 +18,7 @@ function slugify(text) {
 }
 const getPrograms = async (req, res) => {
     try {
-        const { search, category, status, syllabusStatus, all } = req.query;
+        const { search, category, status, syllabusStatus, all, level, learningLevel } = req.query;
         const filter = {};
         if (search) {
             filter.$or = [
@@ -28,6 +28,13 @@ const getPrograms = async (req, res) => {
         }
         if (category && category !== "all") {
             filter.category = category;
+        }
+        const lvl = (learningLevel || level);
+        if (lvl && lvl !== "all") {
+            filter.$or = [
+                { learningLevel: { $regex: new RegExp(`^${lvl}$`, "i") } },
+                { level: { $regex: new RegExp(`^${lvl}$`, "i") } }
+            ];
         }
         if (syllabusStatus && syllabusStatus !== "all") {
             filter.syllabusStatus = syllabusStatus;
@@ -116,6 +123,11 @@ const createProgram = async (req, res) => {
         else {
             data.isActive = true;
         }
+        if (data.learningLevel || data.level) {
+            const lvl = data.learningLevel || data.level;
+            data.learningLevel = lvl;
+            data.level = lvl;
+        }
         if (Array.isArray(data.faculty)) {
             data.faculty = data.faculty.filter((f) => f && mongoose_1.default.isValidObjectId(String(f)));
         }
@@ -155,6 +167,11 @@ const updateProgram = async (req, res) => {
         }
         else if (data.status === "Published") {
             data.isActive = true;
+        }
+        if (data.learningLevel || data.level) {
+            const lvl = data.learningLevel || data.level;
+            data.learningLevel = lvl;
+            data.level = lvl;
         }
         if (Array.isArray(data.faculty)) {
             data.faculty = data.faculty.filter((f) => f && mongoose_1.default.isValidObjectId(String(f)));

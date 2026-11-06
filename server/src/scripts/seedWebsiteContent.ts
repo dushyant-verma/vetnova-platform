@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { BlogCategory } from '../models/BlogCategory';
 import { AdvisoryBoard } from '../models/AdvisoryBoard';
 import { Expert } from '../models/Expert';
+import { connectDB } from '../config/db';
 
 dotenv.config();
 
@@ -232,8 +233,7 @@ export async function seedWebsiteContent() {
 
 // Standalone execution if invoked directly via script
 if (require.main === module) {
-  const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/vetnova';
-  mongoose.connect(MONGO_URI)
+  connectDB()
     .then(async () => {
       await seedWebsiteContent();
       await mongoose.disconnect();

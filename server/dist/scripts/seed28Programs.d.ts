@@ -4,6 +4,8 @@ export interface ProgramSeedData {
     slug: string;
     category: string;
     duration: string;
+    learningLevel?: "Beginner" | "Intermediate" | "Advanced";
+    level?: string;
     description: string;
     image: string;
     status: "Draft" | "Published";

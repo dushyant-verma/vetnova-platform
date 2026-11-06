@@ -145,7 +145,12 @@ const enquiryLimiter = rateLimit({
 });
 
 // Routes
-app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth', (req, res, next) => {
+  if (req.path === '/login' && req.method === 'POST') {
+    return authLimiter(req, res, next);
+  }
+  next();
+}, authRoutes);
 app.use('/api/enquiries', (req, res, next) => {
   if (req.method === 'POST') return enquiryLimiter(req, res, next);
   next();
@@ -153,6 +158,7 @@ app.use('/api/enquiries', (req, res, next) => {
 
 app.use('/api/programs', programRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api/settings/footer', footerRoutes);
 
 // Dynamic Protected & Public Routes Matrix

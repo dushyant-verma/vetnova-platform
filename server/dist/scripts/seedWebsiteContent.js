@@ -9,6 +9,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const BlogCategory_1 = require("../models/BlogCategory");
 const AdvisoryBoard_1 = require("../models/AdvisoryBoard");
 const Expert_1 = require("../models/Expert");
+const db_1 = require("../config/db");
 dotenv_1.default.config();
 function slugify(text) {
     return text
@@ -216,8 +217,7 @@ async function seedWebsiteContent() {
 }
 // Standalone execution if invoked directly via script
 if (require.main === module) {
-    const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/vetnova';
-    mongoose_1.default.connect(MONGO_URI)
+    (0, db_1.connectDB)()
         .then(async () => {
         await seedWebsiteContent();
         await mongoose_1.default.disconnect();

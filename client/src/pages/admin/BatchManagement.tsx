@@ -256,6 +256,15 @@ export const BatchManagement: React.FC = () => {
       return;
     }
 
+    if (formData.startDate && formData.endDate) {
+      const s = new Date(formData.startDate).getTime();
+      const e = new Date(formData.endDate).getTime();
+      if (!isNaN(s) && !isNaN(e) && s > e) {
+        setFormError('Batch end date cannot be earlier than start date.');
+        return;
+      }
+    }
+
     const payload: any = {
       ...formData,
       programName: formData.programName.trim(),

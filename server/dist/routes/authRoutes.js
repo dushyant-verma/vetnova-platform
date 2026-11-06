@@ -9,5 +9,8 @@ const authMiddleware_1 = require("../middlewares/authMiddleware");
 const router = express_1.default.Router();
 router.post('/login', authController_1.authUser);
 router.post('/register', authMiddleware_1.protect, authMiddleware_1.superAdmin, authController_1.registerUser);
+router.get('/me', authMiddleware_1.protect, authController_1.getMe);
+router.post('/refresh', authMiddleware_1.protect, authController_1.refreshToken);
+router.get('/verify', authMiddleware_1.protect, authController_1.verifyToken);
 exports.default = router;
 //# sourceMappingURL=authRoutes.js.map

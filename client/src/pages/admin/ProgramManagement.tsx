@@ -24,6 +24,8 @@ interface ProgramItem {
   category: string;
   duration: string;
   availability?: string;
+  learningLevel?: "Beginner" | "Intermediate" | "Advanced";
+  level?: "Beginner" | "Intermediate" | "Advanced";
   description: string;
   shortDescription?: string;
   fullDescription?: string;
@@ -40,6 +42,7 @@ export const ProgramManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [syllabusFilter, setSyllabusFilter] = useState<"all" | "Available" | "Pending">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "Published" | "Draft">("all");
+  const [levelFilter, setLevelFilter] = useState<"all" | "Beginner" | "Intermediate" | "Advanced">("all");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -62,6 +65,8 @@ export const ProgramManagement = () => {
     category: "Internal Medicine",
     duration: "3 Days",
     availability: "24 Hours",
+    learningLevel: "Beginner",
+    level: "Beginner",
     description: "",
     shortDescription: "",
     fullDescription: "",
@@ -145,6 +150,8 @@ export const ProgramManagement = () => {
       category: "Clinical Training",
       duration: "3 Days",
       availability: "24 Hours",
+      learningLevel: "Beginner",
+      level: "Beginner",
       description: "",
       shortDescription: "",
       fullDescription: "",
@@ -162,6 +169,7 @@ export const ProgramManagement = () => {
   const openEditModal = (prog: ProgramItem) => {
     setFormError(null);
     setFormSuccess(null);
+    const progLvl = (prog.learningLevel || prog.level || "Beginner") as "Beginner" | "Intermediate" | "Advanced";
     setFormData({
       _id: prog._id,
       order: prog.order || 1,
@@ -170,6 +178,8 @@ export const ProgramManagement = () => {
       category: prog.category || "Clinical Training",
       duration: prog.duration || "3 Days",
       availability: prog.availability || "24 Hours",
+      learningLevel: progLvl,
+      level: progLvl,
       description: prog.description || prog.shortDescription || "",
       shortDescription: prog.shortDescription || prog.description || "",
       fullDescription: prog.fullDescription || prog.description || "",
@@ -286,6 +296,7 @@ export const ProgramManagement = () => {
       .filter(Boolean);
 
     const desc = formData.shortDescription?.trim() || formData.description?.trim() || formData.title.trim();
+    const currentLvl = (formData.learningLevel || formData.level || "Beginner") as "Beginner" | "Intermediate" | "Advanced";
     const payload: ProgramItem = {
       ...formData,
       title: formData.title.trim(),
@@ -293,6 +304,8 @@ export const ProgramManagement = () => {
       category: formData.category.trim(),
       duration: formData.duration?.trim() || "3 Days",
       availability: formData.availability?.trim() || "24 Hours",
+      learningLevel: currentLvl,
+      level: currentLvl,
       description: desc,
       shortDescription: desc,
       fullDescription: formData.fullDescription?.trim() || desc,
@@ -314,7 +327,9 @@ export const ProgramManagement = () => {
       p.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSyllabus = syllabusFilter === "all" || p.syllabusStatus === syllabusFilter;
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
-    return matchesSearch && matchesSyllabus && matchesStatus;
+    const pLvl = p.learningLevel || p.level || "Beginner";
+    const matchesLevel = levelFilter === "all" || pLvl.toLowerCase() === levelFilter.toLowerCase();
+    return matchesSearch && matchesSyllabus && matchesStatus && matchesLevel;
   });
 
   const totalPrograms = programs?.length || 0;
@@ -423,6 +438,17 @@ export const ProgramManagement = () => {
 
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <select
+              value={levelFilter}
+              onChange={(e) => setLevelFilter(e.target.value as any)}
+              className="px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 shadow-sm"
+            >
+              <option value="all">Level: All</option>
+              <option value="Beginner">Level: Beginner</option>
+              <option value="Intermediate">Level: Intermediate</option>
+              <option value="Advanced">Level: Advanced</option>
+            </select>
+
+            <select
               value={syllabusFilter}
               onChange={(e) => setSyllabusFilter(e.target.value as any)}
               className="px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 shadow-sm"
@@ -451,7 +477,7 @@ export const ProgramManagement = () => {
               <tr>
                 <th className="px-5 py-3.5 w-16 text-center">#</th>
                 <th className="px-5 py-3.5">Program Name &amp; Route Slug</th>
-                <th className="px-5 py-3.5">Category</th>
+                <th className="px-5 py-3.5">Category &amp; Level</th>
                 <th className="px-5 py-3.5">Status</th>
                 <th className="px-5 py-3.5">Three-Stage Syllabus</th>
                 <th className="px-5 py-3.5 text-right">Actions</th>
@@ -487,10 +513,21 @@ export const ProgramManagement = () => {
                         <div className="font-semibold text-slate-900">{prog.title}</div>
                         <div className="text-xs text-slate-400 font-mono mt-0.5">/{prog.slug}</div>
                       </td>
-                      <td className="px-5 py-4 text-slate-600">
-                        <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
-                          {prog.category}
-                        </span>
+                      <td className="px-5 py-4">
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-medium text-slate-700">
+                            {prog.category}
+                          </span>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
+                            (prog.learningLevel || prog.level) === "Beginner" 
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
+                              : (prog.learningLevel || prog.level) === "Intermediate" 
+                              ? "bg-amber-50 text-amber-700 border border-amber-200" 
+                              : "bg-purple-50 text-purple-700 border border-purple-200"
+                          }`}>
+                            {prog.learningLevel || prog.level || "Beginner"}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-5 py-4">
                         <span 
@@ -659,7 +696,24 @@ export const ProgramManagement = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    Learning Level *
+                  </label>
+                  <select
+                    value={formData.learningLevel || formData.level || "Beginner"}
+                    onChange={(e) => {
+                      const val = e.target.value as "Beginner" | "Intermediate" | "Advanced";
+                      setFormData(p => ({ ...p, learningLevel: val, level: val }));
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm bg-white font-medium text-slate-800"
+                  >
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                  </select>
+                </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Duration</label>
                   <input

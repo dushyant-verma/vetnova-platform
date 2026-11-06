@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import mongoose from 'mongoose';
 import { admin, protect, AuthRequest } from '../middlewares/authMiddleware';
 import { Media } from '../models/Media';
@@ -75,27 +76,48 @@ router.post('/', protect, admin, (req: AuthRequest, res: express.Response, next:
     });
   }
 
-  if (!isCloudinaryConfigured()) {
-    return res.status(500).json({
-      success: false,
-      message: 'Permanent image storage is not configured'
-    });
-  }
-
   try {
-    const sanitizedFilename = path.basename(req.file.originalname || 'upload').replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const ext = path.extname(req.file.originalname || '.jpg').toLowerCase();
+    const baseName = path.basename(req.file.originalname || 'upload', ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    const sanitizedFilename = `${baseName}${ext}`;
     const folder = (req.body.folder || 'vetnova/media').toString().replace(/[^a-zA-Z0-9_\-/]/g, '');
-    
-    const cloudResult = await uploadBufferToCloudinary(req.file.buffer, folder, sanitizedFilename);
+
+    let imageUrl = '';
+    let publicId = '';
+    let format = ext.replace('.', '') || 'jpg';
+    let bytes = req.file.buffer.length;
+
+    if (isCloudinaryConfigured()) {
+      const cloudResult = await uploadBufferToCloudinary(req.file.buffer, folder, sanitizedFilename);
+      imageUrl = cloudResult.secure_url;
+      publicId = cloudResult.public_id;
+      format = cloudResult.format || format;
+      bytes = cloudResult.bytes || bytes;
+    } else {
+      // Local persistent storage fallback
+      const uploadsDir = path.join(__dirname, '../../uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      const uniqueFilename = `${baseName}-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+      const filePath = path.join(uploadsDir, uniqueFilename);
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      // Return server-hosted URL
+      const host = req.get('host') || 'localhost:5001';
+      const protocol = req.protocol || 'http';
+      imageUrl = `${protocol}://${host}/uploads/${uniqueFilename}`;
+      publicId = `local/${uniqueFilename}`;
+    }
 
     let mediaObj = null;
     try {
       const media = new Media({
         filename: sanitizedFilename,
-        url: cloudResult.secure_url,
-        public_id: cloudResult.public_id,
-        format: cloudResult.format,
-        size: cloudResult.bytes,
+        url: imageUrl,
+        public_id: publicId,
+        format: format,
+        size: bytes,
         folder: folder
       });
       mediaObj = await media.save();
@@ -105,13 +127,14 @@ router.post('/', protect, admin, (req: AuthRequest, res: express.Response, next:
 
     return res.status(200).json({
       success: true,
-      url: cloudResult.secure_url,
+      url: imageUrl,
       media: mediaObj
     });
   } catch (error: any) {
+    console.error('Upload handler error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error processing media upload'
+      message: error.message || 'Error processing media upload'
     });
   }
 });
@@ -127,7 +150,15 @@ router.delete('/:id', protect, admin, async (req: AuthRequest, res: express.Resp
     if (!media) return res.status(404).json({ success: false, message: 'Media record not found' });
     
     if (media.public_id) {
-      await deleteCloudinaryAsset(media.public_id);
+      if (media.public_id.startsWith('local/')) {
+        const localFileName = media.public_id.replace('local/', '');
+        const localPath = path.join(__dirname, '../../uploads', localFileName);
+        if (fs.existsSync(localPath)) {
+          try { fs.unlinkSync(localPath); } catch (e) { /* ignore */ }
+        }
+      } else {
+        await deleteCloudinaryAsset(media.public_id);
+      }
     }
 
     await media.deleteOne();

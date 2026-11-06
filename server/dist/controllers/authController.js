@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerUser = exports.authUser = void 0;
+exports.verifyToken = exports.refreshToken = exports.getMe = exports.registerUser = exports.authUser = void 0;
 const User_1 = require("../models/User");
 const generateToken_1 = require("../utils/generateToken");
 const authUser = async (req, res) => {
@@ -69,4 +69,70 @@ const registerUser = async (req, res) => {
     }
 };
 exports.registerUser = registerUser;
+const getMe = async (req, res) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ success: false, message: 'Not authenticated' });
+            return;
+        }
+        res.json({
+            success: true,
+            user: {
+                _id: req.user._id,
+                name: req.user.name,
+                email: req.user.email,
+                role: req.user.role
+            }
+        });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: 'Error fetching profile' });
+    }
+};
+exports.getMe = getMe;
+const refreshToken = async (req, res) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ success: false, message: 'Not authenticated' });
+            return;
+        }
+        const newToken = (0, generateToken_1.generateToken)(req.user._id.toString(), req.user.role);
+        res.json({
+            success: true,
+            token: newToken,
+            user: {
+                _id: req.user._id,
+                name: req.user.name,
+                email: req.user.email,
+                role: req.user.role
+            }
+        });
+    }
+    catch (error) {
+        res.status(500).json({ success: false, message: 'Error refreshing token' });
+    }
+};
+exports.refreshToken = refreshToken;
+const verifyToken = async (req, res) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ success: false, valid: false });
+            return;
+        }
+        res.json({
+            success: true,
+            valid: true,
+            user: {
+                _id: req.user._id,
+                name: req.user.name,
+                email: req.user.email,
+                role: req.user.role
+            }
+        });
+    }
+    catch (error) {
+        res.status(401).json({ success: false, valid: false });
+    }
+};
+exports.verifyToken = verifyToken;
 //# sourceMappingURL=authController.js.map

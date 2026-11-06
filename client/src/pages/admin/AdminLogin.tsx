@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Lock } from 'lucide-react';
+import { Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '@/lib/axios';
 
@@ -13,13 +13,17 @@ export const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, isAuthenticated } = useAuth();
 
-  React.useEffect(() => {
+  const isExpired = searchParams.get('expired') === '1';
+  const redirectPath = searchParams.get('redirect') ? decodeURIComponent(searchParams.get('redirect')!) : '/admin';
+
+  useEffect(() => {
     if (isAuthenticated) {
-      navigate('/admin', { replace: true });
+      navigate(redirectPath, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, redirectPath]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +33,7 @@ export const AdminLogin = () => {
     try {
       const { data } = await api.post('/auth/login', { email, password });
       login(data, data.token);
-      navigate('/admin', { replace: true });
+      navigate(redirectPath, { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid credentials');
     } finally {
@@ -49,6 +53,13 @@ export const AdminLogin = () => {
         </div>
         <h1 className="text-3xl font-bold font-poppins text-center text-slate-900 mb-2">Admin Portal</h1>
         <p className="text-center text-slate-500 mb-8">Sign in to manage VetNova Training Institute</p>
+
+        {isExpired && !error && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>Your session has expired. Please sign in again to continue.</span>
+          </div>
+        )}
 
         {error && <div className="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-lg text-center">{error}</div>}
 

@@ -70,3 +70,66 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ success: false, message: 'Error registering user' });
   }
 };
+
+export const getMe = async (req: any, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Not authenticated' });
+      return;
+    }
+    res.json({
+      success: true,
+      user: {
+        _id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Error fetching profile' });
+  }
+};
+
+export const refreshToken = async (req: any, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Not authenticated' });
+      return;
+    }
+    const newToken = generateToken(req.user._id.toString(), req.user.role);
+    res.json({
+      success: true,
+      token: newToken,
+      user: {
+        _id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Error refreshing token' });
+  }
+};
+
+export const verifyToken = async (req: any, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, valid: false });
+      return;
+    }
+    res.json({
+      success: true,
+      valid: true,
+      user: {
+        _id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role
+      }
+    });
+  } catch (error: any) {
+    res.status(401).json({ success: false, valid: false });
+  }
+};

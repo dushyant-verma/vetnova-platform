@@ -15,6 +15,8 @@ export interface IProgram extends mongoose.Document {
   fullDescription?: string;
   duration?: string;
   availability?: string;
+  learningLevel?: "Beginner" | "Intermediate" | "Advanced";
+  level?: "Beginner" | "Intermediate" | "Advanced";
   learningOutcomes?: string[];
   curriculum?: { title: string; content: string }[];
   faculty?: mongoose.Types.ObjectId[];
@@ -37,6 +39,8 @@ const programSchema = new mongoose.Schema({
   fullDescription: { type: String, trim: true },
   duration: { type: String, default: "3 Days" },
   availability: { type: String, default: "24 Hours" },
+  learningLevel: { type: String, enum: ["Beginner", "Intermediate", "Advanced"], default: "Beginner" },
+  level: { type: String, default: "Beginner" },
   learningOutcomes: [{ type: String }],
   curriculum: [{ title: String, content: String }],
   faculty: [{ type: mongoose.Schema.Types.ObjectId, ref: "Expert" }],

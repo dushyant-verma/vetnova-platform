@@ -14,6 +14,8 @@ const programSchema = new mongoose_1.default.Schema({
     fullDescription: { type: String, trim: true },
     duration: { type: String, default: "3 Days" },
     availability: { type: String, default: "24 Hours" },
+    learningLevel: { type: String, enum: ["Beginner", "Intermediate", "Advanced"], default: "Beginner" },
+    level: { type: String, default: "Beginner" },
     learningOutcomes: [{ type: String }],
     curriculum: [{ title: String, content: String }],
     faculty: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "Expert" }],
