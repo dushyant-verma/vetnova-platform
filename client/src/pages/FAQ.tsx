@@ -11,7 +11,7 @@ const faqCategories = [
 ];
 
 const faqs = [
-  { category: 'Admissions', q: 'How do I apply for a course?', a: 'You can apply by visiting the Book free Counselling  page, selecting your desired course, and filling out the application form with your details.' },
+  { category: 'Admissions', q: 'How do I apply for a course?', a: 'You can apply by visiting the Book Free Counselling page, selecting your desired course, and filling out the application form with your details.' },
   { category: 'Admissions', q: 'What is the eligibility criteria?', a: 'Eligibility varies by program. Veterinarian programs require a valid veterinary degree, while nurse programs require a diploma.' },
   { category: 'Programs', q: 'Are the programs available online?', a: 'Yes, we offer hybrid learning models. Theoretical modules are online, while clinical skills require in-person attendance at our Pune campus.' },
   { category: 'Programs', q: 'Do you offer short courses?', a: 'Yes, we have 2-day and 5-day short courses focusing on specific clinical skills like Ultrasound, Orthopedics, and Soft Tissue Surgery.' },

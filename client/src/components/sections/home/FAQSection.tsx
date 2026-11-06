@@ -27,7 +27,7 @@ const faqs = [
   {
     id: 'faq-5',
     question: 'How do I register?',
-    answer: 'You can register by navigating to the specific program page and clicking the "Book free Counselling " button. Alternatively, you can fill out the enquiry form on this page, and our admissions team will guide you through the process.'
+    answer: 'You can register by navigating to the specific program page and clicking the "Book Free Counselling" button. Alternatively, you can fill out the enquiry form on this page, and our admissions team will guide you through the process.'
   }
 ];
 

@@ -9,6 +9,25 @@ export declare const AdvisoryBoard: mongoose.Model<{
     linkedin?: string;
     displayOrder: number;
     status: "Draft" | "Published";
+    fullBio?: any;
+    qualifications: mongoose.Types.DocumentArray<{
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, mongoose.Types.Subdocument<mongoose.mongo.ObjectId, unknown, {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, {}, {}> & {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }>;
+    achievements: string[];
+    researchInterests: string[];
 } & mongoose.DefaultTimestampProps, {}, {}, {
     id: string;
 }, mongoose.Document<unknown, {}, {
@@ -21,6 +40,25 @@ export declare const AdvisoryBoard: mongoose.Model<{
     linkedin?: string;
     displayOrder: number;
     status: "Draft" | "Published";
+    fullBio?: any;
+    qualifications: mongoose.Types.DocumentArray<{
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, mongoose.Types.Subdocument<mongoose.mongo.ObjectId, unknown, {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, {}, {}> & {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }>;
+    achievements: string[];
+    researchInterests: string[];
 } & mongoose.DefaultTimestampProps, {
     id: string;
 }, {
@@ -35,6 +73,25 @@ export declare const AdvisoryBoard: mongoose.Model<{
     linkedin?: string;
     displayOrder: number;
     status: "Draft" | "Published";
+    fullBio?: any;
+    qualifications: mongoose.Types.DocumentArray<{
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, mongoose.Types.Subdocument<mongoose.mongo.ObjectId, unknown, {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, {}, {}> & {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }>;
+    achievements: string[];
+    researchInterests: string[];
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -53,6 +110,25 @@ export declare const AdvisoryBoard: mongoose.Model<{
     linkedin?: string;
     displayOrder: number;
     status: "Draft" | "Published";
+    fullBio?: any;
+    qualifications: mongoose.Types.DocumentArray<{
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, mongoose.Types.Subdocument<mongoose.mongo.ObjectId, unknown, {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, {}, {}> & {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }>;
+    achievements: string[];
+    researchInterests: string[];
 } & mongoose.DefaultTimestampProps, mongoose.Document<unknown, {}, {
     name: string;
     designation?: string;
@@ -63,6 +139,25 @@ export declare const AdvisoryBoard: mongoose.Model<{
     linkedin?: string;
     displayOrder: number;
     status: "Draft" | "Published";
+    fullBio?: any;
+    qualifications: mongoose.Types.DocumentArray<{
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, mongoose.Types.Subdocument<mongoose.mongo.ObjectId, unknown, {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, {}, {}> & {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }>;
+    achievements: string[];
+    researchInterests: string[];
 } & mongoose.DefaultTimestampProps, {
     id: string;
 }, Omit<mongoose.DefaultSchemaOptions, "timestamps"> & {
@@ -77,6 +172,25 @@ export declare const AdvisoryBoard: mongoose.Model<{
     linkedin?: string;
     displayOrder: number;
     status: "Draft" | "Published";
+    fullBio?: any;
+    qualifications: mongoose.Types.DocumentArray<{
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, mongoose.Types.Subdocument<mongoose.mongo.ObjectId, unknown, {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, {}, {}> & {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }>;
+    achievements: string[];
+    researchInterests: string[];
 } & mongoose.DefaultTimestampProps & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -95,6 +209,25 @@ export declare const AdvisoryBoard: mongoose.Model<{
     linkedin?: string;
     displayOrder: number;
     status: "Draft" | "Published";
+    fullBio?: any;
+    qualifications: mongoose.Types.DocumentArray<{
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, mongoose.Types.Subdocument<mongoose.mongo.ObjectId, unknown, {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, {}, {}> & {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }>;
+    achievements: string[];
+    researchInterests: string[];
 } & {
     _id: mongoose.Types.ObjectId;
 } & {
@@ -111,6 +244,25 @@ export declare const AdvisoryBoard: mongoose.Model<{
     linkedin?: string;
     displayOrder: number;
     status: "Draft" | "Published";
+    fullBio?: any;
+    qualifications: mongoose.Types.DocumentArray<{
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, mongoose.Types.Subdocument<mongoose.mongo.ObjectId, unknown, {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }, {}, {}> & {
+        degree?: string;
+        field?: string;
+        institution?: string;
+        year?: string;
+    }>;
+    achievements: string[];
+    researchInterests: string[];
 } & {
     _id: mongoose.Types.ObjectId;
 } & {

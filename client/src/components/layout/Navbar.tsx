@@ -178,7 +178,7 @@ export const Navbar = () => {
               Browse Courses
             </Button>
             <Button variant="default" className="rounded-full px-6 shadow-md shadow-brand-primary/20" onClick={() => navigate('/apply')}>
-              Book free Counselling
+              Book Free Counselling
             </Button>
           </div>
 
@@ -232,7 +232,7 @@ export const Navbar = () => {
                     Browse Courses
                   </Button>
                   <Button className="w-full rounded-full shadow-md" onClick={() => { navigate('/apply'); closeMenu(); }}>
-                    Book free Counselling
+                    Book Free Counselling
                   </Button>
                 </div>
 

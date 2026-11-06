@@ -87,7 +87,7 @@ export const Testimonials = () => {
               <h2 className="text-3xl font-bold font-poppins mb-4">Ready to advance your career?</h2>
               <p className="text-white/80 mb-8 max-w-xl mx-auto text-lg">Join India's premier veterinary training institute and gain practical skills that set you apart.</p>
               <Link to="/apply">
-                <Button className="bg-white text-brand-primary hover:bg-slate-100 rounded-full px-8 py-6 text-lg font-bold shadow-xl">Book free Counselling </Button>
+                <Button className="bg-white text-brand-primary hover:bg-slate-100 rounded-full px-8 py-6 text-lg font-bold shadow-xl">Book Free Counselling</Button>
               </Link>
             </div>
           </div>

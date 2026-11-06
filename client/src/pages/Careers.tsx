@@ -143,7 +143,7 @@ export const Careers = () => {
                     </div>
                   </div>
                   <Button variant="outline" className="rounded-full shrink-0 group-hover:bg-brand-primary group-hover:text-white border-slate-200">
-                    Book free Counselling  <ChevronRight className="w-4 h-4 ml-1" />
+                    Book Free Counselling <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 </div>
               ))}
