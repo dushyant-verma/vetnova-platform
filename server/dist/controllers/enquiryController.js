@@ -46,7 +46,7 @@ const THANK_YOU_MESSAGES = {
 };
 const createEnquiry = async (req, res) => {
     try {
-        const { persona = 'general', name, firstName, lastName, audience, programName, designation, organization, phone, countryCode = '+91', email, profile, course, message, source = 'Counselling Form', sourcePage = '', formId = '', currentStage, areaOfInterest, skillToDevelop, yearsOfExperience, currentRole, areaToStrengthen, preferredTrainingLevel, background, lookingFor, skillsInterest, preferredLearningMode, explorationGoal, formData = {} } = req.body;
+        const { persona = 'general', name, firstName, lastName, audience, role, whoAreYou, programName, designation, organization, phone, countryCode = '+91', email, profile, course, message, source = 'Counselling Form', sourcePage = '', formId = '', currentStage, areaOfInterest, skillToDevelop, yearsOfExperience, currentRole, areaToStrengthen, preferredTrainingLevel, background, lookingFor, skillsInterest, preferredLearningMode, explorationGoal, formData = {} } = req.body;
         // 1. Validate Persona
         const validPersonas = ['student', 'practitioner', 'nurse', 'partner', 'general'];
         const safePersona = validPersonas.includes(persona)
@@ -186,9 +186,15 @@ const createEnquiry = async (req, res) => {
         const safeOrganization = typeof organization === 'string'
             ? organization.trim().slice(0, 200)
             : (aggregatedData.organization ? String(aggregatedData.organization).slice(0, 200) : '');
-        const safeAudience = typeof audience === 'string' && audience.trim()
+        const safeAudience = (typeof audience === 'string' && audience.trim())
             ? audience.trim().slice(0, 100)
-            : (typeof profile === 'string' && profile.trim() ? profile.trim().slice(0, 100) : (aggregatedData.audience || aggregatedData.role || aggregatedData.whoAreYou || ''));
+            : (typeof role === 'string' && role.trim())
+                ? role.trim().slice(0, 100)
+                : (typeof whoAreYou === 'string' && whoAreYou.trim())
+                    ? whoAreYou.trim().slice(0, 100)
+                    : (typeof profile === 'string' && profile.trim())
+                        ? profile.trim().slice(0, 100)
+                        : (aggregatedData.audience || aggregatedData.role || aggregatedData.whoAreYou || '');
         const safeProgramName = typeof programName === 'string' && programName.trim()
             ? programName.trim().slice(0, 150)
             : (typeof course === 'string' && course.trim() ? course.trim().slice(0, 150) : (aggregatedData.programName || aggregatedData.interestedProgram || ''));

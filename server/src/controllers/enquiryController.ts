@@ -53,6 +53,8 @@ export const createEnquiry = async (req: Request, res: Response): Promise<void> 
       firstName,
       lastName,
       audience,
+      role,
+      whoAreYou,
       programName,
       designation,
       organization,
@@ -231,9 +233,15 @@ export const createEnquiry = async (req: Request, res: Response): Promise<void> 
       ? organization.trim().slice(0, 200)
       : (aggregatedData.organization ? String(aggregatedData.organization).slice(0, 200) : '');
 
-    const safeAudience = typeof audience === 'string' && audience.trim()
+    const safeAudience = (typeof audience === 'string' && audience.trim())
       ? audience.trim().slice(0, 100)
-      : (typeof profile === 'string' && profile.trim() ? profile.trim().slice(0, 100) : (aggregatedData.audience || aggregatedData.role || aggregatedData.whoAreYou || ''));
+      : (typeof role === 'string' && role.trim())
+      ? role.trim().slice(0, 100)
+      : (typeof whoAreYou === 'string' && whoAreYou.trim())
+      ? whoAreYou.trim().slice(0, 100)
+      : (typeof profile === 'string' && profile.trim())
+      ? profile.trim().slice(0, 100)
+      : (aggregatedData.audience || aggregatedData.role || aggregatedData.whoAreYou || '');
 
     const safeProgramName = typeof programName === 'string' && programName.trim()
       ? programName.trim().slice(0, 150)
