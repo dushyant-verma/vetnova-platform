@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 export declare const crudFactory: (model: Model<any>, populateOpts?: any) => {
     getAll: (req: Request, res: Response) => Promise<void>;
     getOne: (req: Request, res: Response) => Promise<void>;
-    createOne: (req: Request, res: Response) => Promise<void>;
+    createOne: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
     updateOne: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
     deleteOne: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
 };

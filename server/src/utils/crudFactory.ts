@@ -208,6 +208,25 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
         if (model.modelName === 'User' && sanitizedBody.role === 'super_admin') {
           sanitizedBody.role = 'admin';
         }
+
+        if (model.modelName === 'BlogCategory') {
+          const catName = sanitizedBody.name ? String(sanitizedBody.name).trim() : '';
+          const catSlug = sanitizedBody.slug ? String(sanitizedBody.slug).trim() : '';
+          const dupOr: any[] = [];
+          if (catName) {
+            dupOr.push({ name: { $regex: new RegExp(`^${escapeRegex(catName)}$`, 'i') } });
+          }
+          if (catSlug) {
+            dupOr.push({ slug: { $regex: new RegExp(`^${escapeRegex(catSlug)}$`, 'i') } });
+          }
+          if (dupOr.length > 0) {
+            const existingDup = await model.findOne({ $or: dupOr });
+            if (existingDup) {
+              return res.status(409).json({ message: `A category with this name or slug already exists (${existingDup.name})` });
+            }
+          }
+        }
+
         const doc = await model.create(sanitizedBody);
         const resultDoc = doc.toObject();
         if (resultDoc.password) {
@@ -247,6 +266,24 @@ export const crudFactory = (model: Model<any>, populateOpts?: any) => {
         let existingCat: any = null;
         if (model.modelName === 'BlogCategory') {
           existingCat = await model.findById(id);
+          const catName = sanitizedBody.name ? String(sanitizedBody.name).trim() : '';
+          const catSlug = sanitizedBody.slug ? String(sanitizedBody.slug).trim() : '';
+          const dupOr: any[] = [];
+          if (catName) {
+            dupOr.push({ name: { $regex: new RegExp(`^${escapeRegex(catName)}$`, 'i') } });
+          }
+          if (catSlug) {
+            dupOr.push({ slug: { $regex: new RegExp(`^${escapeRegex(catSlug)}$`, 'i') } });
+          }
+          if (dupOr.length > 0) {
+            const existingDup = await model.findOne({
+              _id: { $ne: id },
+              $or: dupOr
+            });
+            if (existingDup) {
+              return res.status(409).json({ message: `Another category with this name or slug already exists (${existingDup.name})` });
+            }
+          }
         }
 
         const doc = await model.findByIdAndUpdate(id, sanitizedBody, { new: true, runValidators: true }).select('-password');
