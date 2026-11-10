@@ -84,10 +84,30 @@ const crudFactory = (model, populateOpts) => {
                 }
                 if (category && category !== 'all' && typeof category === 'string') {
                     const safeCategory = escapeRegex(category.trim());
-                    query.$or = [
+                    const catOrConditions = [
                         { category: { $regex: new RegExp(`^${safeCategory}$`, 'i') } },
                         { categories: { $regex: new RegExp(`^${safeCategory}$`, 'i') } }
                     ];
+                    if (model.modelName === 'Blog') {
+                        const CategoryModel = mongoose_1.default.models.BlogCategory;
+                        if (CategoryModel) {
+                            const matchedCat = await CategoryModel.findOne({
+                                $or: [
+                                    { slug: { $regex: new RegExp(`^${safeCategory}$`, 'i') } },
+                                    { name: { $regex: new RegExp(`^${safeCategory}$`, 'i') } }
+                                ]
+                            });
+                            if (matchedCat) {
+                                const altName = escapeRegex(matchedCat.name);
+                                const altSlug = escapeRegex(matchedCat.slug);
+                                catOrConditions.push({ category: { $regex: new RegExp(`^${altName}$`, 'i') } });
+                                catOrConditions.push({ categories: { $regex: new RegExp(`^${altName}$`, 'i') } });
+                                catOrConditions.push({ category: { $regex: new RegExp(`^${altSlug}$`, 'i') } });
+                                catOrConditions.push({ categories: { $regex: new RegExp(`^${altSlug}$`, 'i') } });
+                            }
+                        }
+                    }
+                    query.$or = catOrConditions;
                 }
                 if (program && program !== 'all' && typeof program === 'string') {
                     const safeProgram = escapeRegex(program.trim());
@@ -211,9 +231,68 @@ const crudFactory = (model, populateOpts) => {
                         }
                     }
                 }
+                let existingCat = null;
+                if (model.modelName === 'BlogCategory') {
+                    existingCat = await model.findById(id);
+                }
                 const doc = await model.findByIdAndUpdate(id, sanitizedBody, { new: true, runValidators: true }).select('-password');
                 if (!doc) {
                     return res.status(404).json({ message: 'Record not found' });
+                }
+                if (model.modelName === 'BlogCategory' && existingCat) {
+                    const oldName = existingCat.name?.trim();
+                    const newName = doc.name?.trim();
+                    const oldSlug = existingCat.slug?.trim();
+                    const newSlug = doc.slug?.trim();
+                    if ((oldName && newName && oldName.toLowerCase() !== newName.toLowerCase()) ||
+                        (oldSlug && newSlug && oldSlug.toLowerCase() !== newSlug.toLowerCase())) {
+                        const BlogModel = mongoose_1.default.models.Blog;
+                        if (BlogModel) {
+                            const searchFilters = [];
+                            if (oldName) {
+                                searchFilters.push({ category: { $regex: new RegExp(`^${escapeRegex(oldName)}$`, 'i') } });
+                                searchFilters.push({ categories: { $regex: new RegExp(`^${escapeRegex(oldName)}$`, 'i') } });
+                            }
+                            if (oldSlug) {
+                                searchFilters.push({ category: { $regex: new RegExp(`^${escapeRegex(oldSlug)}$`, 'i') } });
+                                searchFilters.push({ categories: { $regex: new RegExp(`^${escapeRegex(oldSlug)}$`, 'i') } });
+                            }
+                            if (searchFilters.length > 0) {
+                                const affectedBlogs = await BlogModel.find({ $or: searchFilters });
+                                for (const blog of affectedBlogs) {
+                                    let changed = false;
+                                    if (oldName && (new RegExp(`^${escapeRegex(oldName)}$`, 'i').test(blog.category) ||
+                                        (oldSlug && new RegExp(`^${escapeRegex(oldSlug)}$`, 'i').test(blog.category)))) {
+                                        blog.category = newName;
+                                        changed = true;
+                                    }
+                                    if (Array.isArray(blog.categories)) {
+                                        const nextCats = blog.categories.map((c) => {
+                                            if ((oldName && new RegExp(`^${escapeRegex(oldName)}$`, 'i').test(c)) ||
+                                                (oldSlug && new RegExp(`^${escapeRegex(oldSlug)}$`, 'i').test(c))) {
+                                                changed = true;
+                                                return newName;
+                                            }
+                                            return c;
+                                        });
+                                        const uniqueCats = [];
+                                        const seen = new Set();
+                                        for (const c of nextCats) {
+                                            const k = c.toLowerCase();
+                                            if (!seen.has(k)) {
+                                                seen.add(k);
+                                                uniqueCats.push(c);
+                                            }
+                                        }
+                                        blog.categories = uniqueCats;
+                                    }
+                                    if (changed) {
+                                        await blog.save();
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 res.json(doc);
             }
@@ -247,12 +326,30 @@ const crudFactory = (model, populateOpts) => {
                     if (BlogModel) {
                         const catName = escapeRegex(docToDelete.name);
                         const catSlug = escapeRegex(docToDelete.slug);
-                        await BlogModel.updateMany({
+                        const affectedBlogs = await BlogModel.find({
                             $or: [
                                 { category: { $regex: new RegExp(`^${catName}$`, 'i') } },
-                                { category: { $regex: new RegExp(`^${catSlug}$`, 'i') } }
+                                { category: { $regex: new RegExp(`^${catSlug}$`, 'i') } },
+                                { categories: { $regex: new RegExp(`^${catName}$`, 'i') } },
+                                { categories: { $regex: new RegExp(`^${catSlug}$`, 'i') } }
                             ]
-                        }, { $set: { category: 'GENERAL' } });
+                        });
+                        for (const blog of affectedBlogs) {
+                            if (Array.isArray(blog.categories)) {
+                                blog.categories = blog.categories.filter((c) => !new RegExp(`^${catName}$`, 'i').test(c) && !new RegExp(`^${catSlug}$`, 'i').test(c));
+                            }
+                            else {
+                                blog.categories = [];
+                            }
+                            if (blog.categories.length === 0) {
+                                blog.categories = ['GENERAL'];
+                                blog.category = 'GENERAL';
+                            }
+                            else {
+                                blog.category = blog.categories[0];
+                            }
+                            await blog.save();
+                        }
                         const generalExists = await CategoryModel.findOne({ name: { $regex: /^GENERAL$/i } });
                         if (!generalExists) {
                             await CategoryModel.create({
