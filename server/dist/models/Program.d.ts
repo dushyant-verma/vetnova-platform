@@ -4,6 +4,21 @@ export interface ISyllabus {
     intermediate: string[];
     advanced: string[];
 }
+export interface ISyllabusStatusByLevel {
+    foundation: "Available" | "Pending";
+    intermediate: "Available" | "Pending";
+    advanced: "Available" | "Pending";
+}
+export interface IStageTitles {
+    foundation?: string;
+    intermediate?: string;
+    advanced?: string;
+}
+export interface IStageDescriptions {
+    foundation?: string;
+    intermediate?: string;
+    advanced?: string;
+}
 export interface IProgram extends mongoose.Document {
     title: string;
     slug: string;
@@ -16,8 +31,9 @@ export interface IProgram extends mongoose.Document {
     courseLength?: string;
     trainingSchedule?: string;
     availability?: string;
-    learningLevel?: "Beginner" | "Intermediate" | "Advanced";
-    level?: "Beginner" | "Intermediate" | "Advanced";
+    learningLevel?: string;
+    level?: string;
+    levels?: string[];
     learningOutcomes?: string[];
     curriculum?: {
         title: string;
@@ -28,6 +44,9 @@ export interface IProgram extends mongoose.Document {
     image?: string;
     status: "Draft" | "Published";
     syllabusStatus: "Available" | "Pending";
+    syllabusStatusByLevel?: ISyllabusStatusByLevel;
+    stageTitles?: IStageTitles;
+    stageDescriptions?: IStageDescriptions;
     syllabus: ISyllabus;
     isActive: boolean;
     createdAt: Date;

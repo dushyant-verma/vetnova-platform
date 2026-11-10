@@ -17,8 +17,9 @@ const programSchema = new mongoose_1.default.Schema({
     courseLength: { type: String, default: "8 Hours / Day" },
     trainingSchedule: { type: String, default: "8 Hours Per Day" },
     availability: { type: String, default: "8 Hours / Day" },
-    learningLevel: { type: String, enum: ["Beginner", "Intermediate", "Advanced"], default: "Beginner" },
-    level: { type: String, default: "Beginner" },
+    learningLevel: { type: String, default: "All Levels" },
+    level: { type: String, default: "All Levels" },
+    levels: { type: [String], default: ["Foundation", "Intermediate", "Advanced"] },
     learningOutcomes: [{ type: String }],
     curriculum: [{ title: String, content: String }],
     faculty: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "Expert" }],
@@ -26,6 +27,21 @@ const programSchema = new mongoose_1.default.Schema({
     image: { type: String },
     status: { type: String, enum: ["Draft", "Published"], default: "Published" },
     syllabusStatus: { type: String, enum: ["Available", "Pending"], default: "Pending" },
+    syllabusStatusByLevel: {
+        foundation: { type: String, enum: ["Available", "Pending"], default: "Available" },
+        intermediate: { type: String, enum: ["Available", "Pending"], default: "Available" },
+        advanced: { type: String, enum: ["Available", "Pending"], default: "Available" }
+    },
+    stageTitles: {
+        foundation: { type: String },
+        intermediate: { type: String },
+        advanced: { type: String }
+    },
+    stageDescriptions: {
+        foundation: { type: String },
+        intermediate: { type: String },
+        advanced: { type: String }
+    },
     syllabus: {
         foundation: [{ type: String }],
         intermediate: [{ type: String }],

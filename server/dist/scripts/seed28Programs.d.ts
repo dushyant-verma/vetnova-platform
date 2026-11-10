@@ -4,12 +4,28 @@ export interface ProgramSeedData {
     slug: string;
     category: string;
     duration: string;
-    learningLevel?: "Beginner" | "Intermediate" | "Advanced";
+    learningLevel?: string;
     level?: string;
+    levels?: string[];
     description: string;
     image: string;
     status: "Draft" | "Published";
     syllabusStatus: "Available" | "Pending";
+    syllabusStatusByLevel?: {
+        foundation: "Available" | "Pending";
+        intermediate: "Available" | "Pending";
+        advanced: "Available" | "Pending";
+    };
+    stageTitles?: {
+        foundation: string;
+        intermediate: string;
+        advanced: string;
+    };
+    stageDescriptions?: {
+        foundation: string;
+        intermediate: string;
+        advanced: string;
+    };
     syllabus: {
         foundation: string[];
         intermediate: string[];

@@ -6,6 +6,24 @@ export interface ISyllabus {
   advanced: string[];
 }
 
+export interface ISyllabusStatusByLevel {
+  foundation: "Available" | "Pending";
+  intermediate: "Available" | "Pending";
+  advanced: "Available" | "Pending";
+}
+
+export interface IStageTitles {
+  foundation?: string;
+  intermediate?: string;
+  advanced?: string;
+}
+
+export interface IStageDescriptions {
+  foundation?: string;
+  intermediate?: string;
+  advanced?: string;
+}
+
 export interface IProgram extends mongoose.Document {
   title: string;
   slug: string;
@@ -18,8 +36,9 @@ export interface IProgram extends mongoose.Document {
   courseLength?: string;
   trainingSchedule?: string;
   availability?: string;
-  learningLevel?: "Beginner" | "Intermediate" | "Advanced";
-  level?: "Beginner" | "Intermediate" | "Advanced";
+  learningLevel?: string;
+  level?: string;
+  levels?: string[];
   learningOutcomes?: string[];
   curriculum?: { title: string; content: string }[];
   faculty?: mongoose.Types.ObjectId[];
@@ -27,6 +46,9 @@ export interface IProgram extends mongoose.Document {
   image?: string;
   status: "Draft" | "Published";
   syllabusStatus: "Available" | "Pending";
+  syllabusStatusByLevel?: ISyllabusStatusByLevel;
+  stageTitles?: IStageTitles;
+  stageDescriptions?: IStageDescriptions;
   syllabus: ISyllabus;
   isActive: boolean;
   createdAt: Date;
@@ -45,8 +67,9 @@ const programSchema = new mongoose.Schema({
   courseLength: { type: String, default: "8 Hours / Day" },
   trainingSchedule: { type: String, default: "8 Hours Per Day" },
   availability: { type: String, default: "8 Hours / Day" },
-  learningLevel: { type: String, enum: ["Beginner", "Intermediate", "Advanced"], default: "Beginner" },
-  level: { type: String, default: "Beginner" },
+  learningLevel: { type: String, default: "All Levels" },
+  level: { type: String, default: "All Levels" },
+  levels: { type: [String], default: ["Foundation", "Intermediate", "Advanced"] },
   learningOutcomes: [{ type: String }],
   curriculum: [{ title: String, content: String }],
   faculty: [{ type: mongoose.Schema.Types.ObjectId, ref: "Expert" }],
@@ -54,6 +77,21 @@ const programSchema = new mongoose.Schema({
   image: { type: String },
   status: { type: String, enum: ["Draft", "Published"], default: "Published" },
   syllabusStatus: { type: String, enum: ["Available", "Pending"], default: "Pending" },
+  syllabusStatusByLevel: {
+    foundation: { type: String, enum: ["Available", "Pending"], default: "Available" },
+    intermediate: { type: String, enum: ["Available", "Pending"], default: "Available" },
+    advanced: { type: String, enum: ["Available", "Pending"], default: "Available" }
+  },
+  stageTitles: {
+    foundation: { type: String },
+    intermediate: { type: String },
+    advanced: { type: String }
+  },
+  stageDescriptions: {
+    foundation: { type: String },
+    intermediate: { type: String },
+    advanced: { type: String }
+  },
   syllabus: {
     foundation: [{ type: String }],
     intermediate: [{ type: String }],

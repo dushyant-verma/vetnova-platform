@@ -31,13 +31,21 @@ export const getPrograms = async (req: Request, res: Response) => {
 
     const lvl = (learningLevel || level) as string;
     if (lvl && lvl !== "all") {
-      filter.$or = [
-        { learningLevel: { $regex: new RegExp(`^${lvl}$`, "i") } },
-        { level: { $regex: new RegExp(`^${lvl}$`, "i") } }
-      ];
-    }
-
-    if (syllabusStatus && syllabusStatus !== "all") {
+      const stage = (lvl.toLowerCase() === "beginner" ? "foundation" : lvl.toLowerCase()).trim();
+      if (syllabusStatus && syllabusStatus !== "all") {
+        if (stage === "foundation" || stage === "intermediate" || stage === "advanced") {
+          filter.$or = [
+            { [`syllabusStatusByLevel.${stage}`]: syllabusStatus },
+            ...(syllabusStatus === "Available"
+              ? [{ [`syllabus.${stage}.0`]: { $exists: true } }]
+              : [{ [`syllabus.${stage}`]: { $size: 0 } }, { [`syllabus.${stage}`]: { $exists: false } }]
+            )
+          ];
+        } else {
+          filter.syllabusStatus = syllabusStatus;
+        }
+      }
+    } else if (syllabusStatus && syllabusStatus !== "all") {
       filter.syllabusStatus = syllabusStatus;
     }
 
@@ -74,6 +82,14 @@ export const getPrograms = async (req: Request, res: Response) => {
     const cleaned = programs.map((p: any) => {
       const obj = p.toObject ? p.toObject() : { ...p };
       obj.duration = (obj.duration && obj.duration.toLowerCase().includes('day')) ? obj.duration : '3 Days';
+      obj.levels = Array.isArray(obj.levels) && obj.levels.length > 0 ? obj.levels : ["Foundation", "Intermediate", "Advanced"];
+      if (!obj.syllabusStatusByLevel) {
+        obj.syllabusStatusByLevel = {
+          foundation: (obj.syllabus?.foundation?.length > 0) ? "Available" : "Pending",
+          intermediate: (obj.syllabus?.intermediate?.length > 0) ? "Available" : "Pending",
+          advanced: (obj.syllabus?.advanced?.length > 0) ? "Available" : "Pending"
+        };
+      }
       if (obj.slug === 'orthopaedics' && (!obj.image || obj.image.includes('facility-diagnostics-room'))) {
         obj.image = 'assets/images/programs/program-orthopaedics.webp';
       } else if (obj.slug === 'veterinary-dentistry' && (!obj.image || obj.image.includes('facility-diagnostics-room'))) {
@@ -105,6 +121,14 @@ export const getProgramById = async (req: Request, res: Response): Promise<void>
     if (program) {
       const obj = program.toObject ? program.toObject() : { ...program };
       obj.duration = (obj.duration && obj.duration.toLowerCase().includes('day')) ? obj.duration : '3 Days';
+      obj.levels = Array.isArray(obj.levels) && obj.levels.length > 0 ? obj.levels : ["Foundation", "Intermediate", "Advanced"];
+      if (!obj.syllabusStatusByLevel) {
+        obj.syllabusStatusByLevel = {
+          foundation: (obj.syllabus?.foundation?.length > 0) ? "Available" : "Pending",
+          intermediate: (obj.syllabus?.intermediate?.length > 0) ? "Available" : "Pending",
+          advanced: (obj.syllabus?.advanced?.length > 0) ? "Available" : "Pending"
+        };
+      }
       res.json(obj);
     } else {
       res.status(404).json({ message: "Program not found" });
