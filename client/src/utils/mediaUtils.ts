@@ -27,9 +27,10 @@ export function getMediaUrl(url?: string | null, fallback: string = DEFAULT_FALL
     return trimmed;
   }
 
-  // 4. Relative static asset paths (e.g. assets/... or /assets/...) -> return absolute path
+  // 4. Relative static asset paths (e.g. assets/... or /assets/...) -> return absolute URL from production CDN
   if (trimmed.startsWith('assets/') || trimmed.startsWith('/assets/')) {
-    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    const clean = trimmed.replace(/^\/+/, '');
+    return `https://vetnova-learning-centre.vercel.app/${clean}`;
   }
 
   return fallback;

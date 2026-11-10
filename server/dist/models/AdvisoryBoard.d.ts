@@ -4,6 +4,8 @@ export declare const AdvisoryBoard: mongoose.Model<{
     designation?: string;
     organization?: string;
     qualification?: string;
+    specialization?: string;
+    expertise: string[];
     bio?: string;
     image?: string;
     linkedin?: string;
@@ -35,6 +37,8 @@ export declare const AdvisoryBoard: mongoose.Model<{
     designation?: string;
     organization?: string;
     qualification?: string;
+    specialization?: string;
+    expertise: string[];
     bio?: string;
     image?: string;
     linkedin?: string;
@@ -63,11 +67,14 @@ export declare const AdvisoryBoard: mongoose.Model<{
     id: string;
 }, {
     timestamps: true;
+    strict: false;
 }> & Omit<{
     name: string;
     designation?: string;
     organization?: string;
     qualification?: string;
+    specialization?: string;
+    expertise: string[];
     bio?: string;
     image?: string;
     linkedin?: string;
@@ -100,11 +107,14 @@ export declare const AdvisoryBoard: mongoose.Model<{
     id: string;
 }>, mongoose.Schema<any, mongoose.Model<any, any, any, any, any, any, any>, {}, {}, {}, {}, {
     timestamps: true;
+    strict: false;
 }, {
     name: string;
     designation?: string;
     organization?: string;
     qualification?: string;
+    specialization?: string;
+    expertise: string[];
     bio?: string;
     image?: string;
     linkedin?: string;
@@ -134,6 +144,8 @@ export declare const AdvisoryBoard: mongoose.Model<{
     designation?: string;
     organization?: string;
     qualification?: string;
+    specialization?: string;
+    expertise: string[];
     bio?: string;
     image?: string;
     linkedin?: string;
@@ -160,13 +172,16 @@ export declare const AdvisoryBoard: mongoose.Model<{
     researchInterests: string[];
 } & mongoose.DefaultTimestampProps, {
     id: string;
-}, Omit<mongoose.DefaultSchemaOptions, "timestamps"> & {
+}, Omit<mongoose.DefaultSchemaOptions, "strict" | "timestamps"> & {
     timestamps: true;
+    strict: false;
 }> & Omit<{
     name: string;
     designation?: string;
     organization?: string;
     qualification?: string;
+    specialization?: string;
+    expertise: string[];
     bio?: string;
     image?: string;
     linkedin?: string;
@@ -204,6 +219,8 @@ export declare const AdvisoryBoard: mongoose.Model<{
     designation?: string;
     organization?: string;
     qualification?: string;
+    specialization?: string;
+    expertise: string[];
     bio?: string;
     image?: string;
     linkedin?: string;
@@ -239,6 +256,8 @@ export declare const AdvisoryBoard: mongoose.Model<{
     designation?: string;
     organization?: string;
     qualification?: string;
+    specialization?: string;
+    expertise: string[];
     bio?: string;
     image?: string;
     linkedin?: string;

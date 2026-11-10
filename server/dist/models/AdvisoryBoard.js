@@ -10,6 +10,8 @@ const advisoryBoardSchema = new mongoose_1.default.Schema({
     designation: { type: String },
     organization: { type: String },
     qualification: { type: String },
+    specialization: { type: String },
+    expertise: [{ type: String }],
     bio: { type: String },
     image: { type: String },
     linkedin: { type: String },
@@ -25,6 +27,6 @@ const advisoryBoardSchema = new mongoose_1.default.Schema({
         }],
     achievements: [{ type: String }],
     researchInterests: [{ type: String }]
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 exports.AdvisoryBoard = mongoose_1.default.model('AdvisoryBoard', advisoryBoardSchema);
 //# sourceMappingURL=AdvisoryBoard.js.map

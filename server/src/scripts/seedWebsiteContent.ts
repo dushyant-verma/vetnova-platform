@@ -79,7 +79,7 @@ export async function seedWebsiteContent() {
           'Animal Biotechnology, Infectious Diseases & Microbiology',
           'Veterinary Healthcare Delivery, Clinical Operations & Practice Management'
         ],
-        image: 'assets/images/about/about-advisor-01.webp',
+        image: 'https://res.cloudinary.com/b6f4rcyn/image/upload/v1794293771/vetnova/media/about-advisor-01_1794293771563-885020370.webp',
         displayOrder: 1,
         status: 'Published'
       },
@@ -119,7 +119,7 @@ export async function seedWebsiteContent() {
           'Evaluation of Ventilator in Rabbits (Broadline Technologies Funded: ₹0.98 Lakh)',
           'Xanthine Oxidase Use in Canine DCM & Acidosis Puffzone Management (Co-PI)'
         ],
-        image: 'assets/images/about/about-advisor-02.webp',
+        image: 'https://res.cloudinary.com/b6f4rcyn/image/upload/v1794293772/vetnova/media/about-advisor-02_1794293772798-539381137.webp',
         displayOrder: 2,
         status: 'Published'
       },
@@ -155,7 +155,7 @@ export async function seedWebsiteContent() {
           'Pedagogical AI Integration & Objective Veterinary Surgical Education',
           'Human-Wildlife Conflict Resolution & Community-Engaged Welfare Strategies'
         ],
-        image: 'assets/images/about/about-advisor-03.webp',
+        image: 'https://res.cloudinary.com/b6f4rcyn/image/upload/v1794293774/vetnova/media/about-advisor-03_1794293773965-64100203.webp',
         displayOrder: 3,
         status: 'Published'
       },
@@ -193,7 +193,7 @@ export async function seedWebsiteContent() {
           'Veterinary Neurosurgery & Patient-Centred Clinical Care',
           'Interventional Radiology, Advanced Diagnostic Imaging & Hydrotherapy Rehabilitation'
         ],
-        image: 'assets/images/about/about-advisor-04.webp',
+        image: 'https://res.cloudinary.com/b6f4rcyn/image/upload/v1794293775/vetnova/media/about-advisor-04_1794293775354-116542522.webp',
         displayOrder: 4,
         status: 'Published'
       },
@@ -227,7 +227,7 @@ export async function seedWebsiteContent() {
           'Extramural Research Project Leadership & Administration',
           'Veterinary Pathology, Infectious Diseases & Academic Instruction'
         ],
-        image: 'assets/images/about/about-advisor-05.webp',
+        image: 'https://res.cloudinary.com/b6f4rcyn/image/upload/v1794293776/vetnova/media/about-advisor-05_1794293776838-97117315.webp',
         displayOrder: 5,
         status: 'Published'
       },
@@ -266,7 +266,7 @@ export async function seedWebsiteContent() {
           'Veterinary Dermatology &amp; Allergic Skin Disease Protocols',
           'Continuing Veterinary Professional Development &amp; Wet-Lab Workshops'
         ],
-        image: 'assets/images/about/about-advisor-06.webp',
+        image: 'https://res.cloudinary.com/b6f4rcyn/image/upload/v1794293778/vetnova/media/about-advisor-06_1794293778096-869269354.webp',
         displayOrder: 6,
         status: 'Published'
       }

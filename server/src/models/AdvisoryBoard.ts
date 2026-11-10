@@ -5,6 +5,8 @@ const advisoryBoardSchema = new mongoose.Schema({
   designation: { type: String },
   organization: { type: String },
   qualification: { type: String },
+  specialization: { type: String },
+  expertise: [{ type: String }],
   bio: { type: String },
   image: { type: String },
   linkedin: { type: String },
@@ -20,6 +22,6 @@ const advisoryBoardSchema = new mongoose.Schema({
   }],
   achievements: [{ type: String }],
   researchInterests: [{ type: String }]
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 export const AdvisoryBoard = mongoose.model('AdvisoryBoard', advisoryBoardSchema);

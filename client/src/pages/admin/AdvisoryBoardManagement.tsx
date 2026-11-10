@@ -6,12 +6,14 @@ import api from '@/lib/axios';
 import { Modal } from '@/components/ui/Modal';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useForm, Controller } from 'react-hook-form';
+import { getMediaUrl, handleImageLoadError } from '@/utils/mediaUtils';
 
 interface AdvisoryBoardForm {
   name: string;
   designation: string;
   organization: string;
   qualification: string;
+  specialization: string;
   bio: string;
   image: string;
   linkedin: string;
@@ -31,6 +33,7 @@ export const AdvisoryBoardManagement = () => {
       designation: '',
       organization: '',
       qualification: '',
+      specialization: '',
       bio: '',
       image: '',
       linkedin: '',
@@ -85,6 +88,7 @@ export const AdvisoryBoardManagement = () => {
       designation: '',
       organization: '',
       qualification: '',
+      specialization: '',
       bio: '',
       image: '',
       linkedin: '',
@@ -101,6 +105,7 @@ export const AdvisoryBoardManagement = () => {
       designation: member.designation || '',
       organization: member.organization || '',
       qualification: member.qualification || '',
+      specialization: member.specialization || '',
       bio: member.bio || '',
       image: member.image || '',
       linkedin: member.linkedin || '',
@@ -155,7 +160,7 @@ export const AdvisoryBoardManagement = () => {
             <tr className="text-sm font-medium text-slate-500 border-b border-slate-100">
               <th className="px-6 py-4">Board Member</th>
               <th className="px-6 py-4">Designation & Organization</th>
-              <th className="px-6 py-4">Qualification</th>
+              <th className="px-6 py-4">Qualification & Specialization</th>
               <th className="px-6 py-4">Order</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4 text-right">Actions</th>
@@ -170,7 +175,12 @@ export const AdvisoryBoardManagement = () => {
               <tr key={member._id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4 flex items-center gap-3">
                   {member.image ? (
-                    <img src={member.image} alt={member.name} className="w-10 h-10 rounded-full object-cover border border-slate-200" />
+                    <img 
+                      src={getMediaUrl(member.image)} 
+                      alt={member.name} 
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                      onError={(e) => handleImageLoadError(e, member.image)}
+                    />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold">{member.name.charAt(0)}</div>
                   )}
@@ -183,8 +193,9 @@ export const AdvisoryBoardManagement = () => {
                   <div className="font-medium text-slate-800">{member.designation || 'Board Member'}</div>
                   <div className="text-xs text-slate-500">{member.organization}</div>
                 </td>
-                <td className="px-6 py-4 text-slate-600 font-medium">
-                  {member.qualification || 'N/A'}
+                <td className="px-6 py-4 text-slate-600">
+                  <div className="font-medium text-slate-800">{member.qualification || 'N/A'}</div>
+                  {member.specialization && <div className="text-xs text-slate-500">{member.specialization}</div>}
                 </td>
                 <td className="px-6 py-4 text-slate-600 font-mono text-xs">
                   {member.displayOrder !== undefined ? member.displayOrder : 0}
@@ -215,7 +226,7 @@ export const AdvisoryBoardManagement = () => {
           <Controller name="name" control={control} rules={{ required: true }} render={({ field }) => (
             <div>
               <label className="block text-sm font-medium mb-1 text-slate-700">Full Name *</label>
-              <input {...field} placeholder="e.g. Dr. Michael Chen" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+              <input {...field} placeholder="e.g. Dr. Purushottam Narute" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
             </div>
           )} />
 
@@ -223,13 +234,13 @@ export const AdvisoryBoardManagement = () => {
             <Controller name="designation" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Designation / Role</label>
-                <input {...field} placeholder="e.g. Chair, Veterinary Surgery" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <input {...field} placeholder="e.g. Veterinarian & Practice Owner" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
             <Controller name="organization" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Organization / Institution</label>
-                <input {...field} placeholder="e.g. Royal Veterinary College, UK" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <input {...field} placeholder="e.g. Broadlands Animal Hospital" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
           </div>
@@ -238,21 +249,28 @@ export const AdvisoryBoardManagement = () => {
             <Controller name="qualification" control={control} render={({ field }) => (
               <div>
                 <label className="block text-sm font-medium mb-1 text-slate-700">Qualification</label>
-                <input {...field} placeholder="e.g. DVM, PhD, FRCVS" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <input {...field} placeholder="e.g. BVSc & AH, MVSc, PhD" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
-            <Controller name="linkedin" control={control} render={({ field }) => (
+            <Controller name="specialization" control={control} render={({ field }) => (
               <div>
-                <label className="block text-sm font-medium mb-1 text-slate-700">LinkedIn URL</label>
-                <input {...field} placeholder="https://linkedin.com/in/..." className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+                <label className="block text-sm font-medium mb-1 text-slate-700">Specialization</label>
+                <input {...field} placeholder="e.g. Internal Medicine, Soft-Tissue Surgery" className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
               </div>
             )} />
           </div>
 
+          <Controller name="linkedin" control={control} render={({ field }) => (
+            <div>
+              <label className="block text-sm font-medium mb-1 text-slate-700">LinkedIn URL</label>
+              <input {...field} placeholder="https://linkedin.com/in/..." className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+            </div>
+          )} />
+
           <Controller name="bio" control={control} render={({ field }) => (
             <div>
               <label className="block text-sm font-medium mb-1 text-slate-700">Short Bio</label>
-              <textarea {...field} rows={3} placeholder="Pioneer in minimally invasive surgery with over 200 published papers..." className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
+              <textarea {...field} rows={3} placeholder="Dr. Purushottam Narute is a veterinarian, biomedical researcher..." className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-primary/50 outline-none" />
             </div>
           )} />
 
