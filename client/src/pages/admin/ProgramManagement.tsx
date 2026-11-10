@@ -64,7 +64,7 @@ export const ProgramManagement = () => {
     slug: "",
     category: "Internal Medicine",
     duration: "3 Days",
-    availability: "24 Hours",
+    availability: "8 Hours / Day",
     learningLevel: "Beginner",
     level: "Beginner",
     description: "",
@@ -149,7 +149,7 @@ export const ProgramManagement = () => {
       slug: "",
       category: "Clinical Training",
       duration: "3 Days",
-      availability: "24 Hours",
+      availability: "8 Hours / Day",
       learningLevel: "Beginner",
       level: "Beginner",
       description: "",
@@ -177,7 +177,7 @@ export const ProgramManagement = () => {
       slug: prog.slug || "",
       category: prog.category || "Clinical Training",
       duration: prog.duration || "3 Days",
-      availability: prog.availability || "24 Hours",
+      availability: prog.availability || "8 Hours / Day",
       learningLevel: progLvl,
       level: progLvl,
       description: prog.description || prog.shortDescription || "",
@@ -303,7 +303,7 @@ export const ProgramManagement = () => {
       slug: (formData.slug || formData.title).toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-"),
       category: formData.category.trim(),
       duration: formData.duration?.trim() || "3 Days",
-      availability: formData.availability?.trim() || "24 Hours",
+      availability: formData.availability?.trim() || "8 Hours / Day",
       learningLevel: currentLvl,
       level: currentLvl,
       description: desc,
@@ -725,12 +725,12 @@ export const ProgramManagement = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Availability</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Daily Duration / Schedule</label>
                   <input
                     type="text"
-                    value={formData.availability || "24 Hours"}
+                    value={formData.availability || "8 Hours / Day"}
                     onChange={(e) => setFormData(p => ({ ...p, availability: e.target.value }))}
-                    placeholder="e.g. 24 Hours"
+                    placeholder="e.g. 8 Hours / Day"
                     className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm"
                   />
                 </div>

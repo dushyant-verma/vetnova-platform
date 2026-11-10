@@ -9,6 +9,8 @@ export interface IBatch extends Document {
     startDate: Date;
     endDate?: Date;
     duration: string;
+    dailyDuration?: string;
+    trainingSchedule?: string;
     status: 'Upcoming' | 'Ongoing' | 'Completed';
     seatStatus?: string;
     location?: string;

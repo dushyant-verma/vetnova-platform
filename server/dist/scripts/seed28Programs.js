@@ -797,6 +797,11 @@ async function seed28Programs() {
                 match.learningLevel = progData.learningLevel || "Beginner";
                 match.level = match.learningLevel;
             }
+            match.duration = progData.duration || "3 Days";
+            match.dailyDuration = "8 Hours / Day";
+            match.courseLength = "8 Hours / Day";
+            match.trainingSchedule = "8 Hours Per Day";
+            match.availability = "8 Hours / Day";
             match.isActive = true;
             await match.save();
             console.log(`Updated Program #${progData.order}: ${progData.title} (${match._id})`);

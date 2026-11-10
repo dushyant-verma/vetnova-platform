@@ -12,6 +12,9 @@ export interface IProgram extends mongoose.Document {
     shortDescription?: string;
     fullDescription?: string;
     duration?: string;
+    dailyDuration?: string;
+    courseLength?: string;
+    trainingSchedule?: string;
     availability?: string;
     learningLevel?: "Beginner" | "Intermediate" | "Advanced";
     level?: "Beginner" | "Intermediate" | "Advanced";

@@ -10,6 +10,8 @@ export interface IBatch extends Document {
   startDate: Date;
   endDate?: Date;
   duration: string;
+  dailyDuration?: string;
+  trainingSchedule?: string;
   status: 'Upcoming' | 'Ongoing' | 'Completed';
   seatStatus?: string;
   location?: string;
@@ -60,6 +62,8 @@ const batchSchema = new mongoose.Schema({
     }
   },
   duration: { type: String, default: '3 Days', trim: true },
+  dailyDuration: { type: String, default: '8 Hours / Day', trim: true },
+  trainingSchedule: { type: String, default: '8 Hours Per Day', trim: true },
   status: { 
     type: String, 
     enum: ['Upcoming', 'Ongoing', 'Completed'], 
@@ -71,7 +75,7 @@ const batchSchema = new mongoose.Schema({
   maxSeats: { type: Number, default: 12 },
   notes: { type: String, trim: true },
   displayOrder: { type: Number, default: 0 }
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 batchSchema.pre('validate', function(this: any) {
   if (this.startDate && this.endDate) {

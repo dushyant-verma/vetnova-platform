@@ -14,6 +14,9 @@ export interface IProgram extends mongoose.Document {
   shortDescription?: string;
   fullDescription?: string;
   duration?: string;
+  dailyDuration?: string;
+  courseLength?: string;
+  trainingSchedule?: string;
   availability?: string;
   learningLevel?: "Beginner" | "Intermediate" | "Advanced";
   level?: "Beginner" | "Intermediate" | "Advanced";
@@ -38,7 +41,10 @@ const programSchema = new mongoose.Schema({
   shortDescription: { type: String, trim: true },
   fullDescription: { type: String, trim: true },
   duration: { type: String, default: "3 Days" },
-  availability: { type: String, default: "24 Hours" },
+  dailyDuration: { type: String, default: "8 Hours / Day" },
+  courseLength: { type: String, default: "8 Hours / Day" },
+  trainingSchedule: { type: String, default: "8 Hours Per Day" },
+  availability: { type: String, default: "8 Hours / Day" },
   learningLevel: { type: String, enum: ["Beginner", "Intermediate", "Advanced"], default: "Beginner" },
   level: { type: String, default: "Beginner" },
   learningOutcomes: [{ type: String }],
@@ -54,7 +60,7 @@ const programSchema = new mongoose.Schema({
     advanced: [{ type: String }]
   },
   isActive: { type: Boolean, default: true },
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 
 // Sync isActive with status
 programSchema.pre("save", function () {

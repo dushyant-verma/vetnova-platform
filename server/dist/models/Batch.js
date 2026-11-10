@@ -46,6 +46,8 @@ const batchSchema = new mongoose_1.default.Schema({
         }
     },
     duration: { type: String, default: '3 Days', trim: true },
+    dailyDuration: { type: String, default: '8 Hours / Day', trim: true },
+    trainingSchedule: { type: String, default: '8 Hours Per Day', trim: true },
     status: {
         type: String,
         enum: ['Upcoming', 'Ongoing', 'Completed'],
@@ -57,7 +59,7 @@ const batchSchema = new mongoose_1.default.Schema({
     maxSeats: { type: Number, default: 12 },
     notes: { type: String, trim: true },
     displayOrder: { type: Number, default: 0 }
-}, { timestamps: true });
+}, { timestamps: true, strict: false });
 batchSchema.pre('validate', function () {
     if (this.startDate && this.endDate) {
         const start = new Date(this.startDate).getTime();
