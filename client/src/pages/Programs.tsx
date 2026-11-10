@@ -152,7 +152,7 @@ export const Programs = () => {
                         <div className="flex items-center justify-between text-xs text-slate-500 mb-4 pt-3 border-t border-slate-100">
                           <div className="flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5 text-brand-secondary" />
-                            <span>{program.duration || "2 to 4 Weeks"}</span>
+                            <span>{program.duration || "3 Days"}</span>
                           </div>
                           {program.syllabusStatus === "Available" ? (
                             <span className="text-emerald-700 font-semibold">{totalTopics} Syllabus Topics</span>

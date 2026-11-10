@@ -54,8 +54,11 @@ const getPrograms = async (req, res) => {
         Program_1.Program.updateMany({ slug: 'orthopaedics', image: { $regex: 'facility-diagnostics-room' } }, { $set: { image: 'assets/images/programs/program-orthopaedics.webp' } }).exec().catch(() => { });
         Program_1.Program.updateMany({ slug: 'veterinary-dentistry', image: { $regex: 'facility-diagnostics-room' } }, { $set: { image: 'assets/images/programs/program-dentistry.webp' } }).exec().catch(() => { });
         Program_1.Program.updateMany({ slug: 'nephrology-and-urology', image: { $regex: 'facility-diagnostics-room' } }, { $set: { image: 'assets/images/programs/program-nephrology.webp' } }).exec().catch(() => { });
+        // Self-heal and standardize all program durations to 3 Days in MongoDB
+        Program_1.Program.updateMany({ duration: { $nin: ['3 Days', '2 Days'] } }, { $set: { duration: '3 Days' } }).exec().catch(() => { });
         const cleaned = programs.map((p) => {
             const obj = p.toObject ? p.toObject() : { ...p };
+            obj.duration = (obj.duration && obj.duration.toLowerCase().includes('day')) ? obj.duration : '3 Days';
             if (obj.slug === 'orthopaedics' && (!obj.image || obj.image.includes('facility-diagnostics-room'))) {
                 obj.image = 'assets/images/programs/program-orthopaedics.webp';
             }
@@ -86,7 +89,9 @@ const getProgramById = async (req, res) => {
         }
         const program = await Program_1.Program.findOne(query).populate("faculty");
         if (program) {
-            res.json(program);
+            const obj = program.toObject ? program.toObject() : { ...program };
+            obj.duration = (obj.duration && obj.duration.toLowerCase().includes('day')) ? obj.duration : '3 Days';
+            res.json(obj);
         }
         else {
             res.status(404).json({ message: "Program not found" });

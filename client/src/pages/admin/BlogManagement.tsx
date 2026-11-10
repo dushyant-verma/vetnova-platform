@@ -33,7 +33,7 @@ interface CategoryForm {
 }
 
 const AVAILABLE_PROGRAMS = [
-  { id: 'veterinary-skill-up', title: 'Veterinary Skill Up (6 Months)' },
+  { id: 'veterinary-skill-up', title: 'Veterinary Skill Up' },
   { id: 'emergency-medicine', title: 'Emergency & Critical Care' },
   { id: 'radiology-ultrasound', title: 'Radiology & Ultrasound' },
   { id: 'soft-tissue-surgery', title: 'Soft Tissue Surgery' },

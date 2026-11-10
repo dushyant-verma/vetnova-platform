@@ -81,7 +81,7 @@ export const FeaturedCurriculum = () => {
 
               <div className="flex flex-wrap gap-5 mb-14">
                 <div className="flex items-center text-white/90 text-sm font-black tracking-widest uppercase bg-white/10 px-6 py-4 rounded-2xl backdrop-blur-md border border-white/10 shadow-lg">
-                  <Clock className="w-5 h-5 mr-3 text-brand-secondary" /> 3 Months
+                  <Clock className="w-5 h-5 mr-3 text-brand-secondary" /> 3 Days
                 </div>
                 <div className="flex items-center text-white/90 text-sm font-black tracking-widest uppercase bg-white/10 px-6 py-4 rounded-2xl backdrop-blur-md border border-white/10 shadow-lg">
                   <CheckCircle2 className="w-5 h-5 mr-3 text-brand-secondary" /> Hands-on
@@ -140,7 +140,7 @@ export const FeaturedCurriculum = () => {
               </div>
               <div className="flex items-center justify-between mt-auto relative z-10">
                 <div className="flex items-center text-white text-sm font-black uppercase tracking-widest">
-                  <Clock className="w-5 h-5 mr-3 text-brand-secondary" /> 1 Month Program
+                  <Clock className="w-5 h-5 mr-3 text-brand-secondary" /> 3 Days
                 </div>
                 <Link to="/programs/clinic-ready" className="w-16 h-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white group-hover:bg-brand-secondary group-hover:border-brand-secondary group-hover:text-slate-900 group-hover:-rotate-45 transition-all duration-500 backdrop-blur-md">
                   <ArrowRight className="w-7 h-7" />
