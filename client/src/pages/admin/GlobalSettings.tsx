@@ -13,7 +13,7 @@ export const GlobalSettings = () => {
     contactPhone: '+91 92725 61089',
     address: 'Pune, Maharashtra',
     logoUrl: '/logo.png',
-    facebookUrl: '',
+    facebookUrl: 'https://www.facebook.com/people/Vetnova-Institute/61596313738824/',
     linkedinUrl: '',
     instagramUrl: ''
   });

@@ -12,7 +12,7 @@ const defaultSettings = {
     logo: '',
     socialLinks: [
         { platform: 'LinkedIn', url: 'https://linkedin.com' },
-        { platform: 'Facebook', url: 'https://facebook.com' },
+        { platform: 'Facebook', url: 'https://www.facebook.com/people/Vetnova-Institute/61596313738824/' },
         { platform: 'Instagram', url: 'https://instagram.com' },
         { platform: 'YouTube', url: 'https://youtube.com' },
         { platform: 'X', url: 'https://twitter.com' }
